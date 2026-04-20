@@ -1,0 +1,416 @@
+// ============================================================================
+// File: apps/backend/src/db/prisma/schema.prisma
+// Version: 1.0.0 — 2026-04-20
+// Why: Single Prisma schema defining all three logical databases using the
+//      multiSchema preview feature. Each model is annotated with its schema:
+//        @@schema("identity")  → PII boundary (users, orgs, tokens)
+//        @@schema("analytics") → anonymized data (no PII allowed)
+//        @@schema("content")   → scenarios, rules, audit logs
+//
+//      IMPORTANT: Never query across schema boundaries in application code.
+//      The DeidentificationService is the ONLY authorized path from
+//      identity → analytics.
+//
+// Env / Identity: Backend (Prisma generates a typed client from this file)
+// ============================================================================
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["identity", "analytics", "content"]
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// IDENTITY SCHEMA — Contains ALL PII. Access restricted to auth service
+// and de-identification service. NEVER join or copy to analytics.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum UserRole {
+  paramedic
+  admin
+  super_admin
+  clinical_validator
+
+  @@schema("identity")
+}
+
+enum OrgType {
+  paramedic_service
+  training_program
+  private
+
+  @@schema("identity")
+}
+
+enum OrgPlan {
+  pilot
+  standard
+  enterprise
+
+  @@schema("identity")
+}
+
+model User {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String    @unique @db.VarChar(254)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  firstName    String?   @map("first_name") @db.VarChar(100)
+  lastName     String?   @map("last_name") @db.VarChar(100)
+  phone        String?   @db.VarChar(20)
+
+  organizationId String?       @map("organization_id") @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+
+  role UserRole
+
+  emailVerified Boolean   @default(false) @map("email_verified")
+  /// Verification token hash (cleared after verification)
+  emailVerificationTokenHash String? @map("email_verification_token_hash") @db.VarChar(255)
+  emailVerificationTokenExpiresAt DateTime? @map("email_verification_token_expires_at")
+
+  mfaEnabled Boolean  @default(false) @map("mfa_enabled")
+  /// Encrypted TOTP secret — only set when mfa_enabled = true
+  mfaSecret  String?  @map("mfa_secret") @db.VarChar(255)
+
+  /// Password reset token hash (cleared after use)
+  passwordResetTokenHash      String?   @map("password_reset_token_hash") @db.VarChar(255)
+  passwordResetTokenExpiresAt DateTime? @map("password_reset_token_expires_at")
+
+  /// Explicit opt-in for anonymized analytics (PIPEDA requirement)
+  consentAnalytics     Boolean   @default(false) @map("consent_analytics")
+  consentAnalyticsDate DateTime? @map("consent_analytics_date")
+
+  createdAt   DateTime  @default(now()) @map("created_at")
+  lastLoginAt DateTime? @map("last_login_at")
+  /// Soft delete — PIPEDA requires we retain audit history even after deletion
+  deletedAt   DateTime? @map("deleted_at")
+
+  // Relations
+  refreshTokens     RefreshToken[]
+  anonymousMapping  AnonymousMapping?
+
+  @@map("users")
+  @@schema("identity")
+}
+
+model Organization {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String   @db.VarChar(255)
+  type         OrgType
+  province     String?  @db.VarChar(2)
+  billingEmail String?  @map("billing_email") @db.VarChar(254)
+  contractStart DateTime? @map("contract_start") @db.Date
+  contractEnd   DateTime? @map("contract_end") @db.Date
+  plan          OrgPlan?
+  maxSeats      Int?      @map("max_seats")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  // Relations
+  users User[]
+
+  @@map("organizations")
+  @@schema("identity")
+}
+
+/// The ONLY table linking user_id to anonymous_hash.
+/// Access is restricted to DeidentificationService ONLY.
+/// NEVER expose this table through any other service or route.
+model AnonymousMapping {
+  userId        String   @id @map("user_id") @db.Uuid
+  anonymousHash String   @unique @map("anonymous_hash") @db.VarChar(255)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Cascade delete: if user is hard-deleted, mapping is gone too
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("anonymous_mappings")
+  @@schema("identity")
+}
+
+model RefreshToken {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @map("token_hash") @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+  @@schema("identity")
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ANALYTICS SCHEMA — Anonymized data only. NO PII. All references use
+// anonymous_hash. Queries must NEVER join back to identity schema.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum ParamedicLevel {
+  PCP
+  ACP
+  CCP
+  student
+
+  @@schema("analytics")
+}
+
+enum ExperienceBucket {
+  years_0_2  @map("0-2_years")
+  years_3_5  @map("3-5_years")
+  years_5_10 @map("5-10_years")
+  years_10_plus @map("10+_years")
+
+  @@schema("analytics")
+}
+
+enum ServiceType {
+  public_large
+  public_small
+  private
+  training_program
+
+  @@schema("analytics")
+}
+
+enum SessionStatus {
+  in_progress
+  completed
+  abandoned
+
+  @@schema("analytics")
+}
+
+enum DecisionType {
+  assessment
+  medication
+  procedure
+  diagnosis
+  transport
+
+  @@schema("analytics")
+}
+
+/// Anonymized snapshot of a paramedic's profile for analytics correlation.
+/// CONTAINS NO PII — only coarse buckets and the anonymous_hash.
+model ParamedicProfileSnapshot {
+  /// HMAC-SHA256 hash — NOT the user_id
+  anonymousHash    String          @id @map("anonymous_hash") @db.VarChar(255)
+  paramedicLevel   ParamedicLevel? @map("paramedic_level")
+  experienceBucket ExperienceBucket? @map("experience_bucket")
+  /// Coarse region (province code), not exact location
+  region           String?         @db.VarChar(2)
+  serviceType      ServiceType?    @map("service_type")
+  lastUpdated      DateTime        @default(now()) @updatedAt @map("last_updated")
+
+  sessions  AnalyticsSession[]
+  decisions Decision[]
+
+  @@map("paramedic_profile_snapshot")
+  @@schema("analytics")
+}
+
+model AnalyticsSession {
+  id                   String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  /// References anonymous_hash, NOT user_id
+  anonymousHash        String        @map("anonymous_hash") @db.VarChar(255)
+  /// References content.scenarios.id — no PII but cross-schema ref is app-enforced
+  scenarioId           String        @map("scenario_id") @db.Uuid
+  startedAt            DateTime      @map("started_at")
+  completedAt          DateTime?     @map("completed_at")
+  totalDurationSeconds Int?          @map("total_duration_seconds")
+  finalScore           Int?          @map("final_score")
+  status               SessionStatus @default(in_progress)
+  createdAt            DateTime      @default(now()) @map("created_at")
+
+  profile   ParamedicProfileSnapshot @relation(fields: [anonymousHash], references: [anonymousHash])
+  decisions Decision[]
+
+  @@index([anonymousHash])
+  @@index([scenarioId])
+  @@map("sessions")
+  @@schema("analytics")
+}
+
+model Decision {
+  id                    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId             String       @map("session_id") @db.Uuid
+  anonymousHash         String       @map("anonymous_hash") @db.VarChar(255)
+  stateOrder            Int          @map("state_order")
+  decisionType          DecisionType @map("decision_type")
+  decisionValue         Json         @map("decision_value")
+  timeToDecisionMs      Int          @map("time_to_decision_ms")
+  isCorrect             Boolean      @map("is_correct")
+  protocolAlignmentScore Float?      @map("protocol_alignment_score")
+  ruleIdsApplied        String[]     @map("rule_ids_applied")
+  createdAt             DateTime     @default(now()) @map("created_at")
+
+  session AnalyticsSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  profile ParamedicProfileSnapshot  @relation(fields: [anonymousHash], references: [anonymousHash])
+
+  @@index([sessionId])
+  @@index([anonymousHash])
+  @@map("decisions")
+  @@schema("analytics")
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CONTENT SCHEMA — Scenarios, rules, templates, and audit logs.
+// No user data. Safe to query freely for scenario delivery.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum ScenarioCategory {
+  cardiac
+  trauma
+  neuro
+  respiratory
+  pediatric
+  obstetric
+  toxicology
+
+  @@schema("content")
+}
+
+enum ScenarioDifficulty {
+  beginner
+  intermediate
+  advanced
+
+  @@schema("content")
+}
+
+enum ScenarioStatus {
+  draft
+  review
+  published
+
+  @@schema("content")
+}
+
+enum RuleStatus {
+  draft
+  active
+  deprecated
+
+  @@schema("content")
+}
+
+enum AuditActorType {
+  user
+  system
+
+  @@schema("content")
+}
+
+enum AuditResult {
+  success
+  failure
+
+  @@schema("content")
+}
+
+model Scenario {
+  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title                  String             @db.VarChar(255)
+  category               ScenarioCategory
+  difficulty             ScenarioDifficulty
+  estimatedDurationMinutes Int?             @map("estimated_duration_minutes")
+  learningObjectives     String[]           @map("learning_objectives")
+  status                 ScenarioStatus     @default(draft)
+  version                Int                @default(1)
+  clinicalValidatedBy    String?            @map("clinical_validated_by") @db.VarChar(255)
+  clinicalValidatedAt    DateTime?          @map("clinical_validated_at")
+  publishedAt            DateTime?          @map("published_at")
+  createdAt              DateTime           @default(now()) @map("created_at")
+
+  states  ScenarioState[]
+  rules   Rule[]
+
+  @@map("scenarios")
+  @@schema("content")
+}
+
+model ScenarioState {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId         String   @map("scenario_id") @db.Uuid
+  stateOrder         Int      @map("state_order")
+  patientPresentation Json   @map("patient_presentation")
+  expectedActions    Json     @map("expected_actions")
+  timeLimitSeconds   Int?     @map("time_limit_seconds")
+  nextStateLogic     Json?    @map("next_state_logic")
+
+  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  @@unique([scenarioId, stateOrder])
+  @@map("scenario_states")
+  @@schema("content")
+}
+
+model Rule {
+  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId   String     @map("scenario_id") @db.Uuid
+  name         String     @db.VarChar(255)
+  /// Lower priority number = evaluated first
+  priority     Int
+  conditions   Json
+  outcomes     Json
+  timingBonuses Json?     @map("timing_bonuses")
+  validatedBy  String?    @map("validated_by") @db.VarChar(255)
+  validatedAt  DateTime?  @map("validated_at")
+  status       RuleStatus @default(draft)
+  version      Int        @default(1)
+  createdAt    DateTime   @default(now()) @map("created_at")
+
+  scenario          Scenario           @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  feedbackTemplates FeedbackTemplate[]
+
+  @@index([scenarioId, priority])
+  @@map("rules")
+  @@schema("content")
+}
+
+model FeedbackTemplate {
+  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  ruleId            String   @map("rule_id") @db.Uuid
+  baseText          String
+  detailText        String?  @map("detail_text")
+  references        String[]
+  physicianReviewed Boolean  @default(false) @map("physician_reviewed")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  rule Rule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+
+  @@map("feedback_templates")
+  @@schema("content")
+}
+
+/// Immutable audit log — append-only, 7-year retention per PIPEDA.
+/// Lives in content schema because it contains NO direct PII (actor_id
+/// is a user_id string but the audit log itself is not searchable by PII).
+model AuditLog {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  actorType    AuditActorType @map("actor_type")
+  /// For user actors: user_id UUID. For system actors: service name.
+  actorId      String?        @map("actor_id") @db.VarChar(255)
+  action       String         @db.VarChar(255)
+  resourceType String?        @map("resource_type") @db.VarChar(100)
+  resourceId   String?        @map("resource_id") @db.VarChar(255)
+  metadata     Json?
+  ipAddress    String?        @map("ip_address") @db.VarChar(45)
+  userAgent    String?        @map("user_agent") @db.VarChar(500)
+  result       AuditResult
+  createdAt    DateTime       @default(now()) @map("created_at")
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+  @@schema("content")
+}

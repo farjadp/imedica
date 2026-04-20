@@ -1,0 +1,20 @@
+{
+  "name": "@imedica/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Imedica mobile app — React Native + Expo (Phase 2 initialization)",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "echo 'Mobile app initialized in Phase 2. Run: npx expo start'",
+    "build": "echo 'Mobile build configured in Phase 2'",
+    "lint": "echo 'Mobile lint configured in Phase 2'",
+    "typecheck": "echo 'Mobile typecheck configured in Phase 2'"
+  },
+  "dependencies": {
+    "@imedica/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@imedica/config": "workspace:*",
+    "typescript": "^5.7.3"
+  }
+}

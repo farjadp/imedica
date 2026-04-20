@@ -1,0 +1,10 @@
+# ============================================================================
+# File: pnpm-workspace.yaml
+# Version: 1.0.0 — 2026-04-20
+# Why: Declares all pnpm workspace packages for the Imedica monorepo.
+#      pnpm uses this to hoist shared deps and link internal packages.
+# ============================================================================
+
+packages:
+  - "apps/*"
+  - "packages/*"

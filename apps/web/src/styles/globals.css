@@ -1,0 +1,80 @@
+/* ============================================================================
+ * File: apps/web/src/styles/globals.css
+ * Version: 1.0.0 — 2026-04-20
+ * Why: Global CSS reset and base styles. Phase 1 minimal setup.
+ *      Full design system tokens and components come in Phase 2.
+ * ============================================================================ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #020617; /* Slate 950 */
+    --foreground: #f8fafc; /* Slate 50 */
+  }
+
+  body {
+    @apply bg-[#020617] text-slate-50 antialiased;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+  }
+}
+
+@layer utilities {
+  .glass {
+    @apply bg-white/5 backdrop-blur-lg border border-white/10;
+  }
+  .glass-card {
+    @apply bg-slate-900/50 backdrop-blur-xl border border-slate-800 shadow-2xl;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-400 to-brand-500;
+  }
+}
+
+/* ─── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ─── Base ───────────────────────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* ─── Focus styles for accessibility ─────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid #0d9488;
+  outline-offset: 2px;
+}
+
+/* ─── Remove default button styles ───────────────────────────────────────── */
+button {
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+
+/* ─── Remove list styles ─────────────────────────────────────────────────── */
+ul, ol {
+  list-style: none;
+}
+
+/* ─── Images ─────────────────────────────────────────────────────────────── */
+img, svg, video {
+  display: block;
+  max-width: 100%;
+}
+
+/* ─── Input reset ────────────────────────────────────────────────────────── */
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
