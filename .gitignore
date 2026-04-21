@@ -1,0 +1,68 @@
+# ============================================================================
+# File: .gitignore
+# Version: 1.0.0 — 2026-04-20
+# Why: Prevents secrets, build artifacts, and local dev data from being committed.
+#      CRITICAL: .env MUST never reach git — it contains DB passwords and JWT secrets.
+# ============================================================================
+
+# ─── Secrets & Environment ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.node_modules_backup/
+**/.node_modules_backup/
+
+# ─── Build Outputs ───────────────────────────────────────────────────────────
+dist/
+build/
+out/
+.next/
+.expo/
+
+# ─── Turborepo ───────────────────────────────────────────────────────────────
+.turbo/
+
+# ─── Prisma ──────────────────────────────────────────────────────────────────
+# Keep migrations — they're part of source control
+# But ignore generated client (rebuilt on install)
+apps/backend/src/db/prisma/generated/
+
+# ─── Testing & Coverage ──────────────────────────────────────────────────────
+coverage/
+*.lcov
+.nyc_output/
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+logs/
+npm-debug.log*
+pnpm-debug.log*
+
+# ─── OS Artifacts ────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# ─── IDE ─────────────────────────────────────────────────────────────────────
+.vscode/
+.vscode/settings.json
+.idea/
+*.suo
+*.user
+
+# ─── Docker local data ───────────────────────────────────────────────────────
+# Named volumes are managed by Docker; don't commit bind-mount data
+docker/data/
+
+# ─── Terraform ───────────────────────────────────────────────────────────────
+infrastructure/terraform/.terraform/
+infrastructure/terraform/*.tfstate
+infrastructure/terraform/*.tfstate.backup
+infrastructure/terraform/*.tfvars
+!infrastructure/terraform/*.tfvars.example

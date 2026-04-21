@@ -1,0 +1,90 @@
+# ============================================================================
+# File: docker-compose.yml
+# Version: 1.0.0 — 2026-04-20
+# Why: Local development environment for Imedica. Provides:
+#      - PostgreSQL 16 (single instance with 3 schemas: identity, analytics, content)
+#      - Redis 7 (BullMQ queues + caching)
+#      - Mailhog (local SMTP catcher — email goes to http://localhost:8025)
+# PRODUCTION NOTE: All production infra is on DigitalOcean Toronto (TOR1) for
+#      Canadian data residency (PIPEDA/PHIPA). Docker Compose is LOCAL ONLY.
+# ============================================================================
+
+services:
+  # ─── PostgreSQL 16 ───────────────────────────────────────────────────────
+  # Single instance with three schemas for local dev.
+  # In production these will be separate managed databases on DO Toronto.
+  postgres:
+    image: postgres:16-alpine
+    container_name: imedica_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: imedica
+      POSTGRES_PASSWORD: imedica_dev
+      POSTGRES_DB: imedica
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      # Init script creates the three schemas and grants permissions
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U imedica -d imedica"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # ─── Redis 7 ─────────────────────────────────────────────────────────────
+  # Used for: BullMQ job queues, caching (LLM responses, session data)
+  redis:
+    image: redis:7-alpine
+    container_name: imedica_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Mailhog (Local Email Catcher) ───────────────────────────────────────
+  # Catches all outbound email from the backend during local dev.
+  # View captured emails at http://localhost:8025
+  # In production this is replaced by SendGrid.
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: imedica_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"   # SMTP — backend sends to this port
+      - "8025:8025"   # Web UI — view captured emails here
+    logging:
+      driver: "none"   # Suppress verbose mailhog logs in terminal
+
+  # ─── pgAdmin (Optional — uncomment to enable) ────────────────────────────
+  # Useful for exploring the three schemas visually.
+  # pgadmin:
+  #   image: dpage/pgadmin4:latest
+  #   container_name: imedica_pgadmin
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: admin@imedica.local
+  #     PGADMIN_DEFAULT_PASSWORD: admin
+  #   ports:
+  #     - "5050:80"
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  default:
+    name: imedica_network

@@ -1,0 +1,28 @@
+<!doctype html>
+<!--
+  File: apps/web/index.html
+  Version: 1.0.0 — 2026-04-20
+  Why: Vite entry HTML. Root mount point for the React app.
+       Includes font preload and minimal SEO meta tags.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Imedica — Decision-training platform for Canadian paramedics. Practice clinical scenarios and receive physician-validated feedback." />
+    <meta name="robots" content="noindex, nofollow" /><!-- Training app — not for public indexing -->
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Preload Inter font for fast text rendering -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <title>Imedica — Paramedic Decision Training</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
