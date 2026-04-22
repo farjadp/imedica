@@ -6,6 +6,9 @@
 // ============================================================================
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { forwardRef } from 'react';
+
+import { cn } from '../lib/cn.js';
 
 type ButtonVariant = 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
 type ButtonSize = 'sm' | 'md' | 'lg';
@@ -36,31 +39,31 @@ const SIZE_STYLES: Record<ButtonSize, string> = {
   lg: 'h-12 px-5 text-base gap-3',
 };
 
-function joinClasses(...classes: (string | false | undefined | null)[]): string {
-  return classes.filter(Boolean).join(' ');
-}
-
 /**
  * Button primitive with brand-aware variants and an accessible loading state.
  */
-export function Button({
-  variant = 'primary',
-  size = 'md',
-  isLoading = false,
-  leftIcon,
-  rightIcon,
-  className,
-  disabled,
-  children,
-  type = 'button',
-  ...props
-}: ButtonProps): JSX.Element {
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    variant = 'primary',
+    size = 'md',
+    isLoading = false,
+    leftIcon,
+    rightIcon,
+    className,
+    disabled,
+    children,
+    type = 'button',
+    ...props
+  },
+  ref,
+): JSX.Element {
   const isDisabled = disabled === true || isLoading;
 
   return (
     <button
+      ref={ref}
       type={type}
-      className={joinClasses(
+      className={cn(
         'inline-flex items-center justify-center rounded-lg font-medium transition-[transform,filter,background-color,border-color,color,box-shadow] duration-200 ease-standard',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         'active:translate-y-px disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:brightness-100',
@@ -80,9 +83,11 @@ export function Button({
           aria-label="Loading"
           className="inline-flex h-4 w-4 shrink-0 animate-spin rounded-full border-2 border-current border-t-transparent"
         />
-      ) : (
-        leftIcon && <span aria-hidden="true" className="inline-flex shrink-0 items-center">{leftIcon}</span>
-      )}
+      ) : leftIcon ? (
+        <span aria-hidden="true" className="inline-flex shrink-0 items-center">
+          {leftIcon}
+        </span>
+      ) : null}
 
       <span className="inline-flex items-center">{children}</span>
 
@@ -93,4 +98,4 @@ export function Button({
       ) : null}
     </button>
   );
-}
+});

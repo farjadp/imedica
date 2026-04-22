@@ -11,6 +11,7 @@ import type { Router as ExpressRouter } from 'express';
 import { Router } from 'express';
 
 import authRouter from './auth.js';
+import usersRouter from './users.js';
 
 const router: ExpressRouter = Router();
 
@@ -29,6 +30,7 @@ router.get('/health', (_req, res) => {
 // Phase 1: Auth only. More routes added in subsequent phases.
 
 router.use('/auth', authRouter);
+router.use('/users', usersRouter);
 
 // Phase 2+ routes will be added here:
 // router.use('/scenarios', scenarioRouter);       // Phase 3

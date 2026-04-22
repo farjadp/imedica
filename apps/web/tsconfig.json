@@ -7,7 +7,6 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "rootDir": "src",
     "baseUrl": ".",
     "paths": {
       "@imedica/shared": ["../../packages/shared/src/index.ts"],
