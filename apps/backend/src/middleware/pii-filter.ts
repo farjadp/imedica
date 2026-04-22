@@ -19,7 +19,6 @@
 
 import crypto from 'node:crypto';
 
-import type { AccessTokenPayload } from '@imedica/shared';
 import { PII_PATTERNS } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';
 
@@ -72,8 +71,7 @@ export function piiSafeRequestLogger(req: Request, res: Response, next: NextFunc
 
   res.on('finish', () => {
     const durationMs = Date.now() - startAt;
-    const user = req.user as AccessTokenPayload | undefined;
-    const userId = user?.sub ?? 'anonymous';
+    const userId = req.user?.sub ?? 'anonymous';
 
     logger.info('HTTP request completed', {
       requestId: reqId,

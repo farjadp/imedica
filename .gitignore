@@ -23,6 +23,7 @@ build/
 out/
 .next/
 .expo/
+*.tsbuildinfo
 
 # ─── Turborepo ───────────────────────────────────────────────────────────────
 .turbo/

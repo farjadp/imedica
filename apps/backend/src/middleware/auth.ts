@@ -8,7 +8,7 @@
 // Env / Identity: Backend (Express middleware)
 // ============================================================================
 
-import type { AccessTokenPayload, UserRole } from '@imedica/shared';
+import type { UserRole } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';
 
 import { AuthenticationError, ForbiddenError } from '../lib/errors.js';
@@ -52,14 +52,12 @@ export function authenticate(req: Request, _res: Response, next: NextFunction): 
  */
 export function authorize(...roles: UserRole[]) {
   return (req: Request, _res: Response, next: NextFunction): void => {
-    const user = req.user as AccessTokenPayload | undefined;
-
-    if (!user) {
+    if (!req.user) {
       next(new AuthenticationError());
       return;
     }
 
-    if (!roles.includes(user.role)) {
+    if (!roles.includes(req.user.role)) {
       next(new ForbiddenError());
       return;
     }

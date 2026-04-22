@@ -9,7 +9,6 @@
 // Env / Identity: Backend (Express middleware)
 // ============================================================================
 
-import type { AccessTokenPayload } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';
 
 import { auditService } from '../services/audit/AuditService.js';
@@ -55,8 +54,7 @@ function inferAction(method: string, path: string): string {
  */
 export function auditLogMiddleware(req: Request, res: Response, next: NextFunction): void {
   res.on('finish', () => {
-    const user = req.user as AccessTokenPayload | undefined;
-    const userId = user?.sub ?? null;
+    const userId = req.user?.sub ?? null;
     const action = inferAction(req.method, req.path);
     const result = res.statusCode < 400 ? 'success' : 'failure';
 

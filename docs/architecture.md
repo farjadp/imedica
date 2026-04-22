@@ -148,14 +148,14 @@ Paramedic Sees Enhanced Feedback
 ## Module Dependency Graph
 
 ```
-packages/shared
-      ↑  ↑  ↑
-      │  │  │
-apps  │  │  └── apps/mobile
-web ──┘  │
-         └── apps/backend
-               ↑
-         packages/api-client (Phase 2)
+packages/shared        packages/ui
+        ↑  ↑  ↑              ↑
+        │  │  │              │
+apps  │  │  └── apps/mobile │
+web ──┘  │                  │
+           └── apps/backend   │
+                   ↑            │
+           packages/api-client (Phase 2)
 ```
 
 **Rule:** packages can only depend on other packages. Apps can depend on packages. No app-to-app dependencies.

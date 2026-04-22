@@ -14,9 +14,14 @@
   "dependencies": {
     "@imedica/shared": "workspace:*",
     "@tanstack/react-query": "^5.62.7",
+    "axios": "^1.15.1",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.8.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
+    "tailwind-merge": "^3.5.0",
     "zustand": "^5.0.2"
   },
   "devDependencies": {

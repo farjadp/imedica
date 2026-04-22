@@ -1,57 +1,67 @@
+@import '../../../../packages/ui/src/tokens.css';
+
 /* ============================================================================
  * File: apps/web/src/styles/globals.css
- * Version: 1.0.0 — 2026-04-20
- * Why: Global CSS reset and base styles. Phase 1 minimal setup.
- *      Full design system tokens and components come in Phase 2.
+ * Version: 1.1.0 — 2026-04-22
+ * Why: Global CSS reset, Tailwind layers, and runtime token application.
+ *      Phase 2 introduces the design system foundation here.
  * ============================================================================ */
 
-/* ─── Reset ──────────────────────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* ─── Base ───────────────────────────────────────────────────────────────── */
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-}
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
 
-/* ─── Focus styles for accessibility ─────────────────────────────────────── */
-:focus-visible {
-  outline: 2px solid #0d9488;
-  outline-offset: 2px;
-}
+  body {
+    font-family: var(--font-sans);
+    line-height: var(--leading-normal);
+    background: var(--color-background);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-/* ─── Remove default button styles ───────────────────────────────────────── */
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-family: inherit;
-}
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
 
-/* ─── Remove list styles ─────────────────────────────────────────────────── */
-ul, ol {
-  list-style: none;
-}
+  button {
+    cursor: pointer;
+    border: none;
+    background: none;
+    font-family: inherit;
+  }
 
-/* ─── Images ─────────────────────────────────────────────────────────────── */
-img, svg, video {
-  display: block;
-  max-width: 100%;
-}
+  ul,
+  ol {
+    list-style: none;
+  }
 
-/* ─── Input reset ────────────────────────────────────────────────────────── */
-input, textarea, select {
-  font-family: inherit;
-  font-size: inherit;
+  img,
+  svg,
+  video {
+    display: block;
+    max-width: 100%;
+  }
+
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+    font-size: inherit;
+  }
 }

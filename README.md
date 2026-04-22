@@ -105,6 +105,7 @@ imedica/
 │   └── mobile/     # React Native + Expo (Phase 2)
 ├── packages/
 │   ├── shared/     # Shared types, Zod validators, constants
+│   ├── ui/         # Shared UI primitives and Tailwind preset
 │   └── config/     # ESLint, TypeScript, Prettier configs
 ├── docker/
 │   └── postgres/   # Local Postgres init scripts
@@ -117,7 +118,6 @@ imedica/
 Planned for later phases, but not present in this repo yet:
 
 - `packages/api-client/` — typed REST client for web/mobile consumers
-- `packages/ui/` — shared UI primitives and design system components
 - `infrastructure/terraform/` — production infrastructure as code
 
 ---
