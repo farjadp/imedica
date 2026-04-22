@@ -2,7 +2,7 @@
 // File: apps/backend/src/db/seeds/seed.ts
 // Version: 1.0.0 — 2026-04-20
 // Why: Seeds initial data for local development and CI.
-//      Content: 3 placeholder scenarios + 1 super_admin user.
+//      Content: 1 example scenario + 1 super_admin user.
 //      Run with: pnpm --filter backend db:seed
 //
 //      IMPORTANT: Never seed real patient data or real user credentials.
@@ -71,248 +71,131 @@ async function seedIdentity(): Promise<void> {
 async function seedContent(): Promise<void> {
   logger.info('Seeding content schema...');
 
-  // ─── Scenario 1: Cardiac Arrest ──────────────────────────────────────────
-  const cardiacExists = await prisma.scenario.findFirst({
-    where: { title: 'Sudden Cardiac Arrest — Adult Witnessed' },
+  const author = await prisma.user.findUnique({
+    where: { email: 'admin@imedica.local' },
+    select: { id: true },
   });
 
-  if (!cardiacExists) {
-    const cardiac = await prisma.scenario.create({
-      data: {
-        title: 'Sudden Cardiac Arrest — Adult Witnessed',
-        category: 'cardiac',
-        difficulty: 'intermediate',
-        estimatedDurationMinutes: 15,
-        learningObjectives: [
-          'Recognize cardiac arrest within 10 seconds',
-          'Initiate CPR to correct rhythm with appropriate rate and depth',
-          'Correctly identify shockable vs non-shockable rhythms',
-          'Administer epinephrine at correct dose and timing',
-          'Demonstrate high-quality team communication during resuscitation',
-        ],
-        status: 'draft', // Will be moved to 'review' after physician validation
-        states: {
-          create: [
-            {
-              stateOrder: 1,
-              patientPresentation: {
-                chiefComplaint: 'Unresponsive male found collapsed in parking lot',
-                age: 58,
-                sex: 'male',
-                weightKg: 85,
-                vitals: {
-                  gcs: 3,
-                  pulse: 'absent',
-                  respirations: 'absent',
-                  bp: 'unobtainable',
-                  spo2: 'unobtainable',
-                  etco2: null,
-                },
-                history: {
-                  witnessed: true,
-                  downtime: '2 minutes',
-                  bystanterCPR: false,
-                  pmhx: 'Unknown',
-                  medications: 'Unknown',
-                },
-                ecg: 'ventricular_fibrillation',
-                physical: 'Apnoeic. No pulse. Cyanotic.',
-              },
-              expectedActions: {
-                required: ['assess_responsiveness', 'call_for_help', 'start_cpr', 'apply_aed'],
-                optional: ['iv_access', 'airway_adjunct'],
-                contraindicated: ['wait_for_hospital', 'administer_medication_without_cpr'],
-                timeSensitive: [
-                  { action: 'first_shock', maxSeconds: 120, bonusIfBefore: 60 },
-                  { action: 'epinephrine', maxSeconds: 300, unit: 'mg', dose: 1.0 },
-                ],
-              },
-              timeLimitSeconds: 600,
-            },
-            {
-              stateOrder: 2,
-              patientPresentation: {
-                context: 'Post-shock — rhythm check',
-                vitals: {
-                  gcs: 3,
-                  pulse: 'absent',
-                  ecg: 'pulseless_electrical_activity',
-                  etco2: 18,
-                },
-                physical: 'ROSC not achieved. Continue resuscitation.',
-              },
-              expectedActions: {
-                required: ['continue_cpr', 'identify_reversible_causes'],
-                optional: ['advanced_airway', 'iv_bolus'],
-                contraindicated: ['stop_resuscitation'],
-                timeSensitive: [
-                  { action: 'epinephrine_second_dose', maxSeconds: 600, dose: 1.0 },
-                ],
-              },
-              timeLimitSeconds: 300,
-            },
-          ],
-        },
-      },
-    });
-    logger.info('Created cardiac arrest scenario', { scenarioId: cardiac.id });
+  if (!author) {
+    throw new Error('Seed author not found. Run identity seed before content seed.');
   }
 
-  // ─── Scenario 2: Anaphylaxis ─────────────────────────────────────────────
-  const anaphylaxisExists = await prisma.scenario.findFirst({
-    where: { title: 'Severe Anaphylaxis — Bee Sting' },
+  const scenarioExists = await prisma.scenario.findFirst({
+    where: { title: 'Cardiac Arrest in Public Place' },
   });
 
-  if (!anaphylaxisExists) {
-    const anaphylaxis = await prisma.scenario.create({
-      data: {
-        title: 'Severe Anaphylaxis — Bee Sting',
-        category: 'respiratory',
-        difficulty: 'beginner',
-        estimatedDurationMinutes: 10,
-        learningObjectives: [
-          'Recognize anaphylaxis using clinical criteria',
-          'Administer epinephrine IM at correct dose and site',
-          'Identify the need for repeat epinephrine',
-          'Manage airway compromise in anaphylaxis',
-          'Differentiate anaphylaxis from asthma and panic attack',
-        ],
-        status: 'draft',
-        states: {
-          create: [
-            {
-              stateOrder: 1,
-              patientPresentation: {
-                chiefComplaint: '28F stung by bees — difficulty breathing, hives',
-                age: 28,
-                sex: 'female',
-                weightKg: 62,
-                vitals: {
-                  gcs: 14,
-                  hr: 128,
-                  rr: 26,
-                  bp: '84/52',
-                  spo2: 92,
-                  temp: 37.2,
-                },
-                history: {
-                  onset: '5 minutes ago',
-                  trigger: 'Multiple bee stings to the forearm',
-                  pmhx: 'No known allergies (prescribed EpiPen but left at home)',
-                  medications: 'Oral contraceptive',
-                },
-                physical: [
-                  'Stridor present',
-                  'Diffuse urticaria and angioedema',
-                  'Flushed, diaphoretic',
-                  'Equal air entry bilaterally with wheeze',
-                ].join('. '),
-                ecg: 'sinus_tachycardia',
-              },
-              expectedActions: {
-                required: ['epinephrine_im_1000', 'oxygen_15lpm', 'iv_access', 'position_supine'],
-                optional: ['antihistamine', 'salbutamol', 'iv_fluid_bolus'],
-                contraindicated: ['epinephrine_iv_bolus_unmonitored', 'delay_for_history'],
-                timeSensitive: [
-                  {
-                    action: 'epinephrine_im',
-                    maxSeconds: 120,
-                    bonusIfBefore: 60,
-                    dose: 0.5,
-                    unit: 'mg',
-                    route: 'IM',
-                    concentration: '1:1000',
-                  },
-                ],
-              },
-              timeLimitSeconds: 480,
-            },
-          ],
-        },
-      },
-    });
-    logger.info('Created anaphylaxis scenario', { scenarioId: anaphylaxis.id });
+  if (scenarioExists) {
+    logger.info('Example scenario already exists — skipping');
+    return;
   }
 
-  // ─── Scenario 3: Stroke ──────────────────────────────────────────────────
-  const strokeExists = await prisma.scenario.findFirst({
-    where: { title: 'Acute Ischemic Stroke — Time-Critical Transfer' },
+  const scenario = await prisma.scenario.create({
+    data: {
+      title: 'Cardiac Arrest in Public Place',
+      description: 'Adult witnessed cardiac arrest with an initial shockable rhythm and time-sensitive interventions.',
+      category: 'CARDIAC',
+      difficulty: 'INTERMEDIATE',
+      estimatedDuration: 15,
+      patientPresentation: [
+        '<p>55-year-old male, unconscious and not breathing.</p>',
+        '<p>Bystander CPR is in progress on arrival.</p>',
+      ].join(''),
+      learningObjectives: [
+        '<ul>',
+        '<li>Recognize cardiac arrest immediately</li>',
+        '<li>Deliver high-quality CPR and early defibrillation</li>',
+        '<li>Interpret rhythm changes across scenario states</li>',
+        '</ul>',
+      ].join(''),
+      authorId: author.id,
+      status: 'DRAFT',
+      isPublished: false,
+      states: {
+        create: [
+          {
+            order: 0,
+            name: 'Initial Presentation',
+            vitals: {
+              hr: 0,
+              bp: '0/0',
+              spo2: null,
+              rr: 0,
+              temp: null,
+              ecg: 'VF',
+            },
+            physicalExam: '<p>Unresponsive, apneic, pulseless.</p>',
+            symptoms: '<p>No spontaneous movement. Bystanders report sudden collapse.</p>',
+            timeLimit: 120,
+          },
+          {
+            order: 1,
+            name: 'Post-Shock',
+            vitals: {
+              hr: 60,
+              bp: '80/50',
+              spo2: 85,
+              rr: 8,
+              temp: null,
+              ecg: 'Sinus rhythm',
+            },
+            physicalExam: '<p>Pulse is weak but present. Skin remains pale and cool.</p>',
+            symptoms: '<p>Spontaneous respirations have returned but are inadequate.</p>',
+            timeLimit: 180,
+          },
+        ],
+      },
+      rules: {
+        create: [
+          {
+            name: 'Early Defibrillation',
+            description: 'Rewards rapid defibrillation while the rhythm remains ventricular fibrillation.',
+            condition: {
+              action: 'defibrillate',
+              stateOrder: 0,
+              maxTime: 120,
+              vitals: { ecg: 'VF' },
+            },
+            points: 20,
+            feedbackKey: 'early_defib_correct',
+            priority: 100,
+            isActive: true,
+          },
+          {
+            name: 'Delayed CPR',
+            description: 'Penalizes delayed CPR initiation in the initial arrest state.',
+            condition: {
+              action: 'cpr',
+              stateOrder: 0,
+              minTime: 180,
+              vitals: null,
+            },
+            points: -10,
+            feedbackKey: 'delayed_cpr',
+            priority: 90,
+            isActive: true,
+          },
+        ],
+      },
+      feedbackTemplates: {
+        create: [
+          {
+            key: 'early_defib_correct',
+            language: 'en',
+            title: 'Excellent Response Time',
+            message: 'You defibrillated within {time_seconds}s. Early defibrillation improved the chance of ROSC.',
+          },
+          {
+            key: 'delayed_cpr',
+            language: 'en',
+            title: 'Delayed CPR',
+            message: 'CPR should begin immediately. Your delay was {time_seconds}s before compressions started.',
+          },
+        ],
+      },
+    },
   });
 
-  if (!strokeExists) {
-    const stroke = await prisma.scenario.create({
-      data: {
-        title: 'Acute Ischemic Stroke — Time-Critical Transfer',
-        category: 'neuro',
-        difficulty: 'intermediate',
-        estimatedDurationMinutes: 12,
-        learningObjectives: [
-          'Apply the CPSS/FAST stroke recognition tool accurately',
-          'Determine last-known-well time and tPA window',
-          'Perform a targeted neurological assessment',
-          'Initiate stroke protocol and pre-notify receiving hospital',
-          'Avoid hyperglycemia, hypoxia, and hypertension during transport',
-        ],
-        status: 'draft',
-        states: {
-          create: [
-            {
-              stateOrder: 1,
-              patientPresentation: {
-                chiefComplaint: '71M with sudden onset facial droop and arm weakness',
-                age: 71,
-                sex: 'male',
-                weightKg: 78,
-                vitals: {
-                  gcs: 12,
-                  hr: 88,
-                  rr: 16,
-                  bp: '178/98',
-                  spo2: 96,
-                  glucose: 6.8,
-                  temp: 37.0,
-                },
-                history: {
-                  onset: 'Wife found him at 09:15. Last seen normal 08:45.',
-                  pmhx: 'HTN, AF on warfarin, hyperlipidemia',
-                  medications: 'Warfarin, metoprolol, atorvastatin',
-                  allergies: 'NKDA',
-                },
-                neuro: {
-                  facialDroop: 'Right sided',
-                  armDrift: 'Right arm drift present',
-                  speech: 'Dysarthric but intelligible',
-                  pupils: 'PERL 4mm bilateral',
-                },
-                physical: 'Alert but confused. Right hemiparesis. No headache reported.',
-              },
-              expectedActions: {
-                required: [
-                  'cpss_assessment',
-                  'determine_last_known_well',
-                  'obtain_12_lead',
-                  'check_glucose',
-                  'stroke_protocol_activation',
-                  'hospital_pre_notification',
-                ],
-                optional: ['iv_access', 'supplemental_oxygen_if_spo2_below_94'],
-                contraindicated: [
-                  'aggressive_bp_reduction',
-                  'glucose_without_hypoglycemia',
-                  'delay_transport_for_investigations',
-                ],
-                timeSensitive: [
-                  { action: 'hospital_prenotification', maxSeconds: 300 },
-                ],
-              },
-              timeLimitSeconds: 600,
-            },
-          ],
-        },
-      },
-    });
-    logger.info('Created stroke scenario', { scenarioId: stroke.id });
-  }
+  logger.info('Created example scenario', { scenarioId: scenario.id });
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────

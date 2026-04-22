@@ -10,6 +10,10 @@
 import { RATE_LIMITS } from '@imedica/shared';
 import expressRateLimit from 'express-rate-limit';
 
+// ─── Environment Helpers ─────────────────────────────────────────────────────
+
+const isDev = process.env['NODE_ENV'] === 'development';
+const isTest = process.env['NODE_ENV'] === 'test';
 
 // ─── Rate Limiters ────────────────────────────────────────────────────────────
 
@@ -31,7 +35,7 @@ export const loginLimiter = expressRateLimit({
   legacyHeaders: false,
   // In production: replace with RedisStore from rate-limit-redis
   // The in-memory store resets on server restart — fine for MVP
-  skip: (req) => process.env['NODE_ENV'] === 'test' || req.ip === '127.0.0.1' && process.env['NODE_ENV'] === 'development',
+  skip: (req) => isTest || isDev || req.ip === '127.0.0.1',
 });
 
 /**
@@ -50,6 +54,7 @@ export const registerLimiter = expressRateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isTest || isDev,
 });
 
 /**
@@ -68,6 +73,7 @@ export const passwordResetLimiter = expressRateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: () => isTest || isDev,
 });
 
 /**
@@ -86,5 +92,5 @@ export const apiLimiter = expressRateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => process.env['NODE_ENV'] === 'test',
+  skip: () => isTest || isDev,
 });

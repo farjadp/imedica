@@ -93,6 +93,7 @@ model User {
   // Relations
   refreshTokens     RefreshToken[]
   anonymousMapping  AnonymousMapping?
+  authoredScenarios Scenario[]
 
   @@map("users")
   @@schema("identity")
@@ -231,6 +232,7 @@ model AnalyticsSession {
   createdAt            DateTime      @default(now()) @map("created_at")
 
   profile   ParamedicProfileSnapshot @relation(fields: [anonymousHash], references: [anonymousHash])
+  scenario  Scenario                 @relation(fields: [scenarioId], references: [id])
   decisions Decision[]
 
   @@index([anonymousHash])
@@ -267,37 +269,33 @@ model Decision {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 enum ScenarioCategory {
-  cardiac
-  trauma
-  neuro
-  respiratory
-  pediatric
-  obstetric
-  toxicology
+  CARDIAC
+  RESPIRATORY
+  TRAUMA
+  NEUROLOGICAL
+  PEDIATRIC
+  OBSTETRIC
+  TOXICOLOGY
+  ENVIRONMENTAL
+  BEHAVIORAL
+  OTHER
 
   @@schema("content")
 }
 
 enum ScenarioDifficulty {
-  beginner
-  intermediate
-  advanced
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
 
   @@schema("content")
 }
 
 enum ScenarioStatus {
-  draft
-  review
-  published
-
-  @@schema("content")
-}
-
-enum RuleStatus {
-  draft
-  active
-  deprecated
+  DRAFT
+  REVIEW
+  PUBLISHED
+  ARCHIVED
 
   @@schema("content")
 }
@@ -317,75 +315,93 @@ enum AuditResult {
 }
 
 model Scenario {
-  id                     String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title                  String             @db.VarChar(255)
-  category               ScenarioCategory
-  difficulty             ScenarioDifficulty
-  estimatedDurationMinutes Int?             @map("estimated_duration_minutes")
-  learningObjectives     String[]           @map("learning_objectives")
-  status                 ScenarioStatus     @default(draft)
-  version                Int                @default(1)
-  clinicalValidatedBy    String?            @map("clinical_validated_by") @db.VarChar(255)
-  clinicalValidatedAt    DateTime?          @map("clinical_validated_at")
-  publishedAt            DateTime?          @map("published_at")
-  createdAt              DateTime           @default(now()) @map("created_at")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String   @db.VarChar(255)
+  description String   @db.Text
+  category    ScenarioCategory
+  difficulty   ScenarioDifficulty
+  estimatedDuration Int @map("estimated_duration")
 
-  states  ScenarioState[]
-  rules   Rule[]
+  patientPresentation String @db.Text @map("patient_presentation")
+  learningObjectives   String @db.Text @map("learning_objectives")
+
+  authorId    String   @map("author_id") @db.Uuid
+  author      User     @relation(fields: [authorId], references: [id])
+  status      ScenarioStatus @default(DRAFT)
+  isPublished Boolean  @default(false) @map("is_published")
+
+  states      ScenarioState[]
+  rules       ScenarioRule[]
+  feedbackTemplates FeedbackTemplate[]
+  sessions    AnalyticsSession[]
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([category, difficulty, isPublished])
+  @@index([authorId])
 
   @@map("scenarios")
   @@schema("content")
 }
 
 model ScenarioState {
-  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  scenarioId         String   @map("scenario_id") @db.Uuid
-  stateOrder         Int      @map("state_order")
-  patientPresentation Json   @map("patient_presentation")
-  expectedActions    Json     @map("expected_actions")
-  timeLimitSeconds   Int?     @map("time_limit_seconds")
-  nextStateLogic     Json?    @map("next_state_logic")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId  String   @map("scenario_id") @db.Uuid
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  scenario Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  order       Int      @map("state_order")
+  name        String   @db.VarChar(100)
 
-  @@unique([scenarioId, stateOrder])
+  vitals      Json
+  physicalExam String? @db.Text @map("physical_exam")
+  symptoms     String? @db.Text
+  timeLimit   Int?     @map("time_limit_seconds")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([scenarioId, order])
   @@map("scenario_states")
   @@schema("content")
 }
 
-model Rule {
-  id           String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  scenarioId   String     @map("scenario_id") @db.Uuid
-  name         String     @db.VarChar(255)
-  /// Lower priority number = evaluated first
-  priority     Int
-  conditions   Json
-  outcomes     Json
-  timingBonuses Json?     @map("timing_bonuses")
-  validatedBy  String?    @map("validated_by") @db.VarChar(255)
-  validatedAt  DateTime?  @map("validated_at")
-  status       RuleStatus @default(draft)
-  version      Int        @default(1)
-  createdAt    DateTime   @default(now()) @map("created_at")
+model ScenarioRule {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId  String   @map("scenario_id") @db.Uuid
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  scenario          Scenario           @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
-  feedbackTemplates FeedbackTemplate[]
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  condition   Json
+  points      Int
+  feedbackKey String   @map("feedback_key")
+
+  priority    Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@index([scenarioId, priority])
-  @@map("rules")
+  @@map("scenario_rules")
   @@schema("content")
 }
 
 model FeedbackTemplate {
-  id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  ruleId            String   @map("rule_id") @db.Uuid
-  baseText          String
-  detailText        String?  @map("detail_text")
-  references        String[]
-  physicianReviewed Boolean  @default(false) @map("physician_reviewed")
-  createdAt         DateTime @default(now()) @map("created_at")
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId  String   @map("scenario_id") @db.Uuid
+  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  rule Rule @relation(fields: [ruleId], references: [id], onDelete: Cascade)
+  key         String   @db.VarChar(100)
+  language    String   @default("en") @db.VarChar(10)
+  title       String   @db.VarChar(200)
+  message     String   @db.Text
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@unique([scenarioId, key, language])
 
   @@map("feedback_templates")
   @@schema("content")

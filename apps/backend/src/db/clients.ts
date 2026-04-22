@@ -82,7 +82,7 @@ export const db = {
   content: {
     scenario: prisma.scenario,
     scenarioState: prisma.scenarioState,
-    rule: prisma.rule,
+    scenarioRule: prisma.scenarioRule,
     feedbackTemplate: prisma.feedbackTemplate,
     auditLog: prisma.auditLog,
   },
