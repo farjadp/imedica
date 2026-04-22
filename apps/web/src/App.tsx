@@ -28,6 +28,8 @@ import { ScenarioDetailPage } from './features/scenarios/pages/ScenarioDetailPag
 import { ScenarioEditorShellPage } from './features/scenarios/pages/ScenarioEditorShellPage.js';
 import { ScenarioLibraryPage } from './features/scenarios/pages/ScenarioLibraryPage.js';
 import { ScenarioListPage } from './features/scenarios/pages/ScenarioListPage.js';
+import { SessionPage } from './features/sessions/pages/SessionPage.js';
+import { SessionReviewPage } from './features/sessions/pages/SessionReviewPage.js';
 import { queryClient } from './lib/query-client.js';
 
 export default function App(): JSX.Element {
@@ -56,6 +58,22 @@ export default function App(): JSX.Element {
               element={
                 <ProtectedRoute>
                   <ScenarioDetailPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sessions/:sessionId"
+              element={
+                <ProtectedRoute>
+                  <SessionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/sessions/:sessionId/review"
+              element={
+                <ProtectedRoute>
+                  <SessionReviewPage />
                 </ProtectedRoute>
               }
             />

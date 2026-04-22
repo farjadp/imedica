@@ -94,6 +94,7 @@ model User {
   refreshTokens     RefreshToken[]
   anonymousMapping  AnonymousMapping?
   authoredScenarios Scenario[]
+  sessions          Session[]
 
   @@map("users")
   @@schema("identity")
@@ -333,7 +334,8 @@ model Scenario {
   states      ScenarioState[]
   rules       ScenarioRule[]
   feedbackTemplates FeedbackTemplate[]
-  sessions    AnalyticsSession[]
+  analyticsSessions AnalyticsSession[]
+  sessions    Session[]
 
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
@@ -342,6 +344,70 @@ model Scenario {
   @@index([authorId])
 
   @@map("scenarios")
+  @@schema("content")
+}
+
+enum SessionRuntimeStatus {
+  RUNNING
+  COMPLETED
+  ABANDONED
+
+  @@schema("content")
+}
+
+model Session {
+  id          String   @id @default(cuid())
+
+  userId      String   @map("user_id") @db.Uuid
+  user        User     @relation(fields: [userId], references: [id])
+
+  scenarioId  String   @map("scenario_id") @db.Uuid
+  scenario    Scenario @relation(fields: [scenarioId], references: [id])
+
+  startedAt   DateTime @default(now()) @map("started_at")
+  completedAt DateTime? @map("completed_at")
+
+  status      SessionRuntimeStatus @default(RUNNING)
+  currentStateOrder Int @default(0) @map("current_state_order")
+
+  totalScore  Int @default(0) @map("total_score")
+  maxPossibleScore Int? @map("max_possible_score")
+
+  decisions   SessionDecision[]
+
+  userAgent   String? @map("user_agent") @db.VarChar(500)
+  ipAddress   String? @map("ip_address") @db.VarChar(45)
+
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@index([userId, status])
+  @@index([scenarioId, status])
+  @@map("sessions")
+  @@schema("content")
+}
+
+model SessionDecision {
+  id          String   @id @default(cuid())
+  sessionId   String   @map("session_id")
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  actionType  String   @map("action_type") @db.VarChar(100)
+  actionValue String?  @map("action_value") @db.VarChar(255)
+
+  stateOrder  Int      @map("state_order")
+  timestamp   DateTime @default(now())
+  timeFromStart Int    @map("time_from_start")
+
+  isCorrect   Boolean?
+  pointsAwarded Int @default(0) @map("points_awarded")
+  feedbackKey String?  @map("feedback_key") @db.VarChar(100)
+  ruleMatched String?  @map("rule_matched") @db.Uuid
+
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId, timestamp])
+  @@map("session_decisions")
   @@schema("content")
 }
 

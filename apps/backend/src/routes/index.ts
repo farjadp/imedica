@@ -12,6 +12,7 @@ import { Router } from 'express';
 
 import authRouter from './auth.js';
 import scenariosRouter from './scenarios.js';
+import sessionsRouter from './sessions.js';
 import usersRouter from './users.js';
 
 const router: ExpressRouter = Router();
@@ -32,6 +33,7 @@ router.get('/health', (_req, res) => {
 
 router.use('/auth', authRouter);
 router.use('/scenarios', scenariosRouter);
+router.use('/sessions', sessionsRouter);
 router.use('/users', usersRouter);
 
 // Phase 2+ routes will be added here:

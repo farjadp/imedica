@@ -47,6 +47,7 @@ export function ScenarioDetailPage(): JSX.Element {
   const [scenario, setScenario] = useState<PublicScenarioDetail | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -93,6 +94,24 @@ export function ScenarioDetailPage(): JSX.Element {
     if (!scenario) return Heart;
     return getCategoryIcon(scenario.category);
   }, [scenario]);
+
+  async function handleStartScenario(): Promise<void> {
+    if (!scenario) return;
+
+    setIsStarting(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.post<{ success: true; data: { sessionId: string } }>('/api/sessions', {
+        scenarioId: scenario.id,
+      });
+      navigate(`/sessions/${response.data.data.sessionId}`);
+    } catch {
+      setError('Unable to start the session. Please try again.');
+    } finally {
+      setIsStarting(false);
+    }
+  }
 
   return (
     <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background text-text">
@@ -191,11 +210,15 @@ export function ScenarioDetailPage(): JSX.Element {
                 </div>
 
                 <div className="flex justify-center">
-                  <span title="Available in Phase 4">
-                    <Button variant="primary" size="lg" rightIcon={<ChevronRight className="h-4 w-4" />} disabled>
-                      Start Scenario
-                    </Button>
-                  </span>
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    rightIcon={<ChevronRight className="h-4 w-4" />}
+                    onClick={() => void handleStartScenario()}
+                    isLoading={isStarting}
+                  >
+                    Start Scenario
+                  </Button>
                 </div>
               </Card>
             </div>
@@ -205,4 +228,3 @@ export function ScenarioDetailPage(): JSX.Element {
     </main>
   );
 }
-
