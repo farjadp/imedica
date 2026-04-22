@@ -66,6 +66,12 @@ const ALWAYS_STRIP_FIELDS = new Set([
   'name',           // Organization .name is fine, but we redact it in user contexts
 ]);
 
+/** Fields that are safe to ignore during PII pattern checks. */
+const SAFE_PII_IGNORE_FIELDS = new Set([
+  'anonymousHash',
+  'anonymous_hash',
+]);
+
 /** Fields that contain experience in years — bucketed, not exact. */
 const EXPERIENCE_YEAR_FIELDS = new Set(['yearsExperience', 'years_experience', 'experienceYears']);
 
@@ -230,7 +236,8 @@ export class DeidentificationService {
    * @throws PiiLeakageError on any PII detection
    */
   verifyNoLeakage(data: unknown, context: string): void {
-    const dataStr = JSON.stringify(data);
+    const sanitized = this.stripSafeFieldsForLeakage(data);
+    const dataStr = JSON.stringify(sanitized);
     for (const [patternName, pattern] of Object.entries(PII_PATTERNS)) {
       // Reset lastIndex for global regexes
       pattern.lastIndex = 0;
@@ -275,7 +282,8 @@ export class DeidentificationService {
 
   /** Returns the first PII pattern matched in the stringified data, or null. */
   private detectLeakage(data: unknown): { hasLeakage: boolean; field: string | null } {
-    const dataStr = JSON.stringify(data);
+    const sanitized = this.stripSafeFieldsForLeakage(data);
+    const dataStr = JSON.stringify(sanitized);
     for (const [patternName, pattern] of Object.entries(PII_PATTERNS)) {
       pattern.lastIndex = 0;
       if (pattern.test(dataStr)) {
@@ -285,5 +293,34 @@ export class DeidentificationService {
       pattern.lastIndex = 0;
     }
     return { hasLeakage: false, field: null };
+  }
+
+  /**
+   * Removes safe-to-ignore fields (like anonymousHash) before PII checks
+   * to avoid false positives from long hex strings.
+   */
+  private stripSafeFieldsForLeakage(data: unknown): unknown {
+    if (data === null || typeof data !== 'object') {
+      return data;
+    }
+
+    const copy = JSON.parse(JSON.stringify(data)) as Record<string, unknown> | unknown[];
+
+    if (Array.isArray(copy)) {
+      return copy.map((item) => this.stripSafeFieldsForLeakage(item));
+    }
+
+    for (const key of Object.keys(copy)) {
+      if (SAFE_PII_IGNORE_FIELDS.has(key)) {
+        delete copy[key];
+        continue;
+      }
+      const value = copy[key];
+      if (value !== null && typeof value === 'object') {
+        copy[key] = this.stripSafeFieldsForLeakage(value) as Record<string, unknown>;
+      }
+    }
+
+    return copy;
   }
 }

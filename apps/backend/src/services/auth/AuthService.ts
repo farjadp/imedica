@@ -164,7 +164,7 @@ export class AuthService {
 
     log.info('User registered', { userId: user.id });
 
-    return { message: 'Account created. Please check your email to verify your account.' };
+  return { message: 'Account created. Please verify your email to activate your account.' };
   }
 
   // ─── Email Verification ───────────────────────────────────────────────────

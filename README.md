@@ -52,22 +52,32 @@ git clone https://github.com/your-org/imedica.git
 cd imedica
 pnpm install
 
-# 2. Start local services (PostgreSQL + Redis + Mailhog)
+# 2. Configure environment
+cp .env.example .env
+
+# 3. Start local services (PostgreSQL + Redis + Mailhog)
 docker compose up -d
 
-# 3. Run database migrations (creates all 3 schemas + tables)
+# 4. Run database migrations (creates all 3 schemas + tables)
 pnpm db:migrate
 
-# 4. Seed initial data
+# 5. Seed initial data
 pnpm db:seed
 
-# 5. Start all dev servers
+# 6. Start all dev servers
 pnpm dev
 ```
 
 - **Backend API:** http://localhost:3001
 - **Web app:** http://localhost:5173
 - **Mailhog (email UI):** http://localhost:8025
+
+### Seeded Accounts (local dev)
+
+After `pnpm db:seed`, you can log in with:
+
+- **Super admin:** `admin@imedica.local` / `Dev@dmin2026!`
+- **Paramedic:** `paramedic@imedica.local` / `Paramedic2026!`
 
 ### Run Tests
 

@@ -17,7 +17,7 @@ import nodemailer from 'nodemailer';
 import type { SentMessageInfo, Transporter } from 'nodemailer';
 
 import { createChildLogger } from '../../lib/logger.js';
-import { env } from '../../lib/validate-env.js';
+import { env, validateEnv } from '../../lib/validate-env.js';
 
 const log = createChildLogger({ service: 'EmailService' });
 
@@ -95,7 +95,7 @@ export class EmailService {
   private transporter: Transporter<SentMessageInfo>;
 
   constructor() {
-    const config = env();
+    const config = validateEnv();
     this.transporter = nodemailer.createTransport({
       host: config.SMTP_HOST,
       port: config.SMTP_PORT,
