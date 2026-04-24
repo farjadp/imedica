@@ -16,7 +16,7 @@
 // Env / Identity: Backend service — reads identity schema (refresh_tokens)
 // ============================================================================
 
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 import {
   ACCESS_TOKEN_EXPIRES_IN_SECONDS,

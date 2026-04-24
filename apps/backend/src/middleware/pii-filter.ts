@@ -17,7 +17,7 @@
 // Env / Identity: Backend (Express middleware)
 // ============================================================================
 
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 import { PII_PATTERNS } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';

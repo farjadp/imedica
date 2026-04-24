@@ -16,7 +16,7 @@
 // Env / Identity: Backend service — reads/writes identity schema ONLY
 // ============================================================================
 
-import crypto from 'node:crypto';
+import * as crypto from 'node:crypto';
 
 import { BCRYPT_ROUNDS, EMAIL_VERIFICATION_TOKEN_EXPIRES_IN_SECONDS, PASSWORD_RESET_TOKEN_EXPIRES_IN_SECONDS } from '@imedica/shared';
 import type { PublicUser, LoginResponse , RegisterDto, LoginDto } from '@imedica/shared';
