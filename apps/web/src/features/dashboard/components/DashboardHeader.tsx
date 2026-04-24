@@ -14,11 +14,21 @@ import { useAuthStore } from '@/features/auth/store/authStore.js';
 import { cn } from '@/lib/cn.js';
 import { clearAccessToken } from '@/lib/session.js';
 
-const NAV_ITEMS = [
+const DEFAULT_NAV_ITEMS = [
   { label: 'Scenarios', href: '/dashboard', disabled: true },
   { label: 'My Progress', href: '/dashboard', disabled: true },
   { label: 'Settings', href: '/settings', disabled: true },
-] as const;
+];
+
+function getNavItems(role?: string) {
+  const items = [...DEFAULT_NAV_ITEMS];
+  
+  if (role === 'admin' || role === 'super_admin' || role === 'clinical_validator') {
+    items.unshift({ label: 'Admin Scenarios', href: '/admin/scenarios', disabled: false });
+  }
+  
+  return items;
+}
 
 export function DashboardHeader(): JSX.Element {
   const navigate = useNavigate();
@@ -53,7 +63,7 @@ export function DashboardHeader(): JSX.Element {
         </Link>
 
         <nav className="hidden items-center gap-6 md:flex" aria-label="Primary navigation">
-          {NAV_ITEMS.map((item) => (
+          {getNavItems(user?.role).map((item) => (
             <Link
               key={item.label}
               to={item.href}

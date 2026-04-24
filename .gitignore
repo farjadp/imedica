@@ -67,3 +67,5 @@ infrastructure/terraform/*.tfstate
 infrastructure/terraform/*.tfstate.backup
 infrastructure/terraform/*.tfvars
 !infrastructure/terraform/*.tfvars.example
+.vercel
+.env*.local
