@@ -17,9 +17,10 @@
 
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import type { Express } from 'express';
+import type { Express, RequestHandler } from 'express';
 import express from 'express';
-import * as helmet from 'helmet';
+import type { HelmetOptions } from 'helmet';
+import { createRequire } from 'node:module';
 
 import { prisma } from './db/clients.js';
 import { logger } from './lib/logger.js';
@@ -30,6 +31,9 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { attachRequestId, devPiiGuard, piiSafeRequestLogger } from './middleware/pii-filter.js';
 import { apiLimiter } from './middleware/rate-limit.js';
 import apiRouter from './routes/index.js';
+
+const require = createRequire(import.meta.url);
+const helmet = require('helmet') as (options?: Readonly<HelmetOptions>) => RequestHandler;
 
 // ─── Step 1: Initialize Sentry (before everything else) ──────────────────────
 // Importing env() here won't work yet — read from process.env directly
@@ -42,7 +46,7 @@ const config = validateEnv();
 const app: Express = express();
 
 // ─── Security Headers ─────────────────────────────────────────────────────────
-app.use(helmet.default({
+app.use(helmet({
   // Allow inline scripts for health checks
   contentSecurityPolicy: config.NODE_ENV === 'production',
 }));
