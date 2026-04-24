@@ -27,7 +27,7 @@ const TEAM = [
 
 export function AboutUsPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       {/* Hero Section */}
@@ -40,9 +40,9 @@ export function AboutUsPage(): JSX.Element {
         >
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
             Built by clinicians, <br />
-            <span className="text-text-muted">for clinicians.</span>
+            <span className="text-white/70">for clinicians.</span>
           </h1>
-          <p className="text-xl leading-relaxed text-text-muted">
+          <p className="text-xl leading-relaxed text-white/70">
             We know the paramedic workflow intimately. We built Imedica because passive classroom training doesn't replicate the stress and pressure of an actual cardiac arrest.
           </p>
         </motion.div>
@@ -54,7 +54,7 @@ export function AboutUsPage(): JSX.Element {
           <div className="mb-16 grid gap-16 lg:grid-cols-2">
             <div>
               <h2 className="mb-6 text-4xl font-extrabold tracking-tighter text-white">The Founding Team</h2>
-              <p className="text-lg text-text-muted">
+              <p className="text-lg text-white/70">
                 Three Canadian physicians and a full-stack engineer. We combine decades of emergency medical experience with cutting-edge software development.
               </p>
             </div>
@@ -79,7 +79,7 @@ export function AboutUsPage(): JSX.Element {
               >
                 <h3 className="mb-1 text-xl font-bold text-white">{member.name}</h3>
                 <p className="mb-4 text-sm font-semibold text-primary-500">{member.role}</p>
-                <p className="text-sm leading-relaxed text-text-muted">{member.bio}</p>
+                <p className="text-sm leading-relaxed text-white/70">{member.bio}</p>
               </motion.div>
             ))}
           </div>

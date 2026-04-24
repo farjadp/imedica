@@ -30,7 +30,7 @@ const SCENARIOS = [
 
 export function ClinicalScenariosPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       <section className="relative flex min-h-[50vh] w-full flex-col items-center justify-center pt-32 text-center px-8">
@@ -43,7 +43,7 @@ export function ClinicalScenariosPage(): JSX.Element {
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
             Clinical <span className="text-info-500">Scenarios</span>
           </h1>
-          <p className="text-xl leading-relaxed text-text-muted mx-auto max-w-2xl">
+          <p className="text-xl leading-relaxed text-white/70 mx-auto max-w-2xl">
             Practice making decisions in realistic patient cases. Get physician-reviewed feedback and build confidence before the real emergency.
           </p>
         </motion.div>
@@ -72,7 +72,7 @@ export function ClinicalScenariosPage(): JSX.Element {
                     <h3 className="mb-4 text-3xl font-bold text-white">{scenario.title}</h3>
                     <div className="mb-4 rounded-xl bg-black/40 p-4 border border-white/5">
                       <p className="text-sm font-semibold text-white mb-1">Patient Presentation:</p>
-                      <p className="text-sm text-text-muted">{scenario.patient} {scenario.vitals}</p>
+                      <p className="text-sm text-white/70">{scenario.patient} {scenario.vitals}</p>
                     </div>
                   </div>
                   
@@ -82,8 +82,8 @@ export function ClinicalScenariosPage(): JSX.Element {
                       <p className="text-sm text-white">{scenario.optimal}</p>
                     </div>
                     <div className="rounded-xl border border-white/10 bg-white/5 p-4">
-                      <p className="text-xs font-bold uppercase tracking-wider text-text-muted mb-1">System Feedback</p>
-                      <p className="text-sm text-text-muted">{scenario.feedback}</p>
+                      <p className="text-xs font-bold uppercase tracking-wider text-white/70 mb-1">System Feedback</p>
+                      <p className="text-sm text-white/70">{scenario.feedback}</p>
                     </div>
                   </div>
                 </div>

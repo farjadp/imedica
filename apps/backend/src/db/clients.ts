@@ -84,6 +84,8 @@ export const db = {
     scenarioState: prisma.scenarioState,
     scenarioRule: prisma.scenarioRule,
     feedbackTemplate: prisma.feedbackTemplate,
+    session: prisma.session,
+    sessionDecision: prisma.sessionDecision,
     auditLog: prisma.auditLog,
   },
 

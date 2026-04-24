@@ -27,7 +27,7 @@ const PHASES = [
 
 export function RoadmapPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       <section className="relative flex min-h-[60vh] w-full flex-col items-center justify-center pt-32 text-center px-8">
@@ -40,7 +40,7 @@ export function RoadmapPage(): JSX.Element {
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
             Strategic <span className="text-primary-500">Roadmap.</span>
           </h1>
-          <p className="text-xl leading-relaxed text-text-muted mx-auto max-w-2xl">
+          <p className="text-xl leading-relaxed text-white/70 mx-auto max-w-2xl">
             A disciplined, realistic path from a Canadian proof-of-concept to a North American standard in paramedic clinical training.
           </p>
         </motion.div>
@@ -71,7 +71,7 @@ export function RoadmapPage(): JSX.Element {
                 
                 <h3 className="text-sm font-bold uppercase tracking-wider text-primary-500 mb-2">{phase.phase} • {phase.timeframe}</h3>
                 <h4 className="text-2xl font-bold text-white mb-3">{phase.title}</h4>
-                <p className="text-text-muted leading-relaxed">{phase.description}</p>
+                <p className="text-white/70 leading-relaxed">{phase.description}</p>
               </motion.div>
             ))}
             

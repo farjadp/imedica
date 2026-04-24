@@ -8,7 +8,8 @@
 // ============================================================================
 
 import { RATE_LIMITS } from '@imedica/shared';
-import expressRateLimit from 'express-rate-limit';
+import { rateLimit } from 'express-rate-limit';
+import type { Request } from 'express';
 
 // ─── Environment Helpers ─────────────────────────────────────────────────────
 
@@ -21,7 +22,7 @@ const isTest = process.env['NODE_ENV'] === 'test';
  * Login rate limiter: 5 attempts per 15 minutes per IP.
  * Prevents password brute-forcing.
  */
-export const loginLimiter = expressRateLimit({
+export const loginLimiter = rateLimit({
   windowMs: RATE_LIMITS.login.windowMs,
   max: RATE_LIMITS.login.maxRequests,
   message: {
@@ -35,14 +36,14 @@ export const loginLimiter = expressRateLimit({
   legacyHeaders: false,
   // In production: replace with RedisStore from rate-limit-redis
   // The in-memory store resets on server restart — fine for MVP
-  skip: (req) => isTest || isDev || req.ip === '127.0.0.1',
+  skip: (req: Request) => isTest || isDev || req.ip === '127.0.0.1',
 });
 
 /**
  * Registration rate limiter: 10 per hour per IP.
  * Prevents bulk account creation.
  */
-export const registerLimiter = expressRateLimit({
+export const registerLimiter = rateLimit({
   windowMs: RATE_LIMITS.register.windowMs,
   max: RATE_LIMITS.register.maxRequests,
   message: {
@@ -61,7 +62,7 @@ export const registerLimiter = expressRateLimit({
  * Password reset rate limiter: 3 per hour per IP.
  * Prevents email flood attacks via the reset endpoint.
  */
-export const passwordResetLimiter = expressRateLimit({
+export const passwordResetLimiter = rateLimit({
   windowMs: RATE_LIMITS.passwordReset.windowMs,
   max: RATE_LIMITS.passwordReset.maxRequests,
   message: {
@@ -80,7 +81,7 @@ export const passwordResetLimiter = expressRateLimit({
  * General API rate limiter: 100 requests per minute.
  * Applied to all authenticated API routes as a backstop.
  */
-export const apiLimiter = expressRateLimit({
+export const apiLimiter = rateLimit({
   windowMs: RATE_LIMITS.api.windowMs,
   max: RATE_LIMITS.api.maxRequests,
   message: {
