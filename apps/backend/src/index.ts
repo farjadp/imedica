@@ -19,7 +19,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import type { Express } from 'express';
 import express from 'express';
-import helmet from 'helmet';
+import * as helmet from 'helmet';
 
 import { prisma } from './db/clients.js';
 import { logger } from './lib/logger.js';
@@ -42,7 +42,7 @@ const config = validateEnv();
 const app: Express = express();
 
 // ─── Security Headers ─────────────────────────────────────────────────────────
-app.use(helmet({
+app.use(helmet.default({
   // Allow inline scripts for health checks
   contentSecurityPolicy: config.NODE_ENV === 'production',
 }));
