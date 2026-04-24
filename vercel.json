@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "pnpm install && pnpm --filter @imedica/backend... build",
-  "outputDirectory": "apps/backend/dist",
   "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @imedica/shared build && pnpm --filter @imedica/backend build",
+  "outputDirectory": "apps/backend/dist",
   "rewrites": [
     {
       "source": "/(.*)",
