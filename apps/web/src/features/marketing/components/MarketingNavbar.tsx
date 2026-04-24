@@ -60,7 +60,7 @@ export function MarketingNavbar(): JSX.Element {
             >
               <div className="relative z-10 flex items-center gap-1">
                 <span className={`text-sm font-semibold transition-colors duration-200 ${
-                  hoveredNav === link.id ? 'text-white' : 'text-white/60'
+                  hoveredNav === link.id ? 'text-white' : 'text-white/70'
                 }`}>
                   {link.label}
                 </span>

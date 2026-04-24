@@ -47,7 +47,7 @@ export function HomePage(): JSX.Element {
   const aiImgScale = useTransform(aiScrollY, [0, 1], [0.9, 1.1]);
 
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       {/* --- Floating Pill Navbar --- */}
       <MarketingNavbar />
 
@@ -78,14 +78,14 @@ export function HomePage(): JSX.Element {
             className="mb-8 text-6xl font-extrabold tracking-tighter text-white md:text-8xl lg:text-[6rem] lg:leading-[0.95]"
           >
             Master the <br />
-            <span className="text-text-muted">Unpredictable.</span>
+            <span className="text-white/70">Unpredictable.</span>
           </motion.h1>
           
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="mb-12 max-w-lg text-lg leading-relaxed text-text-muted md:text-xl"
+            className="mb-12 max-w-lg text-lg leading-relaxed text-white/70 md:text-xl"
           >
             A hyper-realistic, AI-driven simulator designed exclusively for paramedics. Train for high-acuity calls without the real-world risk.
           </motion.p>
@@ -107,7 +107,7 @@ export function HomePage(): JSX.Element {
             </motion.div>
             <motion.button 
               whileHover={{ x: 5 }}
-              className="flex items-center gap-3 font-semibold text-text-muted transition-colors hover:text-white"
+              className="flex items-center gap-3 font-semibold text-white/70 transition-colors hover:text-white"
             >
               <PlayCircle className="h-6 w-6" />
               Watch Film
@@ -149,7 +149,7 @@ export function HomePage(): JSX.Element {
             <h2 className="mb-6 text-4xl font-extrabold tracking-tighter text-white md:text-6xl">
               Cognitive feedback <br /> in real-time.
             </h2>
-            <p className="mb-8 text-xl leading-relaxed text-text-muted">
+            <p className="mb-8 text-xl leading-relaxed text-white/70">
               Our Phase 5 AI engine monitors every decision, medication, and protocol selection. It doesn't just score you—it thinks like a senior medical director, offering deep, contextual insights into your clinical reasoning.
             </p>
             <motion.ul 
@@ -157,7 +157,7 @@ export function HomePage(): JSX.Element {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true, margin: '-50px' }}
-              className="flex flex-col gap-4 text-text-muted"
+              className="flex flex-col gap-4 text-white/70"
             >
               <motion.li variants={itemVariants} className="flex items-center gap-3">
                 <div className="h-1.5 w-1.5 rounded-full bg-primary-500 shadow-[0_0_10px_var(--color-primary-500)]" /> Protocol alignment analysis
@@ -189,7 +189,7 @@ export function HomePage(): JSX.Element {
       </section>
 
       {/* --- 3. Full-Width Statement & Analytics --- */}
-      <section className="w-full bg-background pt-32 lg:pt-48 pb-16">
+      <section className="w-full bg-[#050505] pt-32 lg:pt-48 pb-16">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
@@ -207,7 +207,7 @@ export function HomePage(): JSX.Element {
             Built for scale. <br />
             Secured by design.
           </h2>
-          <p className="text-xl leading-relaxed text-text-muted">
+          <p className="text-xl leading-relaxed text-white/70">
             Fully compliant with PIPEDA and PHIPA. We physically separate identity data from performance analytics, giving base hospitals actionable insights without compromising individual paramedic privacy.
           </p>
         </motion.div>

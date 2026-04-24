@@ -5,7 +5,7 @@ import { MarketingNavbar } from '../components/MarketingNavbar.js';
 
 export function ContactUsPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       <section className="relative flex min-h-screen w-full items-center pt-32 lg:pt-0">
@@ -30,7 +30,7 @@ export function ContactUsPage(): JSX.Element {
             <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
               Get in touch.
             </h1>
-            <p className="mb-12 text-xl leading-relaxed text-text-muted">
+            <p className="mb-12 text-xl leading-relaxed text-white/70">
               We are currently onboarding 10-15 early-adopter EMS training departments for our pilot program. Want to see if Imedica is right for your service?
             </p>
 
@@ -40,7 +40,7 @@ export function ContactUsPage(): JSX.Element {
                   <Mail className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Email Us</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-white/70">Email Us</p>
                   <a href="mailto:info@imedica.tech" className="text-lg font-medium text-white hover:text-primary-400">info@imedica.tech</a>
                 </div>
               </div>
@@ -49,7 +49,7 @@ export function ContactUsPage(): JSX.Element {
                   <Phone className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Call Us</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-white/70">Call Us</p>
                   <a href="tel:6477173978" className="text-lg font-medium text-white hover:text-primary-400">(647) 717-3978</a>
                 </div>
               </div>
@@ -58,7 +58,7 @@ export function ContactUsPage(): JSX.Element {
                   <MapPin className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-wider text-text-muted">Location</p>
+                  <p className="text-sm font-semibold uppercase tracking-wider text-white/70">Location</p>
                   <p className="text-lg font-medium text-white">Toronto, Ontario, Canada</p>
                 </div>
               </div>
@@ -75,12 +75,12 @@ export function ContactUsPage(): JSX.Element {
             <h3 className="mb-6 text-2xl font-bold text-white">Request a Demo Pilot</h3>
             <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
               <div className="grid gap-4 md:grid-cols-2">
-                <input type="text" placeholder="First Name" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-text-muted outline-none focus:border-primary-500" />
-                <input type="text" placeholder="Last Name" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-text-muted outline-none focus:border-primary-500" />
+                <input type="text" placeholder="First Name" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-primary-500" />
+                <input type="text" placeholder="Last Name" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-primary-500" />
               </div>
-              <input type="email" placeholder="Work Email" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-text-muted outline-none focus:border-primary-500" />
-              <input type="text" placeholder="EMS Service / Organization" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-text-muted outline-none focus:border-primary-500" />
-              <textarea placeholder="Tell us about your current training workflow..." rows={4} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-text-muted outline-none focus:border-primary-500 resize-none" />
+              <input type="email" placeholder="Work Email" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-primary-500" />
+              <input type="text" placeholder="EMS Service / Organization" className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-primary-500" />
+              <textarea placeholder="Tell us about your current training workflow..." rows={4} className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-white/50 outline-none focus:border-primary-500 resize-none" />
               
               <button className="mt-4 w-full rounded-xl bg-primary-600 px-4 py-3 font-bold text-white transition-colors hover:bg-primary-500">
                 Submit Request

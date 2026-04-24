@@ -29,7 +29,7 @@ const FEATURES = [
 
 export function PlatformFeaturesPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       <section className="relative flex min-h-[50vh] w-full flex-col items-center justify-center pt-32 text-center px-8">
@@ -42,7 +42,7 @@ export function PlatformFeaturesPage(): JSX.Element {
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
             Platform <span className="text-white">Features</span>
           </h1>
-          <p className="text-xl leading-relaxed text-text-muted mx-auto max-w-2xl">
+          <p className="text-xl leading-relaxed text-white/70 mx-auto max-w-2xl">
             Not a medical device. Not artificial intelligence magic. Just robust, rule-based logic designed for the reality of Canadian EMS.
           </p>
         </motion.div>
@@ -65,7 +65,7 @@ export function PlatformFeaturesPage(): JSX.Element {
                   {feature.icon}
                 </div>
                 <h3 className="mb-4 text-2xl font-bold text-white">{feature.title}</h3>
-                <p className="text-text-muted leading-relaxed">{feature.description}</p>
+                <p className="text-white/70 leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>

@@ -6,7 +6,7 @@ import { MarketingNavbar } from '../components/MarketingNavbar.js';
 
 export function ProductPage(): JSX.Element {
   return (
-    <main className="relative min-h-screen w-full bg-background text-text selection:bg-primary-500/30">
+    <main className="relative min-h-screen w-full bg-[#050505] text-white selection:bg-primary-500/30">
       <MarketingNavbar />
       
       {/* Hero */}
@@ -23,7 +23,7 @@ export function ProductPage(): JSX.Element {
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-white md:text-7xl">
             Skills decay is <span className="text-error-500">real.</span>
           </h1>
-          <p className="text-xl leading-relaxed text-text-muted mx-auto max-w-2xl">
+          <p className="text-xl leading-relaxed text-white/70 mx-auto max-w-2xl">
             Published data shows 40–50% skill loss within 6 months of training. Paramedic training is infrequent and passive. When emergencies happen, decision quality varies widely.
           </p>
         </motion.div>
@@ -40,7 +40,7 @@ export function ProductPage(): JSX.Element {
               className="rounded-3xl border border-white/10 bg-black/40 p-12 backdrop-blur-sm"
             >
               <h3 className="mb-6 text-2xl font-bold text-white">What Exists Today</h3>
-              <ul className="flex flex-col gap-6 text-text-muted">
+              <ul className="flex flex-col gap-6 text-white/70">
                 <li className="flex items-start gap-4">
                   <div className="mt-1 rounded-full bg-error-500/20 p-2 text-error-500"><Timer className="h-5 w-5" /></div>
                   <div>
@@ -65,7 +65,7 @@ export function ProductPage(): JSX.Element {
               className="rounded-3xl border border-primary-500/30 bg-primary-900/10 p-12 backdrop-blur-sm shadow-[0_0_50px_-12px_var(--color-primary-500)]"
             >
               <h3 className="mb-6 text-2xl font-bold text-white">The Imedica Solution</h3>
-              <ul className="flex flex-col gap-6 text-text-muted">
+              <ul className="flex flex-col gap-6 text-white/70">
                 <li className="flex items-start gap-4">
                   <div className="mt-1 rounded-full bg-primary-500/20 p-2 text-primary-500"><Crosshair className="h-5 w-5" /></div>
                   <div>
@@ -93,7 +93,7 @@ export function ProductPage(): JSX.Element {
            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-12">
              <div>
                <h3 className="text-3xl font-bold text-white mb-4">A data moat for decision-making.</h3>
-               <p className="max-w-xl text-text-muted mb-8">Every scenario generates structured data, building Canada's only dataset of paramedic decision-making under pressure.</p>
+               <p className="max-w-xl text-white/70 mb-8">Every scenario generates structured data, building Canada's only dataset of paramedic decision-making under pressure.</p>
                <Link to="/register" className="inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 font-semibold text-black hover:bg-white/90">
                  Start Free Trial <ArrowRight className="h-4 w-4" />
                </Link>
