@@ -1,12 +1,17 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build",
-  "outputDirectory": "dist",
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile && pnpm --filter @imedica/backend db:generate",
+  "buildCommand": "pnpm run build",
+  "functions": {
+    "api/index.ts": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/index.js"
+      "destination": "/api/index.ts"
     }
   ]
 }

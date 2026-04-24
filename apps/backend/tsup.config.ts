@@ -1,9 +1,11 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: { app: 'src/app.ts' },
   format: ['esm'],
+  outDir: 'dist',
   clean: true,
+  splitting: false,
   noExternal: ['@imedica/shared'],
-  external: ['@prisma/client', 'bcryptjs', 'express', 'winston']
+  external: ['@prisma/client'],
 });
