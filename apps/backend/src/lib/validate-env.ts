@@ -22,11 +22,14 @@ const envSchema = z.object({
     .url()
     .startsWith('postgresql://', 'DATABASE_URL must be a postgresql:// connection string'),
 
-  // Redis
+  // Redis (accepts redis:// for local and rediss:// for TLS/Upstash)
   REDIS_URL: z
     .string()
     .url()
-    .startsWith('redis://', 'REDIS_URL must be a redis:// connection string'),
+    .refine(
+      (url) => url.startsWith('redis://') || url.startsWith('rediss://'),
+      'REDIS_URL must be a redis:// or rediss:// connection string',
+    ),
 
   // JWT — enforce minimum secret length to deter weak secrets
   JWT_ACCESS_SECRET: z
