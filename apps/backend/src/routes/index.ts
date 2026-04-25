@@ -36,10 +36,10 @@ router.use('/scenarios', scenariosRouter);
 router.use('/sessions', sessionsRouter);
 router.use('/users', usersRouter);
 
+import adminRouter from './admin.js';
+
 // Phase 2+ routes will be added here:
-// router.use('/scenarios', scenarioRouter);       // Phase 3
-// router.use('/sessions', sessionRouter);          // Phase 4
 // router.use('/feedback', feedbackRouter);         // Phase 5
-// router.use('/admin', adminRouter);               // Phase 6
+router.use('/admin', adminRouter);
 
 export default router;

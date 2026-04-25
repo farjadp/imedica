@@ -62,6 +62,9 @@ const envSchema = z.object({
   // Optional (production)
   SENTRY_DSN: z.string().url().optional(),
   ANTHROPIC_API_KEY: z.string().startsWith('sk-ant-').optional(),
+  ANTHROPIC_MODEL: z.string().min(1).default('claude-sonnet-4-20250514'),
+  ANTHROPIC_MAX_TOKENS: z.coerce.number().int().min(1).max(8192).default(1000),
+  ANTHROPIC_TIMEOUT_MS: z.coerce.number().int().min(1000).default(5000),
   SENDGRID_API_KEY: z.string().startsWith('SG.').optional(),
 });
 

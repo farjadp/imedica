@@ -403,6 +403,8 @@ model SessionDecision {
   pointsAwarded Int @default(0) @map("points_awarded")
   feedbackKey String?  @map("feedback_key") @db.VarChar(100)
   ruleMatched String?  @map("rule_matched") @db.Uuid
+  enhancedFeedback String? @map("enhanced_feedback") @db.Text
+  feedbackSource   String? @map("feedback_source") @db.VarChar(20)
 
   createdAt   DateTime @default(now()) @map("created_at")
 

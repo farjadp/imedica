@@ -24,7 +24,12 @@ function getNavItems(role?: string) {
   const items = [...DEFAULT_NAV_ITEMS];
   
   if (role === 'admin' || role === 'super_admin' || role === 'clinical_validator') {
+    items.unshift({ label: 'Analytics', href: '/admin/analytics', disabled: false });
     items.unshift({ label: 'Admin Scenarios', href: '/admin/scenarios', disabled: false });
+  }
+
+  if (role === 'admin' || role === 'super_admin') {
+    items.unshift({ label: 'Admin Users', href: '/admin/users', disabled: false });
   }
   
   return items;

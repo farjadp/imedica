@@ -71,7 +71,7 @@ function AccessDenied(): JSX.Element {
 
   return (
     <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-      <Card variant="elevated" padding="lg" className="w-full">
+      <Card variant="outlined" padding="lg" className="w-full">
         <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-error-50 text-error-600 dark:bg-error-900/30 dark:text-error-300">
             <AlertTriangle className="h-6 w-6" aria-hidden="true" />
@@ -257,13 +257,7 @@ export function ScenarioListPage(): JSX.Element {
   }
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background text-text">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-primary-200/25 blur-3xl" />
-        <div className="absolute right-0 top-24 h-96 w-96 rounded-full bg-info-200/20 blur-3xl" />
-        <div className="absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-warning-200/20 blur-3xl" />
-      </div>
-
+    <div className="relative min-h-[calc(100vh-4rem)] bg-background text-text">
       <main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-4">
@@ -300,29 +294,29 @@ export function ScenarioListPage(): JSX.Element {
         </div>
 
         <div className="mb-6 grid gap-4 md:grid-cols-4">
-          <Card variant="elevated" padding="md" className="border-primary-200/80">
+          <Card variant="outlined" padding="md" className="border-primary-200/80">
             <p className="text-sm font-medium text-text-subtle">Total scenarios</p>
             <p className="mt-2 text-3xl font-semibold text-text">{scenarios.length}</p>
             <p className="mt-2 text-sm text-text-muted">{counts.updatedToday} updated today</p>
           </Card>
-          <Card variant="elevated" padding="md">
+          <Card variant="outlined" padding="md">
             <p className="text-sm font-medium text-text-subtle">Published</p>
             <p className="mt-2 text-3xl font-semibold text-text">{counts.published}</p>
             <p className="mt-2 text-sm text-text-muted">Visible to paramedics</p>
           </Card>
-          <Card variant="elevated" padding="md">
+          <Card variant="outlined" padding="md">
             <p className="text-sm font-medium text-text-subtle">Needs review</p>
             <p className="mt-2 text-3xl font-semibold text-text">{counts.reviews}</p>
             <p className="mt-2 text-sm text-text-muted">Awaiting clinical validation</p>
           </Card>
-          <Card variant="elevated" padding="md">
+          <Card variant="outlined" padding="md">
             <p className="text-sm font-medium text-text-subtle">Drafts</p>
             <p className="mt-2 text-3xl font-semibold text-text">{counts.drafts}</p>
             <p className="mt-2 text-sm text-text-muted">Work in progress</p>
           </Card>
         </div>
 
-        <Card variant="elevated" padding="md" className="mb-6">
+        <Card variant="outlined" padding="md" className="mb-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="grid flex-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
               <Input
@@ -413,7 +407,7 @@ export function ScenarioListPage(): JSX.Element {
           </div>
         </Card>
 
-        <Card variant="elevated" padding="none" className="overflow-hidden">
+        <Card variant="outlined" padding="none" className="overflow-hidden">
           <div className="border-b border-border px-5 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>

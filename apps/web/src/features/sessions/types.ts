@@ -7,6 +7,8 @@
 
 import type { ScenarioCategory, ScenarioDifficulty } from '../scenarios/types.js';
 
+export type FeedbackSource = 'cache' | 'llm' | 'fallback';
+
 export interface SessionVitals {
   hr: number | null;
   bp: string | null;
@@ -38,6 +40,17 @@ export interface SessionDecisionRecord {
   pointsAwarded: number;
   feedbackKey: string | null;
   ruleMatched: string | null;
+  enhancedFeedback: string | null;
+  feedbackSource: FeedbackSource | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EnhancedFeedbackStatus {
+  total: number;
+  completed: number;
+  pending: number;
+  isComplete: boolean;
 }
 
 export interface SessionFeedbackTemplate {
@@ -127,4 +140,3 @@ export interface SessionDecisionResponse {
   } | null;
   session: SessionLoadPayload;
 }
-

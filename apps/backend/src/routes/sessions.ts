@@ -12,9 +12,13 @@ import { z } from 'zod';
 
 import { db } from '../db/clients.js';
 import { AuthenticationError, ForbiddenError } from '../lib/errors.js';
+import { createChildLogger } from '../lib/logger.js';
 import { authenticate } from '../middleware/auth.js';
+import { generateEnhancedFeedback } from '../services/llm/feedbackGenerator.js';
+import type { FeedbackEnhancementInput } from '../services/llm/types.js';
 
 const router: ExpressRouter = Router();
+const log = createChildLogger({ route: 'sessions' });
 
 const createSessionSchema = z.object({
   scenarioId: z.string().min(1),
@@ -38,12 +42,45 @@ function parseRuleCondition(condition: unknown): {
   minTime: number | null;
 } {
   const value = (condition ?? {}) as Record<string, unknown>;
+  const action = value['action'];
 
   return {
-    action: String(value['action'] ?? ''),
+    action: typeof action === 'string' ? action : '',
     stateOrder: Number(value['stateOrder'] ?? -1),
     maxTime: value['maxTime'] === null || value['maxTime'] === undefined ? null : Number(value['maxTime']),
     minTime: value['minTime'] === null || value['minTime'] === undefined ? null : Number(value['minTime']),
+  };
+}
+
+type LlmVitals = FeedbackEnhancementInput['state']['vitals'];
+
+function getJsonRecord(value: unknown): Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value) ? (value as Record<string, unknown>) : {};
+}
+
+function readNumber(value: unknown, fallback: number | null): number | null {
+  if (typeof value === 'number' && Number.isFinite(value)) return value;
+  if (typeof value === 'string' && value.trim().length > 0) {
+    const parsed = Number.parseFloat(value);
+    if (Number.isFinite(parsed)) return parsed;
+  }
+  return fallback;
+}
+
+function readString(value: unknown, fallback: string | null): string | null {
+  return typeof value === 'string' && value.trim().length > 0 ? value : fallback;
+}
+
+function normalizeVitals(vitals: unknown): LlmVitals {
+  const record = getJsonRecord(vitals);
+
+  return {
+    HR: readNumber(record['HR'] ?? record['hr'], 0) ?? 0,
+    BP: readString(record['BP'] ?? record['bp'], 'N/A') ?? 'N/A',
+    SpO2: readNumber(record['SpO2'] ?? record['SPO2'] ?? record['spo2'], null),
+    RR: readNumber(record['RR'] ?? record['rr'], 0) ?? 0,
+    Temp: readNumber(record['Temp'] ?? record['temp'], null),
+    ECG: readString(record['ECG'] ?? record['ecg'], null),
   };
 }
 
@@ -51,7 +88,7 @@ function evaluateDecision(args: {
   actionType: string;
   stateOrder: number;
   timeFromStart: number;
-  rules: Array<{
+  rules: {
     id: string;
     action: string;
     stateOrder: number;
@@ -60,7 +97,7 @@ function evaluateDecision(args: {
     points: number;
     feedbackKey: string;
     priority: number;
-  }>;
+  }[];
 }): { matchedRule: (typeof args.rules)[number] | null; pointsAwarded: number; feedbackKey: string | null; isCorrect: boolean | null } {
   const matchedRule = args.rules
     .slice()
@@ -95,7 +132,7 @@ router.post('/', async (req: Request, res: Response, next: NextFunction) => {
 
     const dto = createSessionSchema.parse(req.body);
     const scenarioId = dto.scenarioId;
-    const userId = String(req.user['sub']);
+    const userId = req.user.sub;
 
     const scenario = await db.content.scenario.findFirst({
       where: { id: scenarioId, isPublished: true },
@@ -182,7 +219,7 @@ router.get('/:sessionId', async (req: Request, res: Response, next: NextFunction
     }
 
     const sessionId = String(req.params['sessionId']);
-    const userId = String(req.user['sub']);
+    const userId = req.user.sub;
 
     const session = await db.content.session.findFirst({
       where: { id: sessionId, userId },
@@ -222,7 +259,7 @@ router.post('/:sessionId/decisions', async (req: Request, res: Response, next: N
     }
 
     const sessionId = String(req.params['sessionId']);
-    const userId = String(req.user['sub']);
+    const userId = req.user.sub;
     const dto = createDecisionSchema.parse(req.body);
 
     const session = await db.content.session.findFirst({
@@ -356,7 +393,7 @@ router.post('/:sessionId/complete', async (req: Request, res: Response, next: Ne
     }
 
     const sessionId = String(req.params['sessionId']);
-    const userId = String(req.user['sub']);
+    const userId = req.user.sub;
 
     const session = await db.content.session.findFirst({
       where: { id: sessionId, userId },
@@ -413,6 +450,10 @@ router.post('/:sessionId/complete', async (req: Request, res: Response, next: Ne
       },
     });
 
+    void generateEnhancedFeedbackForSession(session.id).catch((error: unknown) => {
+      log.error('Failed to generate enhanced feedback', { error, sessionId: session.id });
+    });
+
     const response: ApiResponse<{
       session: typeof completedSession;
       totalScore: number;
@@ -431,5 +472,119 @@ router.post('/:sessionId/complete', async (req: Request, res: Response, next: Ne
     next(error);
   }
 });
+
+router.get('/:sessionId/enhanced-feedback-status', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      throw new AuthenticationError();
+    }
+
+    const sessionId = String(req.params['sessionId']);
+    const userId = req.user.sub;
+
+    const session = await db.content.session.findFirst({
+      where: { id: sessionId, userId },
+      select: {
+        decisions: {
+          select: {
+            id: true,
+            enhancedFeedback: true,
+          },
+        },
+      },
+    });
+
+    if (!session) {
+      res.status(404).json({
+        success: false,
+        error: { code: 'NOT_FOUND', message: 'Session not found' },
+      });
+      return;
+    }
+
+    const total = session.decisions.length;
+    const completed = session.decisions.filter((decision) => Boolean(decision.enhancedFeedback)).length;
+
+    res.status(200).json({
+      total,
+      completed,
+      pending: total - completed,
+      isComplete: completed === total,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+async function generateEnhancedFeedbackForSession(sessionId: string): Promise<void> {
+  const session = await db.content.session.findUnique({
+    where: { id: sessionId },
+    include: {
+      scenario: {
+        include: {
+          states: { orderBy: { order: 'asc' } },
+          feedbackTemplates: true,
+        },
+      },
+      decisions: {
+        where: {
+          enhancedFeedback: null,
+        },
+        orderBy: { timestamp: 'asc' },
+      },
+    },
+  });
+
+  if (!session) return;
+
+  for (const decision of session.decisions) {
+    try {
+      const state = session.scenario.states.find((scenarioState) => scenarioState.order === decision.stateOrder) ?? null;
+      const feedbackTemplate = decision.feedbackKey
+        ? session.scenario.feedbackTemplates.find((template) => template.key === decision.feedbackKey)
+        : null;
+
+      const decisionInput: FeedbackEnhancementInput['decision'] = {
+        actionType: decision.actionType,
+        timestamp: decision.timestamp.toISOString(),
+        timeFromStart: decision.timeFromStart,
+        isCorrect: decision.isCorrect,
+        pointsAwarded: decision.pointsAwarded,
+        feedbackKey: decision.feedbackKey,
+      };
+
+      if (decision.actionValue !== null) {
+        decisionInput.actionValue = decision.actionValue;
+      }
+
+      const input: FeedbackEnhancementInput = {
+        decision: decisionInput,
+        scenario: {
+          title: session.scenario.title,
+          category: String(session.scenario.category),
+        },
+        state: {
+          name: state?.name ?? `State ${decision.stateOrder}`,
+          vitals: normalizeVitals(state?.vitals),
+        },
+        ruleFeedback: feedbackTemplate?.message ?? decision.feedbackKey ?? 'No immediate feedback was matched for this action.',
+      };
+
+      const { feedback, source } = await generateEnhancedFeedback(input);
+
+      await db.content.sessionDecision.update({
+        where: { id: decision.id },
+        data: {
+          enhancedFeedback: feedback,
+          feedbackSource: source,
+        },
+      });
+
+      log.info('Enhanced feedback generated', { decisionId: decision.id, source });
+    } catch (error) {
+      log.error('Failed to generate feedback for decision', { error, decisionId: decision.id });
+    }
+  }
+}
 
 export default router;

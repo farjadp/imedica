@@ -7,7 +7,10 @@
 
 import { Badge, Card } from '@imedica/ui';
 
-import type { SessionDecisionRecord, SessionFeedbackTemplate } from '../types.js';
+import type { EnhancedFeedbackStatus, SessionDecisionRecord, SessionFeedbackTemplate } from '../types.js';
+
+import { EnhancedFeedbackCard } from './EnhancedFeedbackCard.js';
+import { EnhancedFeedbackLoading } from './EnhancedFeedbackLoading.js';
 
 function formatClock(seconds: number): string {
   const minutes = Math.floor(seconds / 60);
@@ -20,29 +23,31 @@ function renderRichText(html: string): JSX.Element {
 }
 
 function getTone(decision: SessionDecisionRecord): 'success' | 'warning' | 'error' {
-  if (decision.pointsAwarded > 0) return 'success';
-  if (decision.pointsAwarded < 0) return 'error';
+  if (decision.isCorrect === true) return 'success';
+  if (decision.isCorrect === false) return 'error';
   return 'warning';
 }
 
 function getLabel(decision: SessionDecisionRecord): string {
-  if (decision.pointsAwarded > 0) return 'Correct';
-  if (decision.pointsAwarded < 0) return 'Incorrect';
+  if (decision.isCorrect === true) return 'Correct';
+  if (decision.isCorrect === false) return 'Incorrect';
   return 'Suboptimal';
 }
 
 function getIndicator(decision: SessionDecisionRecord): string {
-  if (decision.pointsAwarded > 0) return '✅';
-  if (decision.pointsAwarded < 0) return '❌';
+  if (decision.isCorrect === true) return '✅';
+  if (decision.isCorrect === false) return '❌';
   return '⚠️';
 }
 
 export function DecisionTimeline({
   decisions,
   templates,
+  enhancedFeedbackStatus,
 }: {
   decisions: SessionDecisionRecord[];
   templates: SessionFeedbackTemplate[];
+  enhancedFeedbackStatus?: EnhancedFeedbackStatus | undefined;
 }): JSX.Element {
   return (
     <Card variant="outlined" padding="lg" className="space-y-4">
@@ -60,14 +65,20 @@ export function DecisionTimeline({
             const feedbackTemplate = decision.feedbackKey
               ? templates.find((template) => template.key === decision.feedbackKey)
               : null;
+            const hasEnhancedFeedback = typeof decision.enhancedFeedback === 'string' && decision.enhancedFeedback.trim().length > 0;
+            const showEnhancedFeedbackLoading =
+              !hasEnhancedFeedback &&
+              enhancedFeedbackStatus !== undefined &&
+              enhancedFeedbackStatus.total > 0 &&
+              !enhancedFeedbackStatus.isComplete;
 
             return (
               <div
                 key={decision.id}
                 className={`rounded-2xl border-l-4 ${
-                  decision.pointsAwarded > 0
+                  decision.isCorrect === true
                     ? 'border-l-success-600'
-                    : decision.pointsAwarded < 0
+                    : decision.isCorrect === false
                       ? 'border-l-error-600'
                       : 'border-l-warning-500'
                 } border border-border bg-surface-muted/50 p-4`}
@@ -91,6 +102,12 @@ export function DecisionTimeline({
                   </p>
                   {feedbackTemplate ? renderRichText(feedbackTemplate.message) : null}
                 </div>
+
+                {hasEnhancedFeedback ? (
+                  <EnhancedFeedbackCard feedback={decision.enhancedFeedback ?? ''} source={decision.feedbackSource} />
+                ) : showEnhancedFeedbackLoading ? (
+                  <EnhancedFeedbackLoading completed={enhancedFeedbackStatus.completed} total={enhancedFeedbackStatus.total} />
+                ) : null}
               </div>
             );
           })
@@ -101,4 +118,3 @@ export function DecisionTimeline({
     </Card>
   );
 }
-

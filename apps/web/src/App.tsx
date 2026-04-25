@@ -11,6 +11,8 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell.js';
 import { AuthBootstrap } from './components/AuthBootstrap.js';
 import { ProtectedRoute } from './components/ProtectedRoute.js';
+import { AnalyticsDashboardPage } from './features/admin/pages/AnalyticsDashboardPage.js';
+import { UserManagementPage } from './features/admin/pages/UserManagementPage.js';
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage.js';
 import { LoginPage } from './features/auth/pages/LoginPage.js';
 import { OnboardingPage } from './features/auth/pages/OnboardingPage.js';
@@ -103,6 +105,22 @@ export default function App(): JSX.Element {
               element={
                 <ProtectedRoute>
                   <ScenarioListPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute>
+                  <UserManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/analytics"
+              element={
+                <ProtectedRoute>
+                  <AnalyticsDashboardPage />
                 </ProtectedRoute>
               }
             />

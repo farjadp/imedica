@@ -40,7 +40,13 @@ apiClient.interceptors.response.use(
 
     const originalRequest = error.config as (typeof error.config & { _retry?: boolean }) | undefined;
 
-    if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
+    if (
+      error.response?.status === 401 &&
+      originalRequest &&
+      !originalRequest._retry &&
+      originalRequest.url !== '/api/auth/refresh' &&
+      originalRequest.url !== '/api/auth/login'
+    ) {
       originalRequest._retry = true;
 
       try {

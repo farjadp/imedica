@@ -270,7 +270,7 @@ export function ScenarioEditorShellPage(): JSX.Element {
   if (!canEdit) {
     return (
       <main className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-4xl items-center justify-center px-4 py-10 sm:px-6 lg:px-8">
-        <Card variant="elevated" padding="lg" className="w-full">
+        <Card variant="outlined" padding="lg" className="w-full">
           <div className="space-y-4">
             <Badge variant="error" className="w-fit">
               Access restricted
@@ -286,14 +286,9 @@ export function ScenarioEditorShellPage(): JSX.Element {
   }
 
   return (
-    <main className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-background text-text">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-primary-200/25 blur-3xl" />
-        <div className="absolute right-0 top-24 h-96 w-96 rounded-full bg-info-200/20 blur-3xl" />
-      </div>
-
+    <div className="min-h-[calc(100vh-4rem)] bg-background text-text">
       <div className="relative mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
-        <Card variant="elevated" padding="none" className="overflow-hidden">
+        <Card variant="outlined" padding="none" className="overflow-hidden">
           <div className="flex flex-col gap-4 border-b border-border px-4 py-4 sm:px-6">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div className="space-y-3">
@@ -551,6 +546,6 @@ export function ScenarioEditorShellPage(): JSX.Element {
           <span>TipTap + React Hook Form + Zod</span>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

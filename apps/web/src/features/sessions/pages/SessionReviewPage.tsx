@@ -6,16 +6,19 @@
 // ============================================================================
 
 import { Button, Card } from '@imedica/ui';
+import { useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { ChevronLeft, RotateCcw } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
-import { isAxiosError } from 'axios';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { apiClient } from '@/lib/api-client.js';
 
+import { getSession } from '../api/sessionsApi.js';
 import { DecisionTimeline } from '../components/DecisionTimeline.js';
 import { ScoreCard } from '../components/ScoreCard.js';
-import type { SessionLoadPayload, SessionRuntimePayload } from '../types.js';
+import { useEnhancedFeedbackPolling } from '../hooks/useEnhancedFeedbackPolling.js';
+import type { SessionRuntimePayload } from '../types.js';
 
 function renderRichText(html: string): JSX.Element {
   return <div className="prose prose-slate max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: html }} />;
@@ -32,58 +35,45 @@ function formatTitleCase(actionType: string): string {
 export function SessionReviewPage(): JSX.Element {
   const navigate = useNavigate();
   const { sessionId } = useParams();
-  const [session, setSession] = useState<SessionLoadPayload | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [retryError, setRetryError] = useState<string | null>(null);
   const [isRetrying, setIsRetrying] = useState(false);
 
+  const {
+    data: session,
+    error: loadError,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ['session', sessionId],
+    queryFn: () => getSession(sessionId ?? ''),
+    enabled: Boolean(sessionId),
+    retry: false,
+  });
+
+  const { status: feedbackStatus, isPolling } = useEnhancedFeedbackPolling(
+    session?.status === 'COMPLETED' ? sessionId : undefined,
+  );
+
   useEffect(() => {
-    let cancelled = false;
-
-    async function loadSession(): Promise<void> {
-      if (!sessionId) {
-        setError('Session not found.');
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await apiClient.get<{ success: true; data: SessionLoadPayload }>(`/api/sessions/${sessionId}`);
-        if (!cancelled) {
-          setSession(response.data.data);
-        }
-      } catch (fetchError) {
-        if (!cancelled) {
-          if (isAxiosError(fetchError) && fetchError.response?.status === 404) {
-            setError('Session not found.');
-          } else {
-            setError('Unable to load session review.');
-          }
-          setSession(null);
-        }
-      } finally {
-        if (!cancelled) {
-          setIsLoading(false);
-        }
-      }
+    if (feedbackStatus?.isComplete && !isPolling) {
+      void refetch();
     }
-
-    void loadSession();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [sessionId]);
+  }, [feedbackStatus?.isComplete, isPolling, refetch]);
 
   const feedbackTemplates = useMemo(() => session?.scenario.feedbackTemplates ?? [], [session]);
+  const error = !sessionId
+    ? 'Session not found.'
+    : loadError
+      ? isAxiosError(loadError) && loadError.response?.status === 404
+        ? 'Session not found.'
+        : 'Unable to load session review.'
+      : null;
 
   async function handleRetry(): Promise<void> {
     if (!session) return;
 
     setIsRetrying(true);
+    setRetryError(null);
 
     try {
       const response = await apiClient.post<{ success: true; data: SessionRuntimePayload }>('/api/sessions', {
@@ -91,7 +81,7 @@ export function SessionReviewPage(): JSX.Element {
       });
       navigate(`/sessions/${response.data.data.sessionId}`);
     } catch {
-      setError('Unable to retry the scenario right now.');
+      setRetryError('Unable to retry the scenario right now.');
     } finally {
       setIsRetrying(false);
     }
@@ -151,6 +141,12 @@ export function SessionReviewPage(): JSX.Element {
         </div>
 
         <div className="space-y-6">
+          {retryError ? (
+            <div className="rounded-xl border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-900/40 dark:bg-error-900/20 dark:text-error-300">
+              {retryError}
+            </div>
+          ) : null}
+
           <Card variant="elevated" padding="lg" className="space-y-2">
             <p className="text-sm font-medium uppercase tracking-[0.18em] text-text-subtle">Session Complete</p>
             <h1 className="text-3xl font-semibold tracking-tight text-text sm:text-4xl">{session.scenario.title}</h1>
@@ -166,7 +162,7 @@ export function SessionReviewPage(): JSX.Element {
             decisionCount={decisionCount}
           />
 
-          <DecisionTimeline decisions={session.decisions} templates={feedbackTemplates} />
+          <DecisionTimeline decisions={session.decisions} templates={feedbackTemplates} enhancedFeedbackStatus={feedbackStatus} />
 
           <Card variant="outlined" padding="lg" className="space-y-3 text-center">
             <h2 className="text-xl font-semibold text-text">Next steps</h2>
