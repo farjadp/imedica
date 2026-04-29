@@ -14,7 +14,7 @@ services:
   # Single instance with three schemas for local dev.
   # In production these will be separate managed databases on DO Toronto.
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: imedica_postgres
     restart: unless-stopped
     environment:
@@ -22,7 +22,7 @@ services:
       POSTGRES_PASSWORD: imedica_dev
       POSTGRES_DB: imedica
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Init script creates the three schemas and grants permissions
@@ -41,7 +41,7 @@ services:
     container_name: imedica_redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - "6380:6379"
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru

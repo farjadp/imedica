@@ -16,13 +16,14 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["multiSchema"]
+  previewFeatures = ["multiSchema", "postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  schemas  = ["identity", "analytics", "content"]
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  schemas    = ["identity", "analytics", "content"]
+  extensions = [vector]
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -56,26 +57,26 @@ enum OrgPlan {
 }
 
 model User {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email        String    @unique @db.VarChar(254)
-  passwordHash String    @map("password_hash") @db.VarChar(255)
-  firstName    String?   @map("first_name") @db.VarChar(100)
-  lastName     String?   @map("last_name") @db.VarChar(100)
-  phone        String?   @db.VarChar(20)
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String  @unique @db.VarChar(254)
+  passwordHash String  @map("password_hash") @db.VarChar(255)
+  firstName    String? @map("first_name") @db.VarChar(100)
+  lastName     String? @map("last_name") @db.VarChar(100)
+  phone        String? @db.VarChar(20)
 
   organizationId String?       @map("organization_id") @db.Uuid
   organization   Organization? @relation(fields: [organizationId], references: [id])
 
   role UserRole
 
-  emailVerified Boolean   @default(false) @map("email_verified")
+  emailVerified                   Boolean   @default(false) @map("email_verified")
   /// Verification token hash (cleared after verification)
-  emailVerificationTokenHash String? @map("email_verification_token_hash") @db.VarChar(255)
+  emailVerificationTokenHash      String?   @map("email_verification_token_hash") @db.VarChar(255)
   emailVerificationTokenExpiresAt DateTime? @map("email_verification_token_expires_at")
 
-  mfaEnabled Boolean  @default(false) @map("mfa_enabled")
+  mfaEnabled Boolean @default(false) @map("mfa_enabled")
   /// Encrypted TOTP secret — only set when mfa_enabled = true
-  mfaSecret  String?  @map("mfa_secret") @db.VarChar(255)
+  mfaSecret  String? @map("mfa_secret") @db.VarChar(255)
 
   /// Password reset token hash (cleared after use)
   passwordResetTokenHash      String?   @map("password_reset_token_hash") @db.VarChar(255)
@@ -101,11 +102,11 @@ model User {
 }
 
 model Organization {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String   @db.VarChar(255)
-  type         OrgType
-  province     String?  @db.VarChar(2)
-  billingEmail String?  @map("billing_email") @db.VarChar(254)
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String    @db.VarChar(255)
+  type          OrgType
+  province      String?   @db.VarChar(2)
+  billingEmail  String?   @map("billing_email") @db.VarChar(254)
   contractStart DateTime? @map("contract_start") @db.Date
   contractEnd   DateTime? @map("contract_end") @db.Date
   plan          OrgPlan?
@@ -165,9 +166,9 @@ enum ParamedicLevel {
 }
 
 enum ExperienceBucket {
-  years_0_2  @map("0-2_years")
-  years_3_5  @map("3-5_years")
-  years_5_10 @map("5-10_years")
+  years_0_2     @map("0-2_years")
+  years_3_5     @map("3-5_years")
+  years_5_10    @map("5-10_years")
   years_10_plus @map("10+_years")
 
   @@schema("analytics")
@@ -204,13 +205,13 @@ enum DecisionType {
 /// CONTAINS NO PII — only coarse buckets and the anonymous_hash.
 model ParamedicProfileSnapshot {
   /// HMAC-SHA256 hash — NOT the user_id
-  anonymousHash    String          @id @map("anonymous_hash") @db.VarChar(255)
-  paramedicLevel   ParamedicLevel? @map("paramedic_level")
+  anonymousHash    String            @id @map("anonymous_hash") @db.VarChar(255)
+  paramedicLevel   ParamedicLevel?   @map("paramedic_level")
   experienceBucket ExperienceBucket? @map("experience_bucket")
   /// Coarse region (province code), not exact location
-  region           String?         @db.VarChar(2)
-  serviceType      ServiceType?    @map("service_type")
-  lastUpdated      DateTime        @default(now()) @updatedAt @map("last_updated")
+  region           String?           @db.VarChar(2)
+  serviceType      ServiceType?      @map("service_type")
+  lastUpdated      DateTime          @default(now()) @updatedAt @map("last_updated")
 
   sessions  AnalyticsSession[]
   decisions Decision[]
@@ -243,20 +244,20 @@ model AnalyticsSession {
 }
 
 model Decision {
-  id                    String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sessionId             String       @map("session_id") @db.Uuid
-  anonymousHash         String       @map("anonymous_hash") @db.VarChar(255)
-  stateOrder            Int          @map("state_order")
-  decisionType          DecisionType @map("decision_type")
-  decisionValue         Json         @map("decision_value")
-  timeToDecisionMs      Int          @map("time_to_decision_ms")
-  isCorrect             Boolean      @map("is_correct")
-  protocolAlignmentScore Float?      @map("protocol_alignment_score")
-  ruleIdsApplied        String[]     @map("rule_ids_applied")
-  createdAt             DateTime     @default(now()) @map("created_at")
+  id                     String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId              String       @map("session_id") @db.Uuid
+  anonymousHash          String       @map("anonymous_hash") @db.VarChar(255)
+  stateOrder             Int          @map("state_order")
+  decisionType           DecisionType @map("decision_type")
+  decisionValue          Json         @map("decision_value")
+  timeToDecisionMs       Int          @map("time_to_decision_ms")
+  isCorrect              Boolean      @map("is_correct")
+  protocolAlignmentScore Float?       @map("protocol_alignment_score")
+  ruleIdsApplied         String[]     @map("rule_ids_applied")
+  createdAt              DateTime     @default(now()) @map("created_at")
 
-  session AnalyticsSession          @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  profile ParamedicProfileSnapshot  @relation(fields: [anonymousHash], references: [anonymousHash])
+  session AnalyticsSession         @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  profile ParamedicProfileSnapshot @relation(fields: [anonymousHash], references: [anonymousHash])
 
   @@index([sessionId])
   @@index([anonymousHash])
@@ -316,33 +317,32 @@ enum AuditResult {
 }
 
 model Scenario {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title       String   @db.VarChar(255)
-  description String   @db.Text
-  category    ScenarioCategory
-  difficulty   ScenarioDifficulty
-  estimatedDuration Int @map("estimated_duration")
+  id                String             @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title             String             @db.VarChar(255)
+  description       String             @db.Text
+  category          ScenarioCategory
+  difficulty        ScenarioDifficulty
+  estimatedDuration Int                @map("estimated_duration")
 
-  patientPresentation String @db.Text @map("patient_presentation")
-  learningObjectives   String @db.Text @map("learning_objectives")
+  patientPresentation String @map("patient_presentation") @db.Text
+  learningObjectives  String @map("learning_objectives") @db.Text
 
-  authorId    String   @map("author_id") @db.Uuid
-  author      User     @relation(fields: [authorId], references: [id])
+  authorId    String         @map("author_id") @db.Uuid
+  author      User           @relation(fields: [authorId], references: [id])
   status      ScenarioStatus @default(DRAFT)
-  isPublished Boolean  @default(false) @map("is_published")
+  isPublished Boolean        @default(false) @map("is_published")
 
-  states      ScenarioState[]
-  rules       ScenarioRule[]
+  states            ScenarioState[]
+  rules             ScenarioRule[]
   feedbackTemplates FeedbackTemplate[]
   analyticsSessions AnalyticsSession[]
-  sessions    Session[]
+  sessions          Session[]
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([category, difficulty, isPublished])
   @@index([authorId])
-
   @@map("scenarios")
   @@schema("content")
 }
@@ -356,30 +356,30 @@ enum SessionRuntimeStatus {
 }
 
 model Session {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId      String   @map("user_id") @db.Uuid
-  user        User     @relation(fields: [userId], references: [id])
+  userId String @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id])
 
-  scenarioId  String   @map("scenario_id") @db.Uuid
-  scenario    Scenario @relation(fields: [scenarioId], references: [id])
+  scenarioId String   @map("scenario_id") @db.Uuid
+  scenario   Scenario @relation(fields: [scenarioId], references: [id])
 
-  startedAt   DateTime @default(now()) @map("started_at")
+  startedAt   DateTime  @default(now()) @map("started_at")
   completedAt DateTime? @map("completed_at")
 
-  status      SessionRuntimeStatus @default(RUNNING)
-  currentStateOrder Int @default(0) @map("current_state_order")
+  status            SessionRuntimeStatus @default(RUNNING)
+  currentStateOrder Int                  @default(0) @map("current_state_order")
 
-  totalScore  Int @default(0) @map("total_score")
+  totalScore       Int  @default(0) @map("total_score")
   maxPossibleScore Int? @map("max_possible_score")
 
-  decisions   SessionDecision[]
+  decisions SessionDecision[]
 
-  userAgent   String? @map("user_agent") @db.VarChar(500)
-  ipAddress   String? @map("ip_address") @db.VarChar(45)
+  userAgent String? @map("user_agent") @db.VarChar(500)
+  ipAddress String? @map("ip_address") @db.VarChar(45)
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([userId, status])
   @@index([scenarioId, status])
@@ -388,25 +388,25 @@ model Session {
 }
 
 model SessionDecision {
-  id          String   @id @default(cuid())
-  sessionId   String   @map("session_id")
-  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  id        String  @id @default(cuid())
+  sessionId String  @map("session_id")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
-  actionType  String   @map("action_type") @db.VarChar(100)
-  actionValue String?  @map("action_value") @db.VarChar(255)
+  actionType  String  @map("action_type") @db.VarChar(100)
+  actionValue String? @map("action_value") @db.VarChar(255)
 
-  stateOrder  Int      @map("state_order")
-  timestamp   DateTime @default(now())
-  timeFromStart Int    @map("time_from_start")
+  stateOrder    Int      @map("state_order")
+  timestamp     DateTime @default(now())
+  timeFromStart Int      @map("time_from_start")
 
-  isCorrect   Boolean?
-  pointsAwarded Int @default(0) @map("points_awarded")
-  feedbackKey String?  @map("feedback_key") @db.VarChar(100)
-  ruleMatched String?  @map("rule_matched") @db.Uuid
-  enhancedFeedback String? @map("enhanced_feedback") @db.Text
-  feedbackSource   String? @map("feedback_source") @db.VarChar(20)
+  isCorrect        Boolean?
+  pointsAwarded    Int      @default(0) @map("points_awarded")
+  feedbackKey      String?  @map("feedback_key") @db.VarChar(100)
+  ruleMatched      String?  @map("rule_matched") @db.Uuid
+  enhancedFeedback String?  @map("enhanced_feedback") @db.Text
+  feedbackSource   String?  @map("feedback_source") @db.VarChar(20)
 
-  createdAt   DateTime @default(now()) @map("created_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@index([sessionId, timestamp])
   @@map("session_decisions")
@@ -414,20 +414,20 @@ model SessionDecision {
 }
 
 model ScenarioState {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  scenarioId  String   @map("scenario_id") @db.Uuid
-  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId String   @map("scenario_id") @db.Uuid
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  order       Int      @map("state_order")
-  name        String   @db.VarChar(100)
+  order Int    @map("state_order")
+  name  String @db.VarChar(100)
 
-  vitals      Json
-  physicalExam String? @db.Text @map("physical_exam")
+  vitals       Json
+  physicalExam String? @map("physical_exam") @db.Text
   symptoms     String? @db.Text
-  timeLimit   Int?     @map("time_limit_seconds")
+  timeLimit    Int?    @map("time_limit_seconds")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([scenarioId, order])
   @@map("scenario_states")
@@ -435,21 +435,21 @@ model ScenarioState {
 }
 
 model ScenarioRule {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  scenarioId  String   @map("scenario_id") @db.Uuid
-  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId String   @map("scenario_id") @db.Uuid
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  name        String   @db.VarChar(100)
-  description String?  @db.Text
+  name        String  @db.VarChar(100)
+  description String? @db.Text
   condition   Json
   points      Int
-  feedbackKey String   @map("feedback_key")
+  feedbackKey String  @map("feedback_key")
 
-  priority    Int      @default(0)
-  isActive    Boolean  @default(true) @map("is_active")
+  priority Int     @default(0)
+  isActive Boolean @default(true) @map("is_active")
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@index([scenarioId, priority])
   @@map("scenario_rules")
@@ -457,20 +457,19 @@ model ScenarioRule {
 }
 
 model FeedbackTemplate {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  scenarioId  String   @map("scenario_id") @db.Uuid
-  scenario    Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  scenarioId String   @map("scenario_id") @db.Uuid
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
 
-  key         String   @db.VarChar(100)
-  language    String   @default("en") @db.VarChar(10)
-  title       String   @db.VarChar(200)
-  message     String   @db.Text
+  key      String @db.VarChar(100)
+  language String @default("en") @db.VarChar(10)
+  title    String @db.VarChar(200)
+  message  String @db.Text
 
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@unique([scenarioId, key, language])
-
   @@map("feedback_templates")
   @@schema("content")
 }
@@ -496,5 +495,64 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
   @@map("audit_logs")
+  @@schema("content")
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// AI KNOWLEDGE BASE — Content schema.
+// Stores uploaded documents and their vector embeddings for RAG.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+enum AiDocumentType {
+  PDF
+  TEXT
+  CSV
+  HF_DATASET
+
+  @@schema("content")
+}
+
+enum AiDocumentStatus {
+  PROCESSING
+  READY
+  ERROR
+
+  @@schema("content")
+}
+
+model AiDocument {
+  id          String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String           @db.VarChar(255)
+  description String?          @db.Text
+  type        AiDocumentType
+  url         String?          @db.Text
+  status      AiDocumentStatus @default(PROCESSING)
+  error       String?          @db.Text
+
+  uploadedById String? @map("uploaded_by_id") @db.Uuid
+
+  chunks AiDocumentChunk[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("ai_documents")
+  @@schema("content")
+}
+
+model AiDocumentChunk {
+  id         String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  documentId String     @map("document_id") @db.Uuid
+  document   AiDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  content String @db.Text
+
+  // Vector embeddings from OpenAI (1536 dimensions)
+  embedding Unsupported("vector(1536)")?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([documentId])
+  @@map("ai_document_chunks")
   @@schema("content")
 }

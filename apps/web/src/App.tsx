@@ -13,6 +13,7 @@ import { AuthBootstrap } from './components/AuthBootstrap.js';
 import { ProtectedRoute } from './components/ProtectedRoute.js';
 import { AnalyticsDashboardPage } from './features/admin/pages/AnalyticsDashboardPage.js';
 import { UserManagementPage } from './features/admin/pages/UserManagementPage.js';
+import { AiHubPage } from './features/admin/pages/AiHubPage.js';
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage.js';
 import { LoginPage } from './features/auth/pages/LoginPage.js';
 import { OnboardingPage } from './features/auth/pages/OnboardingPage.js';
@@ -22,6 +23,10 @@ import { VerifyEmailPage } from './features/auth/pages/VerifyEmailPage.js';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage.js';
 import { HomePage } from './features/home/pages/HomePage.js';
 import { AboutUsPage } from './features/marketing/pages/AboutUsPage.js';
+import { TeamPage } from './features/marketing/pages/TeamPage.js';
+import { BlsGuidePage } from './features/marketing/pages/BlsGuidePage.js';
+import { ProblemPage } from './features/marketing/pages/ProblemPage.js';
+import { SolutionsPage } from './features/marketing/pages/SolutionsPage.js';
 import { ContactUsPage } from './features/marketing/pages/ContactUsPage.js';
 import { PlatformFeaturesPage } from './features/marketing/pages/PlatformFeaturesPage.js';
 import { ProductPage } from './features/marketing/pages/ProductPage.js';
@@ -43,6 +48,11 @@ export default function App(): JSX.Element {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/about" element={<AboutUsPage />} />
+            <Route path="/team" element={<TeamPage />} />
+            <Route path="/bls-guide" element={<BlsGuidePage />} />
+            <Route path="/basic-life-support-bls" element={<BlsGuidePage />} />
+            <Route path="/problem" element={<ProblemPage />} />
+            <Route path="/solutions" element={<SolutionsPage />} />
             <Route path="/contact" element={<ContactUsPage />} />
             <Route path="/product" element={<ProductPage />} />
             <Route path="/roadmap" element={<RoadmapPage />} />
@@ -113,6 +123,14 @@ export default function App(): JSX.Element {
               element={
                 <ProtectedRoute>
                   <UserManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/ai"
+              element={
+                <ProtectedRoute>
+                  <AiHubPage />
                 </ProtectedRoute>
               }
             />
