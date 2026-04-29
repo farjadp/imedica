@@ -27,7 +27,12 @@ export function LoginPage(): JSX.Element {
     onSuccess: (data) => {
       setUser(data.user);
       setAccessToken(data.accessToken);
-      navigate('/dashboard');
+      
+      if (data.user.role === 'admin' || data.user.role === 'super_admin') {
+        navigate('/admin/analytics');
+      } else {
+        navigate('/dashboard');
+      }
     },
   });
 

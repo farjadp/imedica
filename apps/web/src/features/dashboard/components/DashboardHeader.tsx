@@ -123,6 +123,19 @@ export function DashboardHeader(): JSX.Element {
                 <Settings className="h-4 w-4" aria-hidden="true" />
                 Settings
               </button>
+              {(user?.role === 'admin' || user?.role === 'super_admin') && (
+                <button
+                  type="button"
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-primary-600 transition hover:bg-primary-50 hover:text-primary-700 dark:hover:bg-primary-900/20 dark:text-primary-400"
+                  onClick={() => {
+                    setIsOpen(false);
+                    navigate('/admin/analytics');
+                  }}
+                >
+                  <Settings className="h-4 w-4" aria-hidden="true" />
+                  Admin Panel
+                </button>
+              )}
               <button
                 type="button"
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-error-600 transition hover:bg-error-50 hover:text-error-700 dark:hover:bg-error-950/30"
