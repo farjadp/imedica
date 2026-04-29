@@ -68,6 +68,12 @@ const DEFAULT_TEAM = [
     bio: 'A successful dental surgeon and clinic owner, bringing entrepreneurial spirit and proven leadership to drive strategic growth and expand the reach of our life-saving training.',
     avatarImage: '',
   },
+  {
+    name: 'Farjad PMD',
+    role: 'Chief Technology Officer (CTO)',
+    bio: 'The technical mastermind behind our platform. Bringing years of IT expertise to ensure our infrastructure is robust, scalable, and delivers cutting-edge technology for our life-saving training.',
+    avatarImage: '',
+  },
 ];
 
 const DEFAULT_COLLABORATION = [
@@ -155,11 +161,11 @@ export function TeamPage(): JSX.Element {
         </div>
       </section>
 
-      {/* Founders Section */}
+      {/* Team Section */}
       <section className="relative w-full py-24 lg:py-32">
         <div className="mx-auto max-w-7xl px-8">
           <div className="mb-20 text-center">
-            <h2 className="mb-6 text-3xl font-extrabold tracking-tight md:text-5xl">iMEDICA Founders</h2>
+            <h2 className="mb-6 text-3xl font-extrabold tracking-tight md:text-5xl">iMEDICA Leadership Team</h2>
             <p className="mx-auto max-w-3xl text-lg text-gray-600">
               Established by dedicated professionals with a shared vision to empower Canadians. We combined our diverse expertise to create innovative training solutions.
             </p>
