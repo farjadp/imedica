@@ -152,8 +152,7 @@ export function AiHubPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-surface text-text">
-
+    <div className="space-y-6">
       {/* Upload File Modal */}
       {isUploadModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay px-4 backdrop-blur-md">
@@ -252,8 +251,7 @@ export function AiHubPage(): JSX.Element {
         </div>
       )}
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border pb-6">
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border pb-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2 text-sm font-medium text-text-subtle">
               <Database className="h-4 w-4" />
@@ -264,14 +262,6 @@ export function AiHubPage(): JSX.Element {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              leftIcon={<ChevronLeft className="h-4 w-4" />}
-              onClick={() => navigate('/dashboard')}
-              className="rounded-full"
-            >
-              Dashboard
-            </Button>
             <Button 
               variant="secondary" 
               leftIcon={<LinkIcon className="h-4 w-4" />}
@@ -357,7 +347,6 @@ export function AiHubPage(): JSX.Element {
             </table>
           </div>
         </div>
-      </main>
     </div>
   );
 }

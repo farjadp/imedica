@@ -1,5 +1,19 @@
 import { motion } from 'framer-motion';
-import { Activity, Brain, Briefcase, HeartPulse, Shield, Stethoscope, Target, Users, Zap } from 'lucide-react';
+import { Activity, Brain, Briefcase, HeartPulse, Shield, Stethoscope, Target, Users, Zap, Mail } from 'lucide-react';
+
+const LinkedinIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+    <rect x="2" y="9" width="4" height="12"></rect>
+    <circle cx="4" cy="4" r="2"></circle>
+  </svg>
+);
+
+const TwitterIcon = (props: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+  </svg>
+);
 import { useQuery } from '@tanstack/react-query';
 import { adminPagesService } from '../../admin/services/pagesService.js';
 import { MarketingFooter } from '../components/MarketingFooter.js';
@@ -171,7 +185,7 @@ export function TeamPage(): JSX.Element {
             </p>
           </div>
 
-          <div className="grid gap-10 lg:grid-cols-3">
+          <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
             {team.map((member: any, i: number) => (
               <motion.div 
                 key={member.name}
@@ -179,24 +193,38 @@ export function TeamPage(): JSX.Element {
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl p-8 transition-all hover:border-primary-300 hover:shadow-primary-100/50"
+                className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl transition-all hover:-translate-y-2 hover:border-primary-300 hover:shadow-primary-100/50 flex flex-col"
               >
-                <div className="mb-6 flex items-center gap-4">
+                <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-br from-primary-100 to-primary-50"></div>
+                
+                <div className="relative pt-12 px-8 pb-8 flex flex-col flex-1 items-center text-center">
                   {member.avatarImage ? (
-                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full ring-4 ring-primary-200 transition-transform group-hover:scale-110">
+                    <div className="mb-6 flex h-24 w-24 items-center justify-center overflow-hidden rounded-full ring-4 ring-white bg-white shadow-md transition-transform group-hover:scale-110">
                       <img src={member.avatarImage} alt={member.name} className="h-full w-full object-cover" />
                     </div>
                   ) : (
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-xl font-black text-primary-600 ring-4 ring-primary-200 transition-transform group-hover:scale-110">
+                    <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-primary-600 text-3xl font-black text-white ring-4 ring-white shadow-md transition-transform group-hover:scale-110">
                       {member.name.split(' ').map((n: string) => n[0]).join('').replace('D', '')}
                     </div>
                   )}
-                  <div>
-                    <h3 className="text-xl font-extrabold text-gray-900">{member.name}</h3>
-                    <p className="text-sm font-bold tracking-wide text-primary-600">{member.role}</p>
+                  
+                  <h3 className="mb-1 text-xl font-extrabold text-gray-900">{member.name}</h3>
+                  <p className="mb-4 text-sm font-bold tracking-wide text-primary-600">{member.role}</p>
+                  
+                  <p className="mb-8 text-sm leading-relaxed text-gray-600 flex-1">{member.bio}</p>
+                  
+                  <div className="flex items-center justify-center gap-3">
+                    <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors hover:bg-primary-50 hover:text-primary-600">
+                      <LinkedinIcon className="h-5 w-5" />
+                    </a>
+                    <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors hover:bg-primary-50 hover:text-primary-600">
+                      <TwitterIcon className="h-5 w-5" />
+                    </a>
+                    <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 text-gray-400 transition-colors hover:bg-primary-50 hover:text-primary-600">
+                      <Mail className="h-5 w-5" />
+                    </a>
                   </div>
                 </div>
-                <p className="text-base leading-relaxed text-gray-600">{member.bio}</p>
               </motion.div>
             ))}
           </div>

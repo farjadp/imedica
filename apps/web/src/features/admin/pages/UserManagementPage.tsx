@@ -187,8 +187,7 @@ export function UserManagementPage(): JSX.Element {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-surface text-text">
-
+    <div className="space-y-6">
       {/* Create Modal Overlay */}
       {isCreateModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-overlay px-4 backdrop-blur-md">
@@ -259,36 +258,23 @@ export function UserManagementPage(): JSX.Element {
         </div>
       )}
 
-      <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border pb-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-sm font-medium text-text-subtle">
-              <Shield className="h-4 w-4" />
-              <span className="uppercase tracking-widest">Admin Workspace</span>
-            </div>
-            <h1 className="text-4xl font-semibold tracking-tight text-text">System Users</h1>
-            <p className="text-lg text-text-muted">Manage roles, permissions, and platform access.</p>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              leftIcon={<ChevronLeft className="h-4 w-4" />}
-              onClick={() => navigate('/dashboard')}
-              className="rounded-full"
-            >
-              Dashboard
-            </Button>
-            <Button 
-              variant="primary" 
-              leftIcon={<Plus className="h-4 w-4" />}
-              onClick={() => setIsCreateModalOpen(true)}
-              className="rounded-full shadow-sm"
-            >
-              Add User
-            </Button>
-          </div>
+      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between border-b border-border pb-6">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-semibold tracking-tight text-text">System Users</h1>
+          <p className="text-base text-text-muted">Manage roles, permissions, and platform access.</p>
         </div>
+
+        <div className="flex flex-wrap gap-3">
+          <Button 
+            variant="primary" 
+            leftIcon={<Plus className="h-4 w-4" />}
+            onClick={() => setIsCreateModalOpen(true)}
+            className="rounded-full shadow-sm"
+          >
+            Add User
+          </Button>
+        </div>
+      </div>
 
         {/* Filters */}
         <div className="mb-8">
@@ -428,7 +414,6 @@ export function UserManagementPage(): JSX.Element {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

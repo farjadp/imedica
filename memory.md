@@ -69,3 +69,7 @@ Based on the project roadmap, the following phases have been successfully implem
   - **What we did:** Built the core simulation engine where paramedics execute scenarios. Implemented `sessions.ts` to track state changes, decisions, and time limits. Integrated the rule-based feedback system (`Decision` and `SessionDecision` models) to evaluate paramedic actions and calculate scores.
 - **Phase 6 (In Progress): Admin & Analytics**
   - **What we did:** Currently building the Admin panel (`admin.ts` and `AdminAnalyticsService`) to allow training directors to manage organizations, users, and view team-level, de-identified analytics without breaching the privacy boundaries.
+  - **Recent Updates (Admin UI Overhaul):** 
+    - Implemented a unified `AdminLayout` with a persistent sidebar.
+    - Extracted all `/admin/*` routes (`UserManagementPage`, `PageManagementPage`, `AiHubPage`, `AnalyticsDashboardPage`, `ScenarioListPage`) from the main dashboard into this dedicated layout, removing redundant wrappers, conflicting margins, and improving the professional aesthetic.
+    - Added a Dynamic CMS interface in the Admin Panel for managing public Marketing pages (`/problem`, `/solutions`), allowing for direct Base64 image uploads and JSON content management.

@@ -257,9 +257,8 @@ export function ScenarioListPage(): JSX.Element {
   }
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] bg-background text-text">
-      <main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div className="space-y-6">
+        <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between border-b border-border pb-6">
           <div className="max-w-3xl space-y-4">
             <Badge variant="info" size="md" className="w-fit uppercase tracking-[0.18em]">
               Physician authoring workspace
@@ -276,13 +275,6 @@ export function ScenarioListPage(): JSX.Element {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              leftIcon={<Eye className="h-4 w-4" />}
-              onClick={() => navigate('/dashboard')}
-            >
-              Back to dashboard
-            </Button>
             <Button
               variant="primary"
               leftIcon={<Plus className="h-4 w-4" />}
@@ -585,7 +577,6 @@ export function ScenarioListPage(): JSX.Element {
             </div>
           </div>
         </Card>
-      </main>
     </div>
   );
 }

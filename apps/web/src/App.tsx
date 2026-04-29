@@ -11,6 +11,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/AppShell.js';
 import { AuthBootstrap } from './components/AuthBootstrap.js';
 import { ProtectedRoute } from './components/ProtectedRoute.js';
+import { AdminLayout } from './features/admin/components/AdminLayout.js';
 import { AnalyticsDashboardPage } from './features/admin/pages/AnalyticsDashboardPage.js';
 import { UserManagementPage } from './features/admin/pages/UserManagementPage.js';
 import { PageManagementPage } from './features/admin/pages/PageManagementPage.js';
@@ -115,7 +116,9 @@ export default function App(): JSX.Element {
               path="/admin/scenarios"
               element={
                 <ProtectedRoute>
-                  <ScenarioListPage />
+                  <AdminLayout>
+                    <ScenarioListPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -123,7 +126,9 @@ export default function App(): JSX.Element {
               path="/admin/users"
               element={
                 <ProtectedRoute>
-                  <UserManagementPage />
+                  <AdminLayout>
+                    <UserManagementPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -131,7 +136,9 @@ export default function App(): JSX.Element {
               path="/admin/pages"
               element={
                 <ProtectedRoute>
-                  <PageManagementPage />
+                  <AdminLayout>
+                    <PageManagementPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -139,7 +146,9 @@ export default function App(): JSX.Element {
               path="/admin/ai"
               element={
                 <ProtectedRoute>
-                  <AiHubPage />
+                  <AdminLayout>
+                    <AiHubPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -147,7 +156,9 @@ export default function App(): JSX.Element {
               path="/admin/analytics"
               element={
                 <ProtectedRoute>
-                  <AnalyticsDashboardPage />
+                  <AdminLayout>
+                    <AnalyticsDashboardPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -155,7 +166,9 @@ export default function App(): JSX.Element {
               path="/admin/scenarios/new"
               element={
                 <ProtectedRoute>
-                  <ScenarioEditorShellPage />
+                  <AdminLayout>
+                    <ScenarioEditorShellPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
@@ -163,7 +176,9 @@ export default function App(): JSX.Element {
               path="/admin/scenarios/:id/edit"
               element={
                 <ProtectedRoute>
-                  <ScenarioEditorShellPage />
+                  <AdminLayout>
+                    <ScenarioEditorShellPage />
+                  </AdminLayout>
                 </ProtectedRoute>
               }
             />
