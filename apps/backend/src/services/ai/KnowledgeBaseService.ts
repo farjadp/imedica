@@ -1,8 +1,9 @@
 import { PrismaClient } from '@prisma/client';
 import OpenAI from 'openai';
-// @ts-ignore: pdf-parse types are not properly exposed for ESM
-import pdfParse from 'pdf-parse';
 import Papa from 'papaparse';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const pdfParse = require('pdf-parse');
 import { prisma } from '../../db/clients.js';
 import { env } from 'process';
 
