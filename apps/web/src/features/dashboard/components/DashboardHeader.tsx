@@ -29,6 +29,7 @@ function getNavItems(role?: string) {
   }
 
   if (role === 'admin' || role === 'super_admin') {
+    items.unshift({ label: 'Page Management', href: '/admin/pages', disabled: false });
     items.unshift({ label: 'AI Hub', href: '/admin/ai', disabled: false });
     items.unshift({ label: 'Admin Users', href: '/admin/users', disabled: false });
   }

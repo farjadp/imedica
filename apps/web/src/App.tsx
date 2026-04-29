@@ -13,6 +13,7 @@ import { AuthBootstrap } from './components/AuthBootstrap.js';
 import { ProtectedRoute } from './components/ProtectedRoute.js';
 import { AnalyticsDashboardPage } from './features/admin/pages/AnalyticsDashboardPage.js';
 import { UserManagementPage } from './features/admin/pages/UserManagementPage.js';
+import { PageManagementPage } from './features/admin/pages/PageManagementPage.js';
 import { AiHubPage } from './features/admin/pages/AiHubPage.js';
 import { ForgotPasswordPage } from './features/auth/pages/ForgotPasswordPage.js';
 import { LoginPage } from './features/auth/pages/LoginPage.js';
@@ -123,6 +124,14 @@ export default function App(): JSX.Element {
               element={
                 <ProtectedRoute>
                   <UserManagementPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/pages"
+              element={
+                <ProtectedRoute>
+                  <PageManagementPage />
                 </ProtectedRoute>
               }
             />

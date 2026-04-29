@@ -1,15 +1,17 @@
 import { motion } from 'framer-motion';
 import { Activity, Brain, Globe, Shield, Users, Zap } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { adminPagesService } from '../../admin/services/pagesService.js';
 import { MarketingFooter } from '../components/MarketingFooter.js';
 import { MarketingNavbar } from '../components/MarketingNavbar.js';
 
-const STATS = [
+const DEFAULT_STATS = [
   { label: 'Cardiac arrests annually in Canada', value: '40,000+' },
   { label: 'Occur outside of a hospital', value: '80-85%' },
   { label: 'Survival decrease per delayed minute', value: '7-10%' },
 ];
 
-const PILLARS = [
+const DEFAULT_PILLARS = [
   {
     title: 'Healthcare Professionals',
     description: 'Our curriculum is developed and overseen by seasoned medical professionals, ensuring clinical accuracy and alignment with the latest Canadian BLS guidelines.',
@@ -27,25 +29,28 @@ const PILLARS = [
   },
 ];
 
-const TEAM = [
+const DEFAULT_TEAM = [
   {
     name: 'Dr. Salman Erfanian',
     role: 'Co-Founder & Medical Director',
     bio: 'Dedicated healthcare professional driven to empower Canadians with life-saving skills through innovative training solutions.',
+    avatarImage: '',
   },
   {
     name: 'Dr. Somayyeh Motevalli',
     role: 'Co-Founder & Clinical Operations',
     bio: 'Recognizing the need to revolutionize Basic Life Support education with accessible and effective training.',
+    avatarImage: '',
   },
   {
     name: 'Dr. Maryam Daneshian',
     role: 'Co-Founder & Medical Strategy',
     bio: 'Combining diverse clinical expertise to create immersive, consequence-free environments for BLS mastery.',
+    avatarImage: '',
   },
 ];
 
-const FEATURES = [
+const DEFAULT_FEATURES = [
   {
     title: 'Experience Life-Saving Skills, Risk-Free',
     description: 'Immerse yourself in realistic medical emergencies through our cutting-edge Virtual Reality simulations. Practice critical BLS procedures in a safe, consequence-free environment, building muscle memory.',
@@ -64,6 +69,19 @@ const FEATURES = [
 ];
 
 export function AboutUsPage(): JSX.Element {
+  const { data: pageData } = useQuery({
+    queryKey: ['public-page', 'about'],
+    queryFn: () => adminPagesService.getPublicPage('about'),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    retry: false,
+  });
+
+  const content = pageData?.contentJson || {};
+  const stats = content.stats || DEFAULT_STATS;
+  const pillars = content.pillars || DEFAULT_PILLARS;
+  const team = content.team || DEFAULT_TEAM;
+  const features = content.features || DEFAULT_FEATURES;
+
   return (
     <main className="relative min-h-screen w-full bg-white text-gray-900 selection:bg-primary-100">
       <MarketingNavbar />
@@ -71,6 +89,11 @@ export function AboutUsPage(): JSX.Element {
       {/* Hero Section */}
       <section className="relative flex min-h-[70vh] w-full flex-col items-center justify-center overflow-hidden pt-32 text-center px-8">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary-100 via-white to-white"></div>
+        {content.heroImage && (
+          <div className="absolute inset-0 opacity-10">
+            <img src={content.heroImage} alt="Hero Background" className="h-full w-full object-cover" />
+          </div>
+        )}
         
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -79,14 +102,16 @@ export function AboutUsPage(): JSX.Element {
           className="relative z-10 max-w-4xl"
         >
           <div className="mb-6 inline-flex items-center rounded-full border border-primary-200 bg-primary-50 px-4 py-1.5 text-sm font-bold text-primary-600">
-            Based in Newmarket, Ontario
+            {content.heroTagline || "Based in Newmarket, Ontario"}
           </div>
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-gray-900 md:text-7xl lg:text-8xl">
-            Revolutionizing <br />
-            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">Healthcare Training</span>
+            {content.heroTitleLine1 || "Revolutionizing"} <br />
+            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
+              {content.heroTitleLine2 || "Healthcare Training"}
+            </span>
           </h1>
           <p className="mx-auto max-w-2xl text-xl leading-relaxed text-gray-600">
-            We empower individuals across the nation with the skills and confidence to respond effectively in life-threatening medical emergencies using AI and Virtual Reality.
+            {content.heroDescription || "We empower individuals across the nation with the skills and confidence to respond effectively in life-threatening medical emergencies using AI and Virtual Reality."}
           </p>
         </motion.div>
       </section>
@@ -119,7 +144,7 @@ export function AboutUsPage(): JSX.Element {
             </motion.div>
             
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1">
-              {STATS.map((stat, i) => (
+              {stats.map((stat: any, i: number) => (
                 <motion.div 
                   key={stat.label}
                   initial={{ opacity: 0, y: 20 }}
@@ -153,7 +178,7 @@ export function AboutUsPage(): JSX.Element {
           </motion.div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {FEATURES.map((feature, i) => (
+            {features.map((feature: any, i: number) => (
               <motion.div
                 key={feature.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -184,7 +209,7 @@ export function AboutUsPage(): JSX.Element {
           </div>
 
           <div className="mb-24 grid gap-8 md:grid-cols-3">
-            {PILLARS.map((pillar, i) => (
+            {pillars.map((pillar: any, i: number) => (
               <motion.div 
                 key={pillar.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -210,7 +235,7 @@ export function AboutUsPage(): JSX.Element {
             </p>
             
             <div className="grid gap-8 md:grid-cols-3">
-              {TEAM.map((member, i) => (
+              {team.map((member: any, i: number) => (
                 <motion.div 
                   key={member.name}
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -219,9 +244,15 @@ export function AboutUsPage(): JSX.Element {
                   transition={{ duration: 0.5, delay: i * 0.1 }}
                   className="rounded-3xl border border-gray-200 bg-white p-8 shadow-xl"
                 >
-                  <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-100 text-2xl font-black text-primary-600 ring-4 ring-primary-200">
-                    {member.name.split(' ').map(n => n[0]).join('').replace('D', '')}
-                  </div>
+                  {member.avatarImage ? (
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full ring-4 ring-primary-200">
+                      <img src={member.avatarImage} alt={member.name} className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-primary-100 text-2xl font-black text-primary-600 ring-4 ring-primary-200">
+                      {member.name.split(' ').map((n: string) => n[0]).join('').replace('D', '')}
+                    </div>
+                  )}
                   <h3 className="mb-1 text-xl font-extrabold text-gray-900">{member.name}</h3>
                   <p className="mb-4 text-sm font-bold tracking-wide text-primary-600">{member.role}</p>
                   <p className="text-sm leading-relaxed text-gray-600">{member.bio}</p>

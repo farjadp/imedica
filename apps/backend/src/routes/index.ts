@@ -38,10 +38,12 @@ router.use('/users', usersRouter);
 
 import adminRouter from './admin.js';
 import aiRouter from './ai.js';
+import pagesRouter from './pages.js';
 
 // Phase 2+ routes will be added here:
 // router.use('/feedback', feedbackRouter);         // Phase 5
 router.use('/admin', adminRouter);
 router.use('/admin/ai', aiRouter);
+router.use('/pages', pagesRouter);
 
 export default router;

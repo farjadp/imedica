@@ -1,9 +1,11 @@
 import { motion } from 'framer-motion';
 import { Activity, Brain, Briefcase, HeartPulse, Shield, Stethoscope, Target, Users, Zap } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { adminPagesService } from '../../admin/services/pagesService.js';
 import { MarketingFooter } from '../components/MarketingFooter.js';
 import { MarketingNavbar } from '../components/MarketingNavbar.js';
 
-const EXPERTISE = [
+const DEFAULT_EXPERTISE = [
   {
     title: 'Clinical Depth',
     description: 'Our training programs are rooted in the practical knowledge of experienced medical specialists. We ensure simulations accurately reflect emergency realities and adhere to the highest standards.',
@@ -21,7 +23,7 @@ const EXPERTISE = [
   },
 ];
 
-const ECOSYSTEM = [
+const DEFAULT_ECOSYSTEM = [
   {
     title: 'Improving Emergency Response Capacity',
     description: 'We increase the number of individuals equipped to respond confidently in medical emergencies, leading to better outcomes for patients.',
@@ -49,7 +51,7 @@ const ECOSYSTEM = [
   },
 ];
 
-const TEAM = [
+const DEFAULT_TEAM = [
   {
     name: 'Dr. Maryam Daneshian',
     role: 'Chief Executive Officer (CEO)',
@@ -64,16 +66,30 @@ const TEAM = [
     name: 'Dr. Somayyeh Motevalli',
     role: 'Business Developer',
     bio: 'A successful dental surgeon and clinic owner, bringing entrepreneurial spirit and proven leadership to drive strategic growth and expand the reach of our life-saving training.',
+    avatarImage: '',
   },
 ];
 
-const COLLABORATION = [
+const DEFAULT_COLLABORATION = [
   { label: 'Clinically Accurate', value: 'Grounded in Canadian BLS guidelines.' },
   { label: 'Technologically Advanced', value: 'Utilizing AI and VR technologies.' },
   { label: 'Highly Effective', value: 'Improving skill acquisition and confidence.' },
 ];
 
 export function TeamPage(): JSX.Element {
+  const { data: pageData } = useQuery({
+    queryKey: ['public-page', 'team'],
+    queryFn: () => adminPagesService.getPublicPage('team'),
+    staleTime: 5 * 60 * 1000,
+    retry: false,
+  });
+
+  const content = pageData?.contentJson || {};
+  const expertise = content.expertise || DEFAULT_EXPERTISE;
+  const ecosystem = content.ecosystem || DEFAULT_ECOSYSTEM;
+  const team = content.team || DEFAULT_TEAM;
+  const collaboration = content.collaboration || DEFAULT_COLLABORATION;
+
   return (
     <main className="relative min-h-screen w-full bg-white text-gray-900 selection:bg-primary-100">
       <MarketingNavbar />
@@ -81,6 +97,11 @@ export function TeamPage(): JSX.Element {
       {/* Hero Section */}
       <section className="relative flex min-h-[60vh] w-full flex-col items-center justify-center overflow-hidden pt-32 text-center px-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-primary-100 via-white to-white"></div>
+        {content.heroImage && (
+          <div className="absolute inset-0 opacity-10">
+            <img src={content.heroImage} alt="Hero Background" className="h-full w-full object-cover" />
+          </div>
+        )}
         
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
@@ -92,11 +113,13 @@ export function TeamPage(): JSX.Element {
             <HeartPulse className="h-8 w-8 text-primary-600" />
           </div>
           <h1 className="mb-6 text-5xl font-extrabold tracking-tighter text-gray-900 md:text-7xl">
-            The Experts Behind <br />
-            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">IMEDICA</span>
+            {content.heroTitleLine1 || "The Experts Behind"} <br />
+            <span className="bg-gradient-to-r from-primary-600 to-blue-600 bg-clip-text text-transparent">
+              {content.heroTitleLine2 || "IMEDICA"}
+            </span>
           </h1>
           <p className="mx-auto max-w-3xl text-xl leading-relaxed text-gray-600">
-            Driven by experienced healthcare leaders, our strength lies in the unique combination of extensive clinical knowledge, technological innovation, and proven entrepreneurial acumen.
+            {content.heroDescription || "Driven by experienced healthcare leaders, our strength lies in the unique combination of extensive clinical knowledge, technological innovation, and proven entrepreneurial acumen."}
           </p>
         </motion.div>
       </section>
@@ -112,7 +135,7 @@ export function TeamPage(): JSX.Element {
           </div>
 
           <div className="grid gap-8 md:grid-cols-3">
-            {EXPERTISE.map((item, i) => (
+            {expertise.map((item: any, i: number) => (
               <motion.div
                 key={item.title}
                 initial={{ opacity: 0, y: 20 }}
@@ -143,7 +166,7 @@ export function TeamPage(): JSX.Element {
           </div>
 
           <div className="grid gap-10 lg:grid-cols-3">
-            {TEAM.map((member, i) => (
+            {team.map((member: any, i: number) => (
               <motion.div 
                 key={member.name}
                 initial={{ opacity: 0, scale: 0.95 }}
@@ -153,9 +176,15 @@ export function TeamPage(): JSX.Element {
                 className="group relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl p-8 transition-all hover:border-primary-300 hover:shadow-primary-100/50"
               >
                 <div className="mb-6 flex items-center gap-4">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-xl font-black text-primary-600 ring-4 ring-primary-200 transition-transform group-hover:scale-110">
-                    {member.name.split(' ').map(n => n[0]).join('').replace('D', '')}
-                  </div>
+                  {member.avatarImage ? (
+                    <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full ring-4 ring-primary-200 transition-transform group-hover:scale-110">
+                      <img src={member.avatarImage} alt={member.name} className="h-full w-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 text-xl font-black text-primary-600 ring-4 ring-primary-200 transition-transform group-hover:scale-110">
+                      {member.name.split(' ').map((n: string) => n[0]).join('').replace('D', '')}
+                    </div>
+                  )}
                   <div>
                     <h3 className="text-xl font-extrabold text-gray-900">{member.name}</h3>
                     <p className="text-sm font-bold tracking-wide text-primary-600">{member.role}</p>
@@ -187,7 +216,7 @@ export function TeamPage(): JSX.Element {
               </p>
               
               <div className="space-y-4">
-                {COLLABORATION.map((item, i) => (
+                {collaboration.map((item: any, i: number) => (
                   <div key={item.label} className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white shadow-sm px-4 py-3">
                     <div className="h-2 w-2 rounded-full bg-primary-500"></div>
                     <div>
@@ -199,7 +228,7 @@ export function TeamPage(): JSX.Element {
             </motion.div>
 
             <div className="space-y-4">
-              {ECOSYSTEM.map((point, i) => (
+              {ecosystem.map((point: any, i: number) => (
                 <motion.div 
                   key={point.title}
                   initial={{ opacity: 0, x: 20 }}

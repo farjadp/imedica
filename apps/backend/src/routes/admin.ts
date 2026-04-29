@@ -123,4 +123,48 @@ router.delete('/users/:id', async (req: Request<{ id: string }>, res: Response, 
   }
 });
 
+// ─── GET /api/admin/pages ────────────────────────────────────────────────────
+router.get('/pages', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { prisma } = await import('../db/clients.js');
+    const pages = await prisma.pageContent.findMany({
+      orderBy: { slug: 'asc' },
+    });
+    res.status(200).json({ success: true, data: pages });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ─── PUT /api/admin/pages/:slug ──────────────────────────────────────────────
+const updatePageSchema = z.object({
+  title: z.string().min(1),
+  contentJson: z.any(),
+});
+
+router.put('/pages/:slug', async (req: Request<{ slug: string }>, res: Response, next: NextFunction) => {
+  try {
+    const { slug } = req.params;
+    const body = updatePageSchema.parse(req.body);
+    const { prisma } = await import('../db/clients.js');
+
+    const page = await prisma.pageContent.upsert({
+      where: { slug },
+      update: {
+        title: body.title,
+        contentJson: body.contentJson,
+      },
+      create: {
+        slug,
+        title: body.title,
+        contentJson: body.contentJson,
+      },
+    });
+
+    res.status(200).json({ success: true, data: page });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;
