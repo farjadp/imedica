@@ -8,6 +8,7 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
+    "postinstall": "pnpm --filter @imedica/backend db:generate",
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
@@ -20,6 +21,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "prettier": "^3.3.3",
     "turbo": "^2.3.3",
     "typescript": "^5.7.3"
