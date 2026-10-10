@@ -20,7 +20,8 @@ import { experienceBucket, keyedHash, weekStart } from "../src/server/privacy/ha
 export const DEV_PASSWORD = "Imedica-dev-2026";
 
 const seedPassword = process.env.SEED_PASSWORD || DEV_PASSWORD;
-if (process.env.NODE_ENV === "production" && seedPassword === DEV_PASSWORD) {
+const deployed = process.env.NODE_ENV === "production" || Boolean(process.env.RAILWAY_ENVIRONMENT);
+if (deployed && seedPassword === DEV_PASSWORD) {
   throw new Error("Set SEED_PASSWORD before seeding a deployed environment.");
 }
 
