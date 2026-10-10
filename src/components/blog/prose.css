@@ -1,0 +1,136 @@
+/* Blog article body, rendered from Markdown. Serif headings, sans body at a
+   comfortable measure, and the same pine/signal accents as the site.
+   Imported by the components that use it rather than living in globals.css,
+   where Tailwind's build emptied it on Railway. Not a CSS Module: the
+   Tailwind loader in next.config strips module scoping. */
+
+.blog-prose {
+  font-size: 18px;
+  line-height: 1.75;
+  color: var(--color-ink-2);
+}
+.blog-prose > * + * {
+  margin-top: 1.25em;
+}
+.blog-prose h2,
+.blog-prose h3,
+.blog-prose h4 {
+  position: relative;
+  font-family: var(--font-display);
+  font-weight: 500;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  scroll-margin-top: 7rem;
+}
+.blog-prose h2 {
+  margin-top: 2.2em;
+  font-size: clamp(1.7rem, 2.6vw, 2.1rem);
+  line-height: 1.12;
+}
+.blog-prose h3 {
+  margin-top: 1.8em;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+.blog-prose h4 {
+  margin-top: 1.6em;
+  font-size: 1.15rem;
+}
+.blog-prose .anchor {
+  position: absolute;
+  left: -1.1em;
+  color: var(--color-rule);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.blog-prose h2:hover .anchor,
+.blog-prose h3:hover .anchor,
+.blog-prose h4:hover .anchor {
+  opacity: 1;
+}
+.blog-prose a {
+  color: var(--color-pine);
+  text-decoration: underline;
+  text-decoration-color: rgb(18 61 49 / 0.3);
+}
+.blog-prose a:hover {
+  text-decoration-color: var(--color-pine);
+}
+.blog-prose strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.blog-prose ul,
+.blog-prose ol {
+  padding-left: 1.3em;
+}
+.blog-prose ul {
+  list-style: disc;
+}
+.blog-prose ol {
+  list-style: decimal;
+}
+.blog-prose li + li {
+  margin-top: 0.4em;
+}
+.blog-prose li::marker {
+  color: var(--color-pine-3);
+}
+.blog-prose blockquote {
+  border-left: 3px solid var(--color-signal);
+  padding: 0.2em 0 0.2em 1.1em;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.45;
+  color: var(--color-ink);
+}
+.blog-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: var(--color-paper-2);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+.blog-prose pre {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #0b1714;
+  color: var(--color-paper);
+  padding: 1.1em 1.3em;
+  font-size: 0.85em;
+  line-height: 1.6;
+}
+.blog-prose pre code {
+  background: none;
+  padding: 0;
+}
+.blog-prose img {
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  border: 1px solid var(--color-rule);
+}
+.blog-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+  margin: 2.5em 0;
+}
+.blog-prose table {
+  display: block;
+  overflow-x: auto;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9em;
+}
+.blog-prose th,
+.blog-prose td {
+  border-bottom: 1px solid var(--color-rule-2);
+  padding: 0.6em 0.8em;
+  text-align: left;
+}
+.blog-prose th {
+  color: var(--color-ink);
+  font-weight: 600;
+  border-bottom-color: var(--color-ink);
+}

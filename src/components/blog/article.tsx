@@ -8,6 +8,7 @@ import { asFaq, asSources, formatPostDate } from "@/lib/blog";
 import { renderMarkdown } from "@/server/blog/markdown";
 
 import { Cover } from "./post-card";
+import "./prose.css";
 import { Share } from "./share";
 import { Toc } from "./toc";
 
@@ -110,7 +111,7 @@ export function Article({ post, url, banner }: { post: ArticlePost; url: string;
               </aside>
             ) : null}
 
-            <div className="prose-blog" dangerouslySetInnerHTML={{ __html: html }} />
+            <div className="blog-prose" dangerouslySetInnerHTML={{ __html: html }} />
 
             {faq.length ? (
               <section className="mt-16" aria-labelledby="faq">

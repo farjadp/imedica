@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
 
 import { StatusPill } from "@/components/app/page-header";
+import "@/components/blog/prose.css";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Select, Textarea } from "@/components/ui/field";
 import type { FaqItem, SourceItem } from "@/lib/blog";
@@ -416,7 +417,7 @@ export function PostEditor({
               </Field>
             </>
           ) : (
-            <div className="prose-blog min-h-[520px] max-w-none" dangerouslySetInnerHTML={{ __html: preview || "<p>Nothing to preview yet.</p>" }} />
+            <div className="blog-prose min-h-[520px] max-w-none" dangerouslySetInnerHTML={{ __html: preview || "<p>Nothing to preview yet.</p>" }} />
           )}
         </Section>
 
