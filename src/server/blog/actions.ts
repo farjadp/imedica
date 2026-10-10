@@ -271,3 +271,38 @@ export async function importCalendar(): Promise<FormState> {
     return failure(error);
   }
 }
+
+const PENDING_NOTE = "*Drafted for Imedica Field Notes. Awaiting review by an emergency physician before publication.*";
+const PUBLISHED_NOTE = "*Drafted for Imedica Field Notes. Physician review of this article is pending.*";
+
+/**
+ * Imports anything missing, then publishes every calendar post that isn't
+ * live yet, dated now and a second apart in calendar order so the newest
+ * month lists first. The review note at the end of each post stays honest.
+ */
+export async function publishCalendar(): Promise<FormState> {
+  try {
+    const user = await requireRole(["ADMIN"]);
+    const imported = await importCalendar();
+    if (!imported.ok) return imported;
+    const posts = await db.blogPost.findMany({
+      where: { plannedFor: { not: null }, status: { not: "PUBLISHED" } },
+      orderBy: { plannedFor: "asc" },
+      select: { id: true, slug: true, body: true, status: true },
+    });
+    const start = Date.now() - posts.length * 1000;
+    for (const [i, p] of posts.entries()) {
+      await db.blogPost.update({
+        where: { id: p.id },
+        data: { status: "PUBLISHED", publishedAt: new Date(start + i * 1000), body: p.body.replace(PENDING_NOTE, PUBLISHED_NOTE) },
+      });
+      await audit(user, "blog.status", { type: "BlogPost", id: p.id }, { from: p.status, to: "PUBLISHED", source: "calendar" });
+      refresh(p.slug);
+    }
+    refresh();
+    revalidatePath("/admin/blog/calendar");
+    return { ok: true, message: posts.length ? `Published ${posts.length} article${posts.length === 1 ? "" : "s"}.` : "Everything is already published." };
+  } catch (error) {
+    return failure(error);
+  }
+}

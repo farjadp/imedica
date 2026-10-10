@@ -5,7 +5,7 @@ import { PageHeader, StatusPill } from "@/components/app/page-header";
 import { formatDate } from "@/lib/labels";
 import { cn } from "@/lib/cn";
 import { requireRolePage } from "@/server/auth/guards";
-import { importCalendar } from "@/server/blog/actions";
+import { importCalendar, publishCalendar } from "@/server/blog/actions";
 import { CALENDAR, getCalendar } from "@/server/blog/calendar";
 
 export const metadata = { title: "Editorial calendar" };
@@ -16,6 +16,7 @@ export default async function CalendarPage() {
   const user = await requireRolePage(["PHYSICIAN", "ADMIN"], "/admin/blog/calendar");
   const rows = await getCalendar();
   const waiting = rows.filter((r) => r.file?.article && !r.post).length;
+  const unpublished = rows.filter((r) => r.file?.article && r.post?.status !== "PUBLISHED").length;
   const now = new Date();
 
   return (
@@ -26,15 +27,27 @@ export default async function CalendarPage() {
           <>
             One Field Note a month, {monthLabel(CALENDAR.start)} to {monthLabel(CALENDAR.end)}. Articles are drafted in{" "}
             <code className="rounded bg-paper-2 px-1 text-[13px]">content/blog</code> and imported as <strong>In review</strong>: a
-            physician checks each one in the editor, then it&apos;s published or scheduled. Nothing goes live from here.{" "}
+            physician checks each one in the editor, then it&apos;s published or scheduled. <strong>Publish all</strong> puts every
+            remaining article live at once, dated today, each marked as awaiting physician review until that line is edited out.{" "}
             <Link href="/admin/blog" className="underline">
               ← All posts
             </Link>
           </>
         }
         actions={
-          user.role === "ADMIN" && waiting ? (
-            <InlineAction action={importCalendar} fields={{}} label={`Import ${waiting} draft${waiting === 1 ? "" : "s"}`} variant="primary" />
+          user.role === "ADMIN" && (waiting || unpublished) ? (
+            <>
+              {waiting ? <InlineAction action={importCalendar} fields={{}} label={`Import ${waiting} draft${waiting === 1 ? "" : "s"}`} variant="secondary" /> : null}
+              {unpublished ? (
+                <InlineAction
+                  action={publishCalendar}
+                  fields={{}}
+                  label={`Publish all ${unpublished}`}
+                  variant="primary"
+                  confirmText={`Publish ${unpublished} article${unpublished === 1 ? "" : "s"} now, dated today? Each one says physician review is pending until you edit that line out.`}
+                />
+              ) : null}
+            </>
           ) : undefined
         }
       />
