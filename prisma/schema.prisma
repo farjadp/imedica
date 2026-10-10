@@ -428,6 +428,83 @@ model AiFeedback {
   @@schema("content")
 }
 
+// ─── blog (public marketing content, in the content schema) ────────────────
+
+enum PostStatus {
+  DRAFT
+  REVIEW
+  SCHEDULED
+  PUBLISHED
+  ARCHIVED
+
+  @@schema("content")
+}
+
+model BlogCategory {
+  id          String     @id @default(cuid())
+  slug        String     @unique
+  name        String
+  description String?
+  sortOrder   Int        @default(0)
+  createdAt   DateTime   @default(now())
+  posts       BlogPost[]
+
+  @@schema("content")
+}
+
+// Authors are staff. Their display name is copied onto the post, because the
+// content schema can't reference identity.User.
+model BlogPost {
+  id              String        @id @default(cuid())
+  slug            String        @unique
+  title           String
+  excerpt         String
+  body            String // Markdown
+  keyTakeaway     String? // a standalone 40–60 word answer, shown in a box and used for AI search
+  faq             Json          @default("[]") // [{ q, a }]
+  sources         Json          @default("[]") // [{ title, url }]
+  status          PostStatus    @default(DRAFT)
+  categoryId      String?
+  category        BlogCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags            String[]      @default([])
+  coverImageId    String?
+  coverImage      BlogImage?    @relation("cover", fields: [coverImageId], references: [id], onDelete: SetNull)
+  coverAlt        String?
+  authorId        String // identity.User.id (no relation: cross-schema)
+  authorName      String
+  authorTitle     String?
+  readingMinutes  Int           @default(1)
+  featured        Boolean       @default(false)
+  metaTitle       String?
+  metaDescription String?
+  focusKeyword    String?
+  canonicalUrl    String?
+  noindex         Boolean       @default(false)
+  publishedAt     DateTime? // also the go-live time for SCHEDULED posts
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+  @@index([categoryId])
+  @@schema("content")
+}
+
+// Uploaded images live in Postgres, because the app's disk is wiped on every
+// deploy. Blog images are small and few, and are served with a long cache.
+model BlogImage {
+  id        String     @id @default(cuid())
+  mime      String
+  bytes     Bytes
+  width     Int?
+  height    Int?
+  size      Int
+  alt       String?
+  createdAt DateTime   @default(now())
+  covers    BlogPost[] @relation("cover")
+
+  @@schema("content")
+}
+
 // ─── analytics ──────────────────────────────────────────────────────────────
 // De-identified. No user id, no name, no free text. Experience is bucketed.
 
