@@ -6,6 +6,7 @@ import { z } from "zod";
 import { type FormState, fieldErrors } from "@/lib/form";
 import { audit } from "@/server/audit";
 import { db } from "@/server/db";
+import { clientIp, limited } from "@/server/rate-limit";
 
 const schema = z.object({
   name: z.string().trim().min(2, "Enter your name.").max(120),
@@ -25,6 +26,9 @@ export async function requestDemo(_prev: FormState, formData: FormData): Promise
   }
   const { website, ...data } = parsed.data;
   if (website) return { ok: true };
+  if (limited(`demo:${await clientIp()}`, 5, 60 * 60_000)) {
+    return { message: "We've received several requests from you already. We'll be in touch." };
+  }
 
   try {
     const lead = await db.demoRequest.create({ data: { ...data, message: data.message || null } });

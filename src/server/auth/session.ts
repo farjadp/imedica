@@ -22,7 +22,7 @@ export type CurrentUser = {
   organizationName: string | null;
 };
 
-export async function createSession(userId: string) {
+export async function createSession(userId: string, opts: { setCookie?: boolean } = {}) {
   const token = newToken();
   const expiresAt = new Date(Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000);
   const userAgent = (await headers()).get("user-agent")?.slice(0, 255) ?? null;
@@ -32,6 +32,7 @@ export async function createSession(userId: string) {
   });
   await db.user.update({ where: { id: userId }, data: { lastLoginAt: new Date() } });
 
+  if (opts.setCookie === false) return token;
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
@@ -44,7 +45,8 @@ export async function createSession(userId: string) {
 
 export async function destroySession() {
   const jar = await cookies();
-  const token = jar.get(SESSION_COOKIE)?.value;
+  const bearer = (await headers()).get("authorization");
+  const token = bearer?.startsWith("Bearer ") ? bearer.slice(7) : jar.get(SESSION_COOKIE)?.value;
   if (token) {
     await db.authSession.deleteMany({ where: { tokenHash: hashToken(token) } });
   }
