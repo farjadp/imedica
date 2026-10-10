@@ -11,7 +11,7 @@ import { cn } from "@/lib/cn";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Imedica HealthTech Inc. is a Toronto company founded by clinicians to train emergency decision-making.",
+  description: "Imedica HealthTech Inc. is an Ontario company, based in Newmarket, founded by clinicians to train emergency decision-making.",
 };
 
 const team = [
@@ -75,7 +75,7 @@ export default function AboutPage() {
   return (
     <>
       <PageHero
-        chrome={["Imedica HealthTech Inc. · Toronto", "Founded by clinicians"]}
+        chrome={["Imedica HealthTech Inc. · Newmarket, Ontario", "Founded by clinicians"]}
         title={
           <>
             Clinicians building <Accent>the training we wanted.</Accent>
