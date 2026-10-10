@@ -17,6 +17,10 @@
   --color-rule: #d9d6cb;
   --color-rule-2: #e7e4da;
 
+  /* The logo green, from the original iMedica artwork, deepened a touch to sit
+     beside pine. */
+  --color-brand: #17914a;
+
   --color-pine: #123d31;
   --color-pine-2: #1b5444;
   --color-pine-3: #2a6b58;

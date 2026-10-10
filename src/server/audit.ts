@@ -30,7 +30,9 @@ export type AuditAction =
   | "blog.status"
   | "blog.delete"
   | "blog.image_upload"
-  | "blog.category";
+  | "blog.category"
+  | "inbox.receive"
+  | "inbox.handle";
 
 /** Never throws: a failed audit write must not break the action it records. */
 export async function audit(

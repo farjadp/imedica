@@ -1,4 +1,4 @@
-import { ExternalLink, Plus, Tags } from "lucide-react";
+import { CalendarDays, ExternalLink, Plus, Tags } from "lucide-react";
 import Link from "next/link";
 
 import { InlineAction } from "@/components/app/inline-action";
@@ -51,6 +51,9 @@ export default async function BlogDesk({ searchParams }: { searchParams: Promise
         description="Field Notes on the public site. Drafts stay private; scheduled posts go live on their own at the set time."
         actions={
           <>
+            <ButtonLink href="/admin/blog/calendar" variant="secondary">
+              <CalendarDays className="size-4" /> Calendar
+            </ButtonLink>
             <ButtonLink href="/admin/blog/categories" variant="secondary">
               <Tags className="size-4" /> Categories
             </ButtonLink>
