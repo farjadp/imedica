@@ -17,7 +17,9 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - run: npm ci
+      # npm ci skips platform binaries a macOS-made lockfile doesn't list
+      # (npm/cli#4828); install resolves the Linux ones.
+      - run: npm install --no-audit --no-fund
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
