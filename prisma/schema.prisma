@@ -1,0 +1,467 @@
+// ============================================================================
+// Imedica data model
+//
+// Three Postgres schemas, kept apart on purpose (PIPEDA / PHIPA):
+//
+//   identity  — everything that identifies a person: users, organizations,
+//               sessions, invitations, audit trail. Only this schema holds PII.
+//   content   — clinical scenarios and their runtime. Training sessions are
+//               keyed by an anonymous hash, never by a user id.
+//   analytics — de-identified projections for reporting. No PII, no user id,
+//               no free text. Grouped by cohort key with k-anonymity on read.
+//
+// There are no relations across schemas. The only bridge is
+// src/server/privacy/deidentify.ts, which turns a user/org id into a keyed
+// one-way hash. Do not add cross-schema relations.
+// ============================================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["identity", "content", "analytics"]
+}
+
+// ─── identity ───────────────────────────────────────────────────────────────
+
+enum Role {
+  PARAMEDIC // trains
+  INSTRUCTOR // training director at a service: manages people, sees team analytics
+  PHYSICIAN // authors and reviews clinical content
+  ADMIN // Imedica staff: all organizations
+
+  @@schema("identity")
+}
+
+enum OrgType {
+  EMS_SERVICE
+  FIRE_SERVICE
+  HOSPITAL
+  COLLEGE
+  LONG_TERM_CARE
+  OTHER
+
+  @@schema("identity")
+}
+
+enum ParamedicLevel {
+  PCP // Primary Care Paramedic
+  ACP // Advanced Care Paramedic
+  CCP // Critical Care Paramedic
+  EMR // Emergency Medical Responder
+  STUDENT
+  OTHER
+
+  @@schema("identity")
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  type      OrgType  @default(EMS_SERVICE)
+  province  String   @default("ON")
+  seatLimit Int      @default(25)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  invitations Invitation[]
+
+  @@schema("identity")
+}
+
+model User {
+  id              String          @id @default(cuid())
+  email           String          @unique
+  passwordHash    String
+  firstName       String
+  lastName        String
+  role            Role            @default(PARAMEDIC)
+  level           ParamedicLevel?
+  yearsExperience Int?
+  organizationId  String?
+  organization    Organization?   @relation(fields: [organizationId], references: [id])
+  active          Boolean         @default(true)
+  lastLoginAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  sessions    AuthSession[]
+  resetTokens PasswordResetToken[]
+
+  @@index([organizationId])
+  @@schema("identity")
+}
+
+// Opaque, revocable login sessions. Only the SHA-256 of the token is stored.
+model AuthSession {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userAgent String?
+
+  @@index([userId])
+  @@schema("identity")
+}
+
+model Invitation {
+  id             String       @id @default(cuid())
+  email          String
+  role           Role         @default(PARAMEDIC)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  tokenHash      String       @unique
+  invitedById    String
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@schema("identity")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@schema("identity")
+}
+
+// Inbound sales leads from the marketing site.
+model DemoRequest {
+  id           String   @id @default(cuid())
+  name         String
+  email        String
+  organization String
+  role         String
+  teamSize     String
+  message      String?
+  handled      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@schema("identity")
+}
+
+// Who did what. Lives with identity because it names the actor.
+model AuditLog {
+  id             String   @id @default(cuid())
+  actorId        String?
+  actorRole      Role?
+  organizationId String?
+  action         String // e.g. "scenario.publish", "user.invite"
+  targetType     String?
+  targetId       String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([action])
+  @@schema("identity")
+}
+
+// ─── content ────────────────────────────────────────────────────────────────
+
+enum ScenarioCategory {
+  CARDIAC
+  RESPIRATORY
+  NEUROLOGICAL
+  TRAUMA
+  TOXICOLOGY
+  ENVIRONMENTAL
+  OBSTETRIC
+  PEDIATRIC
+  ALLERGIC
+  METABOLIC
+
+  @@schema("content")
+}
+
+enum Difficulty {
+  FOUNDATIONAL
+  INTERMEDIATE
+  ADVANCED
+
+  @@schema("content")
+}
+
+enum ScenarioStatus {
+  DRAFT
+  IN_REVIEW
+  PUBLISHED
+  ARCHIVED
+
+  @@schema("content")
+}
+
+enum ActionCategory {
+  ASSESSMENT
+  AIRWAY
+  BREATHING
+  CIRCULATION
+  MEDICATION
+  PROCEDURE
+  TRANSPORT
+  COMMUNICATION
+
+  @@schema("content")
+}
+
+// Triage-tag colours map onto these in the UI.
+enum Outcome {
+  CORRECT // green
+  ACCEPTABLE // green outline
+  SUBOPTIMAL // yellow
+  HARMFUL // red
+  CRITICAL // black: patient harm that ends the scenario
+
+  @@schema("content")
+}
+
+model Scenario {
+  id             String           @id @default(cuid())
+  slug           String           @unique
+  title          String
+  summary        String
+  dispatch       String // the call as dispatch gives it
+  category       ScenarioCategory
+  difficulty     Difficulty       @default(INTERMEDIATE)
+  status         ScenarioStatus   @default(DRAFT)
+  timeLimitSec   Int              @default(600)
+  learningGoals  String[]         @default([])
+  protocolSource String? // e.g. "ALS PCS v5.4 — Medical Directive: Cardiac Ischemia"
+  authorId       String // identity.User.id (no relation: cross-schema)
+  reviewerId     String?
+  publishedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  states   ScenarioState[]
+  actions  ScenarioAction[]
+  rules    ScenarioRule[]
+  feedback FeedbackTemplate[]
+  sessions TrainingSession[]
+
+  @@index([status, category])
+  @@schema("content")
+}
+
+// A moment in the call: what the paramedic sees and the patient's vitals.
+model ScenarioState {
+  id         String   @id @default(cuid())
+  scenarioId String
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  order      Int
+  title      String
+  narrative  String
+  // { hr, sbp, dbp, rr, spo2, etco2, gcs, temp, glucose, rhythm, skin }
+  vitals     Json
+  isStart    Boolean  @default(false)
+  isTerminal Boolean  @default(false)
+  // Shown when the scenario ends in this state.
+  debrief    String?
+
+  rulesFrom ScenarioRule[] @relation("RuleFromState")
+  rulesTo   ScenarioRule[] @relation("RuleToState")
+
+  @@index([scenarioId, order])
+  @@schema("content")
+}
+
+// An entry on the paramedic's action menu.
+model ScenarioAction {
+  id         String         @id @default(cuid())
+  scenarioId String
+  scenario   Scenario       @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  category   ActionCategory
+  label      String
+  detail     String? // e.g. dose and route for a medication
+  order      Int            @default(0)
+
+  rules ScenarioRule[]
+
+  @@index([scenarioId])
+  @@schema("content")
+}
+
+// The deterministic grader: in state X, doing action Y has outcome Z.
+// Rules are evaluated by priority (lowest first); the first match wins.
+// An action with no matching rule is scored SUBOPTIMAL with 0 points.
+model ScenarioRule {
+  id          String            @id @default(cuid())
+  scenarioId  String
+  scenario    Scenario          @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  fromStateId String? // null = applies in any state
+  fromState   ScenarioState?    @relation("RuleFromState", fields: [fromStateId], references: [id], onDelete: Cascade)
+  actionId    String
+  action      ScenarioAction    @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  outcome     Outcome
+  points      Int               @default(0)
+  toStateId   String? // null = stay in the current state
+  toState     ScenarioState?    @relation("RuleToState", fields: [toStateId], references: [id], onDelete: SetNull)
+  // Must happen within this many seconds of entering the state, else SUBOPTIMAL.
+  withinSec   Int?
+  rationale   String // physician's one-line reason, shown in review
+  feedbackId  String?
+  feedback    FeedbackTemplate? @relation(fields: [feedbackId], references: [id], onDelete: SetNull)
+  priority    Int               @default(100)
+  // A required step: missing it is reported in the debrief.
+  required    Boolean           @default(false)
+
+  @@index([scenarioId, fromStateId])
+  @@schema("content")
+}
+
+// Longer teaching notes a rule can point at.
+model FeedbackTemplate {
+  id         String   @id @default(cuid())
+  scenarioId String
+  scenario   Scenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  title      String
+  body       String
+  reference  String? // protocol / guideline citation
+
+  rules ScenarioRule[]
+
+  @@schema("content")
+}
+
+enum SessionStatus {
+  IN_PROGRESS
+  COMPLETED
+  TIMED_OUT
+  ABANDONED
+
+  @@schema("content")
+}
+
+// A paramedic's run through a scenario. Keyed by anonymous hash only.
+model TrainingSession {
+  id             String        @id @default(cuid())
+  scenarioId     String
+  scenario       Scenario      @relation(fields: [scenarioId], references: [id])
+  anonymousHash  String
+  cohortKey      String?
+  status         SessionStatus @default(IN_PROGRESS)
+  currentStateId String?
+  score          Int           @default(0)
+  maxScore       Int           @default(0)
+  startedAt      DateTime      @default(now())
+  stateEnteredAt DateTime      @default(now())
+  endedAt        DateTime?
+
+  decisions  SessionDecision[]
+  aiFeedback AiFeedback?
+
+  @@index([anonymousHash, startedAt])
+  @@schema("content")
+}
+
+model SessionDecision {
+  id        String          @id @default(cuid())
+  sessionId String
+  session   TrainingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  actionId  String
+  stateId   String
+  ruleId    String?
+  outcome   Outcome
+  points    Int
+  elapsedMs Int // since session start
+  createdAt DateTime        @default(now())
+
+  @@index([sessionId])
+  @@schema("content")
+}
+
+enum AiFeedbackStatus {
+  PENDING
+  READY
+  FAILED
+  SKIPPED // no API key configured
+
+  @@schema("content")
+}
+
+enum ReviewStatus {
+  UNREVIEWED
+  APPROVED
+  FLAGGED
+
+  @@schema("content")
+}
+
+// The AI explanation layer. It explains the rule engine's verdicts; it never
+// changes a score. Physicians can approve or flag it.
+model AiFeedback {
+  id              String           @id @default(cuid())
+  sessionId       String           @unique
+  session         TrainingSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  status          AiFeedbackStatus @default(PENDING)
+  content         Json?
+  error           String?
+  model           String?
+  inputTokens     Int              @default(0)
+  outputTokens    Int              @default(0)
+  cacheReadTokens Int              @default(0)
+  costMicroUsd    Int              @default(0)
+  review          ReviewStatus     @default(UNREVIEWED)
+  reviewNote      String?
+  reviewerId      String?
+  reviewedAt      DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([status])
+  @@index([review])
+  @@schema("content")
+}
+
+// ─── analytics ──────────────────────────────────────────────────────────────
+// De-identified. No user id, no name, no free text. Experience is bucketed.
+
+model AnalyticsSession {
+  id               String           @id @default(cuid())
+  anonymousHash    String
+  cohortKey        String?
+  scenarioId       String
+  category         ScenarioCategory
+  difficulty       Difficulty
+  level            ParamedicLevel?
+  experienceBucket String? // "0-2", "3-5", "6-10", "10+"
+  scorePct         Int
+  durationSec      Int
+  outcome          SessionStatus
+  harmfulCount     Int              @default(0)
+  missedRequired   Int              @default(0)
+  completedWeek    DateTime // truncated to the week: no exact timestamps
+
+  decisions AnalyticsDecision[]
+
+  @@index([cohortKey, completedWeek])
+  @@index([anonymousHash])
+  @@schema("analytics")
+}
+
+model AnalyticsDecision {
+  id             String           @id @default(cuid())
+  sessionId      String
+  session        AnalyticsSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  actionCategory ActionCategory
+  outcome        Outcome
+  secondsInState Int
+
+  @@index([sessionId])
+  @@schema("analytics")
+}
