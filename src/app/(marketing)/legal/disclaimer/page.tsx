@@ -43,8 +43,8 @@ export default function DisclaimerPage() {
       </p>
       <h2>Field Notes articles</h2>
       <p>
-        Blog articles are general education. They&apos;re reviewed by physicians before publication and cite their sources,
-        but they aren&apos;t a substitute for formal training or for local protocols.
+        Blog articles are general education and cite their sources. Each is reviewed by a physician; an article still
+        awaiting that review says so at the end. None of them is a substitute for formal training or for local protocols.
       </p>
       <h2>In an emergency</h2>
       <p>Imedica is not a way to get help. In an emergency, call 911.</p>
