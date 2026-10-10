@@ -68,7 +68,19 @@ export const vitalsSchema = z.object({
   rhythm: z.enum(["sinus", "tachycardia", "stemi", "bradycardia", "vfib", "asystole"]).optional().nullable(),
   skin: optionalText(80),
 });
-export type Vitals = z.infer<typeof vitalsSchema>;
+export type Vitals = {
+  hr?: number | null;
+  sbp?: number | null;
+  dbp?: number | null;
+  rr?: number | null;
+  spo2?: number | null;
+  etco2?: number | null;
+  gcs?: number | null;
+  temp?: number | null;
+  glucose?: number | null;
+  rhythm?: "sinus" | "tachycardia" | "stemi" | "bradycardia" | "vfib" | "asystole" | null;
+  skin?: string | null;
+};
 
 export const stateSchema = z.object({
   title: text(2, 120, "Title"),
