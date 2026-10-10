@@ -6,6 +6,7 @@ import { EcgTrace } from "@/components/clinical/ecg-trace";
 import { CallSequence } from "@/components/marketing/call-sequence";
 import { HeroCall } from "@/components/marketing/hero-call";
 import { HeroStage } from "@/components/marketing/hero-stage";
+import { PilotClose } from "@/components/marketing/pilot-close";
 import { PrivacyLayersLazy } from "@/components/marketing/privacy-layers-lazy";
 import { Container } from "@/components/marketing/section";
 import { Statement } from "@/components/marketing/statement";
@@ -308,32 +309,7 @@ export default function HomePage() {
         </Container>
       </section>
 
-      {/* ─── Close ───────────────────────────────────────────────────────── */}
-      <section data-nav="dark" className="relative overflow-hidden bg-pine text-paper">
-        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-30" aria-hidden>
-          <EcgTrace rhythm="sinus" height={180} stroke="rgb(247 246 241 / 0.5)" />
-        </div>
-        <Container className="relative py-28 md:py-40">
-          <h2 className="max-w-4xl font-display text-[clamp(3rem,7.4vw,7rem)] leading-[0.92] font-medium tracking-[-0.045em]">
-            Run a pilot with <em className="font-normal text-[#9ff0c4]">your service.</em>
-          </h2>
-          <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
-            <p className="max-w-lg text-[18px] leading-relaxed text-paper/75">
-              Six months, your paramedics, scenarios matched to your directives, and a before-and-after view of where the
-              team improved. Pilots open in Ontario for 2026.
-            </p>
-            <Link
-              href="/demo"
-              className="group inline-flex h-16 items-center gap-3 self-start rounded-full bg-paper pr-3 pl-8 text-[17px] font-medium text-pine transition-colors hover:bg-white md:self-auto"
-            >
-              Book a demo
-              <span className="flex size-11 items-center justify-center rounded-full bg-pine text-paper transition-transform group-hover:rotate-45">
-                <ArrowUpRight className="size-5" />
-              </span>
-            </Link>
-          </div>
-        </Container>
-      </section>
+      <PilotClose />
     </>
   );
 }
