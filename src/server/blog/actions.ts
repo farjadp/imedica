@@ -218,3 +218,56 @@ export async function deleteCategory(_prev: FormState, formData: FormData): Prom
     return failure(error);
   }
 }
+
+// ─── Editorial calendar ───────────────────────────────────────────────────
+
+/**
+ * Turns the Markdown files in content/blog into "In review" drafts. Never
+ * publishes and never overwrites: a month that already has a post, or a slug
+ * that's taken, is skipped.
+ */
+export async function importCalendar(): Promise<FormState> {
+  try {
+    const user = await requireRole(["ADMIN"]);
+    const { readCalendarFiles } = await import("./calendar");
+    const files = await readCalendarFiles();
+    const categories = await db.blogCategory.findMany({ select: { id: true, slug: true } });
+    let created = 0;
+    let skipped = 0;
+    for (const { article: a } of files) {
+      if (!a) continue;
+      const exists = await db.blogPost.findFirst({ where: { OR: [{ plannedFor: a.month }, { slug: a.slug }] }, select: { id: true } });
+      if (exists) {
+        skipped += 1;
+        continue;
+      }
+      const post = await db.blogPost.create({
+        data: {
+          slug: a.slug,
+          title: a.title,
+          excerpt: a.excerpt,
+          body: a.body,
+          keyTakeaway: a.keyTakeaway ?? null,
+          faq: a.faq,
+          sources: a.sources,
+          tags: a.tags,
+          categoryId: categories.find((c) => c.slug === a.category)?.id ?? null,
+          focusKeyword: a.focusKeyword ?? null,
+          metaDescription: a.metaDescription ?? null,
+          status: "REVIEW",
+          plannedFor: a.month,
+          authorId: user.id,
+          authorName: "Imedica Clinical Team",
+          readingMinutes: readingMinutes(a.body),
+        },
+      });
+      await audit(user, "blog.create", { type: "BlogPost", id: post.id }, { source: "calendar", month: a.month });
+      created += 1;
+    }
+    refresh();
+    revalidatePath("/admin/blog/calendar");
+    return { ok: true, message: created ? `Imported ${created} draft${created === 1 ? "" : "s"} for review.${skipped ? ` ${skipped} already existed.` : ""}` : "Nothing new to import." };
+  } catch (error) {
+    return failure(error);
+  }
+}
