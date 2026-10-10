@@ -134,7 +134,7 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
         </Link>
       </header>
 
-      <div className="mx-auto grid w-full max-w-[1280px] flex-1 gap-5 p-4 md:p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+      <div className="mx-auto grid w-full max-w-[1280px] flex-1 grid-cols-[minmax(0,1fr)] gap-5 p-4 md:p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
         {/* Left: the patient */}
         <section className="space-y-4">
           <div className="rounded-lg border border-rule bg-card">
