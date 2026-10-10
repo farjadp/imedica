@@ -9,9 +9,9 @@
 // Env / Identity: Backend (Node.js)
 // ============================================================================
 
+import { PII_PATTERNS } from '@imedica/shared';
 import { createLogger, format, transports } from 'winston';
 
-import { PII_PATTERNS } from '@imedica/shared';
 
 const { combine, timestamp, errors, json, colorize, printf } = format;
 
@@ -20,7 +20,7 @@ const { combine, timestamp, errors, json, colorize, printf } = format;
 // Application code should never produce logs with PII in the first place.
 
 const piiScrubber = format((info) => {
-  const message = typeof info['message'] === 'string' ? info['message'] : '';
+  const message = typeof info.message === 'string' ? info.message : '';
   let scrubbed = message;
 
   for (const [patternName, pattern] of Object.entries(PII_PATTERNS)) {
@@ -46,7 +46,7 @@ const piiScrubber = format((info) => {
     }
   }
 
-  info['message'] = scrubbed;
+  info.message = scrubbed;
   return info;
 });
 

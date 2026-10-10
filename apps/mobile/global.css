@@ -1,0 +1,4 @@
+/* NativeWind global CSS — imported by index.ts to enable Tailwind everywhere */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

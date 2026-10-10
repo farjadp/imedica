@@ -83,12 +83,14 @@ function bucketExperience(years: number): string {
 // ─── DeidentificationService ──────────────────────────────────────────────────
 
 export class DeidentificationService {
-  private readonly secret: string;
   private readonly audit: AuditService;
 
   constructor(audit: AuditService) {
-    this.secret = env().DEIDENT_SECRET;
     this.audit = audit;
+  }
+
+  private get secret(): string {
+    return env().DEIDENT_SECRET;
   }
 
   // ─── Public API ────────────────────────────────────────────────────────────

@@ -8,26 +8,11 @@
 // Env / Identity: Backend (Express middleware)
 // ============================================================================
 
+import type { UserRole } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';
-
-import type { AccessTokenPayload, UserRole } from '@imedica/shared';
 
 import { AuthenticationError, ForbiddenError } from '../lib/errors.js';
 import { tokenService } from '../services/auth/TokenService.js';
-
-// ─── Type Augmentation ────────────────────────────────────────────────────────
-// Extend Express Request to include the authenticated user payload.
-
-declare global {
-  namespace Express {
-    interface Request {
-      /** Populated by the `authenticate` middleware after JWT verification. */
-      user?: AccessTokenPayload;
-      /** The raw refresh token ID extracted from the httpOnly cookie (for logout). */
-      refreshTokenId?: string;
-    }
-  }
-}
 
 // ─── authenticate middleware ──────────────────────────────────────────────────
 

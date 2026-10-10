@@ -15,6 +15,7 @@
 // ============================================================================
 
 import type { AuditActorType, AuditResult } from '@imedica/shared';
+import { Prisma } from '@prisma/client';
 
 import { db } from '../../db/clients.js';
 import { logger } from '../../lib/logger.js';
@@ -29,8 +30,8 @@ export interface AuditEntry {
   resourceType?: string | null;
   resourceId?: string | null;
   metadata?: Record<string, unknown> | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
+  ipAddress?: string | null | undefined;
+  userAgent?: string | null | undefined;
   result: AuditResult;
 }
 
@@ -62,7 +63,10 @@ export class AuditService {
           action: entry.action,
           resourceType: entry.resourceType ?? null,
           resourceId: entry.resourceId ?? null,
-          metadata: entry.metadata ?? undefined,
+          metadata:
+            entry.metadata === null || entry.metadata === undefined
+              ? Prisma.JsonNull
+              : (entry.metadata as Prisma.InputJsonValue),
           ipAddress: entry.ipAddress ?? null,
           userAgent: entry.userAgent?.substring(0, 500) ?? null, // Enforce DB field limit
           result: entry.result,

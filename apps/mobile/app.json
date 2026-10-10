@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "Imedica",
+    "slug": "imedica",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "imedica",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.imedica.app",
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Face ID is used to securely access your Imedica account."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#16a35c"
+      },
+      "package": "com.imedica.app",
+      "edgeToEdgeEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "09098c42-1b28-40c0-b6ea-d91da0eb19c8"
+      }
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "owner": "farjadp"
+  }
+}

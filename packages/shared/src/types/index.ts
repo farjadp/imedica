@@ -238,8 +238,8 @@ export interface ApiResponse<T> {
   success: true;
   data: T;
   meta?: {
-    requestId?: string;
-    timestamp?: string;
+    requestId?: string | undefined;
+    timestamp?: string | undefined;
   };
 }
 
@@ -253,8 +253,8 @@ export interface ApiErrorResponse {
     details?: unknown;
   };
   meta?: {
-    requestId?: string;
-    timestamp?: string;
+    requestId?: string | undefined;
+    timestamp?: string | undefined;
   };
 }
 

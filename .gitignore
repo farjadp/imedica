@@ -14,6 +14,8 @@
 # ─── Dependencies ────────────────────────────────────────────────────────────
 node_modules/
 .pnpm-store/
+.node_modules_backup/
+**/.node_modules_backup/
 
 # ─── Build Outputs ───────────────────────────────────────────────────────────
 dist/
@@ -21,6 +23,7 @@ build/
 out/
 .next/
 .expo/
+*.tsbuildinfo
 
 # ─── Turborepo ───────────────────────────────────────────────────────────────
 .turbo/
@@ -48,6 +51,7 @@ Thumbs.db
 *.swo
 
 # ─── IDE ─────────────────────────────────────────────────────────────────────
+.vscode/
 .vscode/settings.json
 .idea/
 *.suo
@@ -63,3 +67,5 @@ infrastructure/terraform/*.tfstate
 infrastructure/terraform/*.tfstate.backup
 infrastructure/terraform/*.tfvars
 !infrastructure/terraform/*.tfvars.example
+.vercel
+.env*.local

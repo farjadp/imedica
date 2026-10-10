@@ -5,5 +5,5 @@
 // Env / Identity: Shared (web, mobile, backend)
 // ============================================================================
 
-export * from './auth.js';
-export * from './scenario.js';
+export * from './auth';
+export * from './scenario';

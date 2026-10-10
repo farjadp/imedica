@@ -71,91 +71,93 @@ async function seedIdentity(): Promise<void> {
 async function seedContent(): Promise<void> {
   logger.info('Seeding content schema...');
 
-  // ─── Scenario 1: Cardiac Arrest ──────────────────────────────────────────
-  const cardiacExists = await prisma.scenario.findFirst({
-    where: { title: 'Sudden Cardiac Arrest — Adult Witnessed' },
+  // ─── Scenario 1: Demo Cardiac Arrest (VSA) ───────────────────────────────
+  const demoScenarioExists = await prisma.scenario.findFirst({
+    where: { title: 'DEMO: Cardiac Arrest (VSA)' },
   });
 
-  if (!cardiacExists) {
+  if (!demoScenarioExists) {
     const cardiac = await prisma.scenario.create({
       data: {
-        title: 'Sudden Cardiac Arrest — Adult Witnessed',
+        id: '11111111-1111-1111-1111-111111111111',
+        title: 'DEMO: Cardiac Arrest (VSA)',
         category: 'cardiac',
         difficulty: 'intermediate',
-        estimatedDurationMinutes: 15,
+        estimatedDurationMinutes: 3,
         learningObjectives: [
-          'Recognize cardiac arrest within 10 seconds',
-          'Initiate CPR to correct rhythm with appropriate rate and depth',
-          'Correctly identify shockable vs non-shockable rhythms',
-          'Administer epinephrine at correct dose and timing',
-          'Demonstrate high-quality team communication during resuscitation',
+          'Recognize cardiac arrest vs syncope',
+          'Administer High-Quality CPR',
+          'Deploy first shock for V-Fib quickly',
+          'Administer Epinephrine 1mg correctly'
         ],
-        status: 'draft', // Will be moved to 'review' after physician validation
+        status: 'published',
         states: {
           create: [
             {
               stateOrder: 1,
               patientPresentation: {
-                chiefComplaint: 'Unresponsive male found collapsed in parking lot',
-                age: 58,
-                sex: 'male',
-                weightKg: 85,
-                vitals: {
-                  gcs: 3,
-                  pulse: 'absent',
-                  respirations: 'absent',
-                  bp: 'unobtainable',
-                  spo2: 'unobtainable',
-                  etco2: null,
-                },
-                history: {
-                  witnessed: true,
-                  downtime: '2 minutes',
-                  bystanterCPR: false,
-                  pmhx: 'Unknown',
-                  medications: 'Unknown',
-                },
-                ecg: 'ventricular_fibrillation',
-                physical: 'Apnoeic. No pulse. Cyanotic.',
+                 clinicalPicture: "58-year-old male found collapsed on the floor in a grocery store.",
+                 observations: "Patient is completely unresponsive. Apneic (no breathing) and cyanotic around the lips.",
+                 vitals: "No palpable radial or carotid pulse."
               },
               expectedActions: {
-                required: ['assess_responsiveness', 'call_for_help', 'start_cpr', 'apply_aed'],
-                optional: ['iv_access', 'airway_adjunct'],
-                contraindicated: ['wait_for_hospital', 'administer_medication_without_cpr'],
-                timeSensitive: [
-                  { action: 'first_shock', maxSeconds: 120, bonusIfBefore: 60 },
-                  { action: 'epinephrine', maxSeconds: 300, unit: 'mg', dose: 1.0 },
-                ],
+                required: ['Start CPR'],
+                optional: ['Call for backup'],
+                contraindicated: ['Administer Epinephrine'],
+                timeSensitive: []
               },
-              timeLimitSeconds: 600,
+              timeLimitSeconds: 120,
             },
             {
               stateOrder: 2,
               patientPresentation: {
-                context: 'Post-shock — rhythm check',
-                vitals: {
-                  gcs: 3,
-                  pulse: 'absent',
-                  ecg: 'pulseless_electrical_activity',
-                  etco2: 18,
-                },
-                physical: 'ROSC not achieved. Continue resuscitation.',
+                 clinicalPicture: "CPR in progress. The AED has been applied to the patient's bare chest.",
+                 observations: "The AED interrupts CPR and announces 'Analyzing Rhythm'.",
+                 vitals: "Monitor shows coarse Ventricular Fibrillation (V-Fib)."
               },
               expectedActions: {
-                required: ['continue_cpr', 'identify_reversible_causes'],
-                optional: ['advanced_airway', 'iv_bolus'],
-                contraindicated: ['stop_resuscitation'],
-                timeSensitive: [
-                  { action: 'epinephrine_second_dose', maxSeconds: 600, dose: 1.0 },
-                ],
+                required: ['Defibrillate 200J'],
+                optional: ['Charge AED while doing CPR'],
+                contraindicated: ['Pause CPR to place IV'],
+                timeSensitive: []
               },
-              timeLimitSeconds: 300,
+              timeLimitSeconds: 60,
             },
+            {
+              stateOrder: 3,
+              patientPresentation: {
+                 clinicalPicture: "Shock delivered. CPR immediately resumed for 2 minutes.",
+                 observations: "IV access has been secured during the compression cycle.",
+                 vitals: "Next rhythm check shows sustained Ventricular Fibrillation."
+              },
+              expectedActions: {
+                required: ['Epinephrine 1mg IV'],
+                optional: ['Prepare Amiodarone'],
+                contraindicated: ['Stop CPR to check pulse'],
+                timeSensitive: []
+              },
+              timeLimitSeconds: 60,
+            },
+            {
+              stateOrder: 4,
+              patientPresentation: {
+                 clinicalPicture: "After Epinephrine and a second shock, the patient suddenly groans and moves his hand.",
+                 observations: "Patient is making weak spontaneous respiratory efforts. Chest rising symmetrically.",
+                 vitals: "Strong carotid pulse present. HR 95. SpO2 88%. BP 90/60."
+              },
+              expectedActions: {
+                required: ['Assess ABCs', 'Administer Oxygen'],
+                optional: ['Obtain 12-lead ECG'],
+                contraindicated: ['Give another shock', 'Give more Epinephrine'],
+                timeSensitive: []
+              },
+              timeLimitSeconds: 120,
+            }
           ],
         },
       },
     });
-    logger.info('Created cardiac arrest scenario', { scenarioId: cardiac.id });
+    logger.info('Created Demo Cardiac Arrest scenario', { scenarioId: cardiac.id });
   }
 
   // ─── Scenario 2: Anaphylaxis ─────────────────────────────────────────────

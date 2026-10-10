@@ -16,10 +16,7 @@
 // Env / Identity: Backend service — reads identity schema (refresh_tokens)
 // ============================================================================
 
-import crypto from 'node:crypto';
-
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
+import * as crypto from 'node:crypto';
 
 import {
   ACCESS_TOKEN_EXPIRES_IN_SECONDS,
@@ -27,6 +24,9 @@ import {
   REFRESH_TOKEN_EXPIRES_IN_SECONDS,
 } from '@imedica/shared';
 import type { AccessTokenPayload, RefreshTokenPayload, UserRole } from '@imedica/shared';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
 
 import { db } from '../../db/clients.js';
 import {

@@ -8,10 +8,10 @@
 // Env / Identity: Backend (Express middleware — MUST be last in middleware chain)
 // ============================================================================
 
+import type { ApiErrorResponse } from '@imedica/shared';
 import type { NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
 
-import type { ApiErrorResponse } from '@imedica/shared';
 
 import { AppError, ValidationError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
@@ -25,7 +25,7 @@ import { captureError } from '../lib/sentry.js';
  *
  * Express identifies error-handling middleware by the 4-argument signature.
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 export function errorHandler(
   error: unknown,
   req: Request,

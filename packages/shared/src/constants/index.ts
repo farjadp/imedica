@@ -8,7 +8,7 @@
 // Env / Identity: Shared (web, mobile, backend)
 // ============================================================================
 
-import type { UserRole, ScenarioCategory, DecisionType } from '../types/index.js';
+import type { UserRole, ScenarioCategory, DecisionType } from '../types/index';
 
 // ─── Auth Token Configuration ─────────────────────────────────────────────────
 

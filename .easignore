@@ -1,0 +1,12 @@
+# EAS Build — tell EAS to include the monorepo root
+# By default EAS only uploads the project directory.
+# We need packages/shared to be available during the build.
+
+# Exclude heavy stuff that isn't needed for the build
+node_modules
+apps/backend
+apps/web
+apps/mobile/node_modules
+.turbo
+.git
+*.log

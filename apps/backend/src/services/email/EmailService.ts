@@ -92,23 +92,28 @@ function passwordResetTemplate(params: {
 // ─── EmailService ─────────────────────────────────────────────────────────────
 
 export class EmailService {
-  private transporter: Transporter;
+  private _transporter: Transporter | null = null;
 
-  constructor() {
-    const config = env();
-    this.transporter = nodemailer.createTransport({
-      host: config.SMTP_HOST,
-      port: config.SMTP_PORT,
-      secure: config.SMTP_SECURE,
-      auth:
-        config.SMTP_USER && config.SMTP_PASS
-          ? { user: config.SMTP_USER, pass: config.SMTP_PASS }
-          : undefined,
-    });
-    log.debug('Email transport initialized', {
-      host: config.SMTP_HOST,
-      port: config.SMTP_PORT,
-    });
+  constructor() {}
+
+  private get transporter(): Transporter {
+    if (!this._transporter) {
+      const config = env();
+      this._transporter = nodemailer.createTransport({
+        host: config.SMTP_HOST,
+        port: config.SMTP_PORT,
+        secure: config.SMTP_SECURE,
+        auth:
+          config.SMTP_USER && config.SMTP_PASS
+            ? { user: config.SMTP_USER, pass: config.SMTP_PASS }
+            : undefined,
+      });
+      log.debug('Email transport initialized', {
+        host: config.SMTP_HOST,
+        port: config.SMTP_PORT,
+      });
+    }
+    return this._transporter;
   }
 
   // ─── Public Send Methods ───────────────────────────────────────────────────

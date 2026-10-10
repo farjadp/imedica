@@ -19,7 +19,7 @@ import { auditService } from '../services/audit/AuditService.js';
  * Maps HTTP method + path pattern to a human-readable action string for the audit log.
  * More specific patterns must come before more general ones.
  */
-const ACTION_MAP: Array<{ method: string; pattern: RegExp; action: string }> = [
+const ACTION_MAP: { method: string; pattern: RegExp; action: string }[] = [
   { method: 'POST', pattern: /^\/api\/auth\/register$/, action: 'auth.register_attempt' },
   { method: 'POST', pattern: /^\/api\/auth\/login$/, action: 'auth.login_attempt' },
   { method: 'POST', pattern: /^\/api\/auth\/logout$/, action: 'auth.logout' },

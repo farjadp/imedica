@@ -7,24 +7,25 @@
 // Env / Identity: Backend (Express router)
 // ============================================================================
 
-import type { Request, Response, NextFunction } from 'express';
-import { Router } from 'express';
-
+import type { ApiResponse } from '@imedica/shared';
 import {
+  REFRESH_TOKEN_COOKIE_NAME,
+  REFRESH_TOKEN_COOKIE_OPTIONS,
   ForgotPasswordSchema,
   LoginSchema,
   RegisterSchema,
   ResetPasswordSchema,
   VerifyEmailSchema,
 } from '@imedica/shared';
-import type { ApiResponse } from '@imedica/shared';
+import type { NextFunction, Request, Response, Router as ExpressRouter } from 'express';
+import { Router } from 'express';
 
-import { REFRESH_TOKEN_COOKIE_NAME, REFRESH_TOKEN_COOKIE_OPTIONS } from '@imedica/shared';
+import { AuthenticationError } from '../lib/errors.js';
 import { authenticate } from '../middleware/auth.js';
 import { loginLimiter, passwordResetLimiter, registerLimiter } from '../middleware/rate-limit.js';
 import { authService } from '../services/auth/AuthService.js';
 
-const router = Router();
+const router: ExpressRouter = Router();
 
 // ─── POST /api/auth/register ─────────────────────────────────────────────────
 
@@ -73,6 +74,11 @@ router.post('/login', loginLimiter, async (req: Request, res: Response, next: Ne
 
 router.post('/logout', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
+    if (!req.user) {
+      next(new AuthenticationError());
+      return;
+    }
+
     // Get refresh token ID from cookie to revoke it
     const refreshTokenRaw: unknown = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
 
@@ -94,7 +100,7 @@ router.post('/logout', authenticate, async (req: Request, res: Response, next: N
       }
     }
 
-    const result = await authService.logout(tokenId, req.user!.sub, {
+    const result = await authService.logout(tokenId, req.user.sub, {
       ipAddress: req.ip,
     });
 
@@ -189,7 +195,12 @@ router.post('/reset-password', async (req: Request, res: Response, next: NextFun
 
 router.get('/me', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = await authService.getMe(req.user!.sub);
+    if (!req.user) {
+      next(new AuthenticationError());
+      return;
+    }
+
+    const user = await authService.getMe(req.user.sub);
     const response: ApiResponse<typeof user> = { success: true, data: user };
     res.status(200).json(response);
   } catch (error) {

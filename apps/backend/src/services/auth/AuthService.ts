@@ -350,7 +350,7 @@ export class AuthService {
       resourceType: 'refresh_token',
       resourceId: null,
       result: 'success',
-      ipAddress: meta.ipAddress,
+      ipAddress: meta.ipAddress ?? null,
     });
 
     return {
@@ -380,7 +380,7 @@ export class AuthService {
       resourceType: 'refresh_token',
       resourceId: tokenId,
       result: 'success',
-      ipAddress: meta.ipAddress,
+      ipAddress: meta.ipAddress ?? null,
     });
 
     return { message: 'Logged out successfully.' };
@@ -411,7 +411,7 @@ export class AuthService {
         actorId: null,
         action: 'password_reset_requested_unknown_email',
         result: 'success',
-        ipAddress: meta.ipAddress,
+        ipAddress: meta.ipAddress ?? null,
       });
       return { message: GENERIC_MESSAGE };
     }
@@ -442,7 +442,7 @@ export class AuthService {
       resourceType: 'user',
       resourceId: user.id,
       result: 'success',
-      ipAddress: meta.ipAddress,
+      ipAddress: meta.ipAddress ?? null,
     });
 
     return { message: GENERIC_MESSAGE };
@@ -508,7 +508,7 @@ export class AuthService {
       resourceType: 'user',
       resourceId: matchedUserId,
       result: 'success',
-      ipAddress: meta.ipAddress,
+      ipAddress: meta.ipAddress ?? null,
     });
 
     log.info('Password reset completed', { userId: matchedUserId });

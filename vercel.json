@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "installCommand": "pnpm install --frozen-lockfile",
+  "buildCommand": "pnpm --filter @imedica/shared build && pnpm --filter @imedica/backend build",
+  "outputDirectory": "apps/backend/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.js"
+    }
+  ]
+}

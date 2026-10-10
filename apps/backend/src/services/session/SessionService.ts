@@ -27,7 +27,7 @@ export class SessionService {
     const anonymousHash = await this.deident.getAnonymousHash(userId);
 
     // 2. Ensure a profile snapshot exists for this hash (baseline analytics tracking)
-    await db.analytics.paramedicProfileSnapshot.upsert({
+    await db.analytics.paramedicProfile.upsert({
       where: { anonymousHash },
       create: { anonymousHash },
       update: { lastUpdated: new Date() },
@@ -41,7 +41,7 @@ export class SessionService {
       throw new NotFoundError('Scenario');
     }
 
-    const session = await db.analytics.analyticsSession.create({
+    const session = await db.analytics.session.create({
       data: {
         anonymousHash,
         scenarioId: dto.scenarioId,
@@ -60,7 +60,7 @@ export class SessionService {
   async submitDecision(userId: string, sessionId: string, dto: SubmitDecisionDto) {
     const anonymousHash = await this.deident.getAnonymousHash(userId);
 
-    const session = await db.analytics.analyticsSession.findUnique({
+    const session = await db.analytics.session.findUnique({
       where: { id: sessionId },
       include: { decisions: true },
     });
@@ -140,7 +140,7 @@ export class SessionService {
   async getResults(userId: string, sessionId: string) {
     const anonymousHash = await this.deident.getAnonymousHash(userId);
 
-    const session = await db.analytics.analyticsSession.findUnique({
+    const session = await db.analytics.session.findUnique({
       where: { id: sessionId },
       include: { decisions: true },
     });
@@ -155,7 +155,7 @@ export class SessionService {
 
     // Mark completed if not already
     if (session.status !== 'completed') {
-      await db.analytics.analyticsSession.update({
+      await db.analytics.session.update({
         where: { id: sessionId },
         data: { status: 'completed', completedAt: new Date(), finalScore: score },
       });

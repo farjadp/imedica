@@ -20,6 +20,11 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 
+import { config as dotenvConfig } from 'dotenv';
+import { resolve } from 'path';
+// Load from monorepo root
+dotenvConfig({ path: resolve(__dirname, '../../../.env') });
+
 import { initSentry } from './lib/sentry.js';
 import { validateEnv } from './lib/validate-env.js';
 

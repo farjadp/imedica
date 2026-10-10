@@ -22,11 +22,14 @@ const envSchema = z.object({
     .url()
     .startsWith('postgresql://', 'DATABASE_URL must be a postgresql:// connection string'),
 
-  // Redis
+  // Redis (accepts redis:// for local and rediss:// for TLS/Upstash)
   REDIS_URL: z
     .string()
     .url()
-    .startsWith('redis://', 'REDIS_URL must be a redis:// connection string'),
+    .refine(
+      (url) => url.startsWith('redis://') || url.startsWith('rediss://'),
+      'REDIS_URL must be a redis:// or rediss:// connection string',
+    ),
 
   // JWT — enforce minimum secret length to deter weak secrets
   JWT_ACCESS_SECRET: z
@@ -59,6 +62,9 @@ const envSchema = z.object({
   // Optional (production)
   SENTRY_DSN: z.string().url().optional(),
   ANTHROPIC_API_KEY: z.string().startsWith('sk-ant-').optional(),
+  ANTHROPIC_MODEL: z.string().min(1).default('claude-sonnet-4-20250514'),
+  ANTHROPIC_MAX_TOKENS: z.coerce.number().int().min(1).max(8192).default(1000),
+  ANTHROPIC_TIMEOUT_MS: z.coerce.number().int().min(1000).default(5000),
   SENDGRID_API_KEY: z.string().startsWith('SG.').optional(),
 });
 

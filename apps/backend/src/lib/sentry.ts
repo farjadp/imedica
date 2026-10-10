@@ -34,9 +34,13 @@ export function initSentry(dsn: string | undefined, env: string): void {
     beforeSend(event) {
       // Strip user object (contains email) — we track by anonymous ID only
       if (event.user) {
-        event.user = {
-          id: event.user.id, // Keep anonymous session ID if present
-        };
+        if (event.user.id !== undefined) {
+          event.user = {
+            id: event.user.id, // Keep anonymous session ID if present
+          };
+        } else {
+          delete event.user;
+        }
       }
       // Remove sensitive request headers
       if (event.request?.headers) {
@@ -75,10 +79,10 @@ export function initSentry(dsn: string | undefined, env: string): void {
 export function captureError(
   error: unknown,
   context?: {
-    userId?: string;      // Anonymous user ID (NOT email or name)
-    requestId?: string;
-    action?: string;
-    extra?: Record<string, unknown>;
+    userId?: string | undefined;      // Anonymous user ID (NOT email or name)
+    requestId?: string | undefined;
+    action?: string | undefined;
+    extra?: Record<string, unknown> | undefined;
   },
 ): void {
   Sentry.withScope((scope) => {
