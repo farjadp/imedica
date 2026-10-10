@@ -1,6 +1,8 @@
 // Local development seed. Every person and organization here is fictional.
 //
-// Test accounts (all share the password below — local development only):
+// Test accounts. Locally they share DEV_PASSWORD below. On any deployed
+// environment set SEED_PASSWORD instead: the seed refuses to publish the
+// documented dev password on a public server.
 //   admin@imedica.test        Imedica administrator
 //   physician@imedica.test    physician, author of the scenarios
 //   reviewer@imedica.test     second physician (publishes; two-person rule)
@@ -16,6 +18,11 @@ import type { ActionCategory, Outcome, ParamedicLevel, ScenarioCategory } from "
 import { experienceBucket, keyedHash, weekStart } from "../src/server/privacy/hash";
 
 export const DEV_PASSWORD = "Imedica-dev-2026";
+
+const seedPassword = process.env.SEED_PASSWORD || DEV_PASSWORD;
+if (process.env.NODE_ENV === "production" && seedPassword === DEV_PASSWORD) {
+  throw new Error("Set SEED_PASSWORD before seeding a deployed environment.");
+}
 
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL! }) });
 const secret = process.env.DEIDENTIFICATION_SECRET!;
@@ -372,7 +379,7 @@ async function upsertScenario(def: ScenarioDef, authorId: string, reviewerId: st
 }
 
 async function main() {
-  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 12);
+  const passwordHash = await bcrypt.hash(seedPassword, 12);
 
   const org = await db.organization.upsert({
     where: { slug: "lakeshore-paramedic-services" },
@@ -476,7 +483,7 @@ async function main() {
   }
 
   console.log(`Seeded ${people.length} users, 3 scenarios and de-identified history for ${org.name}.`);
-  console.log(`All test accounts use the password: ${DEV_PASSWORD}`);
+  console.log(seedPassword === DEV_PASSWORD ? `All test accounts use the password: ${DEV_PASSWORD}` : "All test accounts use SEED_PASSWORD.");
 }
 
 main()
