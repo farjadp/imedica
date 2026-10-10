@@ -24,7 +24,13 @@ export type AuditAction =
   | "scenario.archive"
   | "scenario.delete"
   | "ai.review"
-  | "demo.request";
+  | "demo.request"
+  | "blog.create"
+  | "blog.update"
+  | "blog.status"
+  | "blog.delete"
+  | "blog.image_upload"
+  | "blog.category";
 
 /** Never throws: a failed audit write must not break the action it records. */
 export async function audit(

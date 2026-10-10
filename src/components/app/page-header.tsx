@@ -40,10 +40,19 @@ export function StatusPill({ status }: { status: string }) {
   const styles: Record<string, string> = {
     DRAFT: "bg-paper-2 text-ink-2",
     IN_REVIEW: "bg-tag-yellow-wash text-tag-yellow",
+    REVIEW: "bg-tag-yellow-wash text-tag-yellow",
+    SCHEDULED: "bg-pine-wash text-pine",
     PUBLISHED: "bg-tag-green-wash text-tag-green",
     ARCHIVED: "bg-paper-2 text-ink-3 line-through",
   };
-  const label: Record<string, string> = { DRAFT: "Draft", IN_REVIEW: "In review", PUBLISHED: "Published", ARCHIVED: "Archived" };
+  const label: Record<string, string> = {
+    DRAFT: "Draft",
+    IN_REVIEW: "In review",
+    REVIEW: "In review",
+    SCHEDULED: "Scheduled",
+    PUBLISHED: "Published",
+    ARCHIVED: "Archived",
+  };
   return (
     <span className={`inline-flex h-6 items-center rounded-full px-2.5 text-[12px] font-medium ${styles[status] ?? ""}`}>
       {label[status] ?? status}
