@@ -13,7 +13,7 @@
 | `signal` #c2302a | ECG trace, live indicators, the active tab underline, time running out. Never decoration. |
 | `tag-green / yellow / red / black` | Outcomes, following Canadian triage tags: correct/acceptable, suboptimal, harmful, critical. Always with a text label. |
 
-The runtime monitor is the one dark surface (#0d1513 with monitor green #9ff0c4 and alarm #ff7b6f), because that is what a monitor looks like.
+The dark surfaces are the monitor's (#06110e with monitor green #9ff0c4 and alarm #ff7b6f): the homepage hero, the statement band, the footer and the runtime monitor. Everything a person reads at length sits on paper.
 
 ## Type
 
@@ -26,11 +26,14 @@ The runtime monitor is the one dark surface (#0d1513 with monitor green #9ff0c4 
 - **ECG trace** (`components/clinical/ecg-trace.tsx`): synthesised lead II, rhythm-aware, seamless scroll, paused under reduced motion.
 - **ECG paper** utility: the 1 mm / 5 mm grid behind traces.
 - **Outcome tags**: small mono uppercase labels in triage colours.
+- **Vectorcardiogram hero** (three.js, `hero-vcg.ts`): the P, QRS and T loops the cardiac vector traces each beat, drawn in sync with a full-width monitor sweep from one clock (`cardiac.ts`). Glow comes from additive halo lines, not post-processing (bloom broke canvas alpha).
 - **Privacy plates** (three.js): the three schemas as stacked plates, with records crossing only through the hash gate. Lazy-loaded.
 
 ## Rules
 
 - No eyebrow labels over headings, no gradient text, no card grids standing in for structure.
+- Display type is big and tight: Source Serif 4 at up to ~9.6rem, tracking -0.045em, with italic serif accents in monitor green or pine.
+- Navigation is a floating pill that turns dark over any section marked `data-nav="dark"`.
 - Motion: one entrance (`verdict-in`, expo ease-out, a slight blur) for things that arrive; the ECG sweep. Nothing else moves.
 - Focus rings are pine, the text caret is signal red, and selection is pine on paper.
 - Charts: one hue per series, values in ink, suppressed groups say "fewer than 5 people" rather than disappearing.

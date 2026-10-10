@@ -1,31 +1,15 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
 import { EcgTrace } from "@/components/clinical/ecg-trace";
+import { CallSequence } from "@/components/marketing/call-sequence";
 import { HeroCall } from "@/components/marketing/hero-call";
+import { HeroStage } from "@/components/marketing/hero-stage";
 import { PrivacyLayersLazy } from "@/components/marketing/privacy-layers-lazy";
-import { Container, SectionHeading } from "@/components/marketing/section";
-import { ButtonLink } from "@/components/ui/button";
+import { Container } from "@/components/marketing/section";
+import { Statement } from "@/components/marketing/statement";
 import { OutcomeTag } from "@/components/ui/outcome-tag";
-
-const runReport = [
-  {
-    time: "00:00",
-    name: "Dispatch",
-    body: "The call arrives the way it would on the road: age, complaint, what bystanders said. You walk in with the same thin picture.",
-  },
-  {
-    time: "00:40",
-    name: "Decide",
-    body: "Vitals move. The patient answers, or doesn't. You choose from the full action menu (assessments, drugs, procedures, transport) with the clock running.",
-  },
-  {
-    time: "09:15",
-    name: "Debrief",
-    body: "Every decision comes back tagged against the physician's rules, with the reason, the protocol behind it, and what a stronger run looked like.",
-  },
-];
 
 const team = [
   {
@@ -43,7 +27,7 @@ const team = [
   {
     name: "Dr. Somayyeh Motevalli",
     role: "Business Development",
-    note: "Runs pilots and keeps training directors close to the roadmap.",
+    note: "Runs the pilots and keeps training directors close to the roadmap.",
     photo: "/team/somayyeh-motevalli.jpg",
   },
 ];
@@ -51,220 +35,302 @@ const team = [
 export default function HomePage() {
   return (
     <>
-      {/* Hero: the product, working, in the first viewport. */}
-      <section className="relative overflow-hidden border-b border-rule">
-        <Container className="grid items-center gap-12 pt-10 pb-16 md:pt-16 lg:grid-cols-[1fr_minmax(0,540px)] lg:gap-16 lg:pb-24">
-          <div>
-            <h1 className="font-display text-[clamp(2.6rem,6vw,4.6rem)] leading-[0.98] font-medium tracking-[-0.03em] text-ink">
-              Make the hard call
-              <br />
-              before it&apos;s real.
-            </h1>
-            <p className="mt-6 max-w-[34rem] text-lg leading-relaxed text-ink-2">
-              Imedica puts paramedics inside physician-written emergencies and scores every decision against
-              protocol the moment it&apos;s made. Your service sees where the team is strong and where it isn&apos;t,
-              never one person&apos;s results.
+      {/* ─── Hero: the resus bay monitor ─────────────────────────────────── */}
+      <section
+        data-nav="dark"
+        className="relative -mt-24 flex min-h-[100svh] flex-col overflow-hidden bg-[#06110e] text-paper md:-mt-28"
+      >
+        <HeroStage />
+        <div
+          className="pointer-events-none absolute inset-0"
+          aria-hidden
+          style={{
+            background:
+              "radial-gradient(55% 55% at 72% 40%, rgb(42 107 88 / 0.22), transparent 70%), radial-gradient(40% 40% at 8% 100%, rgb(194 48 42 / 0.10), transparent 70%)",
+          }}
+        />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.07]"
+          aria-hidden
+          style={{
+            backgroundImage:
+              "linear-gradient(to right, #9ff0c4 1px, transparent 1px), linear-gradient(to bottom, #9ff0c4 1px, transparent 1px)",
+            backgroundSize: "56px 56px",
+            maskImage: "radial-gradient(ellipse at 60% 45%, black 20%, transparent 75%)",
+          }}
+        />
+
+        {/* Monitor chrome */}
+        <div className="relative z-10 mx-auto flex w-full max-w-[1320px] justify-between px-5 pt-28 font-mono text-[11px] tracking-[0.16em] text-paper/45 uppercase md:px-10 md:pt-32">
+          <span>Bay 04 · Lead II · 25 mm/s</span>
+          <span className="hidden md:block">HR 66 · SpO₂ 98 · NIBP 118/76</span>
+        </div>
+
+        <div className="relative z-10 mx-auto flex w-full max-w-[1320px] flex-1 flex-col justify-center px-5 pt-10 pb-[30vh] md:px-10 md:pb-[28vh]">
+          <h1 className="max-w-[11ch] font-display text-[clamp(3.4rem,9.2vw,9.6rem)] leading-[0.9] font-medium tracking-[-0.045em]">
+            Make the hard call <em className="font-normal text-[#9ff0c4]">before it&apos;s real.</em>
+          </h1>
+          <div className="mt-8 flex max-w-xl flex-col gap-7 md:mt-10">
+            <p className="text-[18px] leading-relaxed text-paper/72 md:text-[19px]">
+              Physician-written emergencies for Canadian paramedics. Every decision scored against protocol the moment
+              you make it, and your service sees the team, never one person.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <ButtonLink href="/demo" size="lg">
-                Request a demo
-              </ButtonLink>
-              <ButtonLink href="/how-it-works" size="lg" variant="secondary">
-                How a scenario works
-              </ButtonLink>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href="/demo"
+                className="group inline-flex h-13 items-center gap-2 rounded-full bg-[#9ff0c4] px-6 text-[15px] font-medium text-[#06110e] transition-colors hover:bg-white"
+              >
+                Book a demo
+                <ArrowUpRight className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+              <a
+                href="#try"
+                className="inline-flex h-13 items-center gap-2 rounded-full border border-white/20 px-6 text-[15px] text-paper transition-colors hover:border-white/50"
+              >
+                Try a call now
+              </a>
             </div>
-            <p className="mt-6 text-[13px] text-ink-3">
-              For EMS, fire and hospital services in Canada. Pilots open in Ontario for 2026.
-            </p>
           </div>
+        </div>
 
+        <div className="pointer-events-none absolute right-5 bottom-[29%] z-10 hidden items-center gap-4 font-mono text-[10px] tracking-[0.16em] text-paper/45 uppercase md:right-10 md:flex">
+          <span>Vectorcardiogram</span>
+          <span className="flex items-center gap-1.5">
+            <i className="size-1.5 rounded-full bg-[#ffd27a]" /> P
+          </span>
+          <span className="flex items-center gap-1.5">
+            <i className="size-1.5 rounded-full bg-[#9ff0c4]" /> QRS
+          </span>
+          <span className="flex items-center gap-1.5">
+            <i className="size-1.5 rounded-full bg-[#86d9ff]" /> T
+          </span>
+        </div>
+      </section>
+
+      {/* ─── Try it ──────────────────────────────────────────────────────── */}
+      <section id="try" className="scroll-mt-24 py-24 md:py-36">
+        <Container className="grid items-center gap-14 lg:grid-cols-[0.9fr_minmax(0,560px)] lg:gap-24">
           <div>
-            <HeroCall />
-            <p className="mt-3 text-center text-[12px] text-ink-3">
-              Illustrative case. Follow your own service&apos;s medical directives.
+            <h2 className="font-display text-[clamp(2.6rem,5.6vw,5.2rem)] leading-[0.95] font-medium tracking-[-0.035em] text-ink">
+              One patient. <br />
+              Four choices. <br />
+              <em className="font-normal text-pine-3">Your call.</em>
+            </h2>
+            <p className="mt-7 max-w-md text-[18px] leading-relaxed text-ink-2">
+              This is how every Imedica scenario feels. Pick what you&apos;d do first. The verdict comes from the
+              physician&apos;s rules, instantly, and the patient responds.
             </p>
-          </div>
-        </Container>
-      </section>
-
-      {/* The gap */}
-      <section className="py-20 md:py-28">
-        <Container className="grid gap-12 md:grid-cols-[1fr_1fr] md:gap-20">
-          <SectionHeading title="The calls that matter most are the ones you see least." />
-          <div className="space-y-5 text-[17px] leading-relaxed text-ink-2">
-            <p>
-              A paediatric arrest, anaphylaxis at a school, a tricyclic overdose: some crews meet these once a year,
-              some never before the night it counts. Recertification day can&apos;t make up the difference, and the
-              road is the wrong place to learn.
-            </p>
-            <p>
-              Imedica gives those rare calls a place to happen first. Short scenarios, run on a phone or a station
-              computer between calls, each one written and checked by an emergency physician.
-            </p>
-          </div>
-        </Container>
-      </section>
-
-      {/* Run report: dispatch → decide → debrief */}
-      <section className="border-y border-rule bg-card">
-        <Container className="py-20 md:py-28">
-          <SectionHeading
-            title="Every scenario runs like a call."
-            lead="Ten to fifteen minutes from dispatch to debrief, timed the way the road is."
-          />
-          <div className="mt-14">
-            <div className="ecg-paper relative mb-10 overflow-hidden rounded-md border border-rule">
-              <EcgTrace rhythm="sinus" height={56} />
-            </div>
-            <ol className="grid gap-10 md:grid-cols-3 md:gap-8">
-              {runReport.map((s) => (
-                <li key={s.name} className="border-t border-ink pt-5">
-                  <p className="font-mono text-[12px] text-signal">{s.time}</p>
-                  <h3 className="mt-1 font-display text-2xl font-medium text-ink">{s.name}</h3>
-                  <p className="mt-3 text-[15px] leading-relaxed text-ink-2">{s.body}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
-        </Container>
-      </section>
-
-      {/* Rules decide, AI explains */}
-      <section className="py-20 md:py-28">
-        <Container className="grid items-start gap-14 lg:grid-cols-[1fr_1.05fr] lg:gap-20">
-          <div>
-            <SectionHeading
-              title="Physicians write the rules. The rules decide the score."
-              lead="The grade comes from deterministic rules a physician wrote for that exact moment in the call. Claude then explains each verdict in plain language. It can't change a score, and every explanation is open to physician review."
-            />
             <ul className="mt-8 space-y-3 text-[15px] text-ink-2">
-              {[
-                "Same decision, same score, every time",
-                "Timing counts: the right drug, given late, is marked late",
-                "Explanations cite the directive they come from",
-              ].map((t) => (
-                <li key={t} className="flex gap-3">
-                  <Check className="mt-0.5 size-4 shrink-0 text-tag-green" aria-hidden />
-                  {t}
-                </li>
-              ))}
+              {["Same decision, same score, every time", "Timing counts: right drug, given late, is marked late", "Wrong choices change the patient"].map(
+                (t) => (
+                  <li key={t} className="flex gap-3">
+                    <Check className="mt-0.5 size-4 shrink-0 text-tag-green" aria-hidden /> {t}
+                  </li>
+                ),
+              )}
             </ul>
           </div>
-
-          <figure className="rounded-xl border border-rule bg-card p-5 shadow-[var(--shadow-lift)] md:p-6">
-            <figcaption className="flex items-baseline justify-between border-b border-rule pb-3">
-              <span className="font-display text-lg font-medium">Debrief · Inferior STEMI</span>
-              <span className="tabular font-mono text-sm text-ink-2">78%</span>
-            </figcaption>
-            <ol className="divide-y divide-rule-2">
-              {(
-                [
-                  ["00:48", "12-lead ECG", "CORRECT"],
-                  ["01:30", "ASA 162 mg chewed", "CORRECT"],
-                  ["02:05", "Right-sided leads V4R", "ACCEPTABLE"],
-                  ["03:40", "Nitroglycerin 0.4 mg SL", "HARMFUL"],
-                  ["05:10", "IV access, fluid bolus 250 mL", "CORRECT"],
-                ] as const
-              ).map(([t, label, outcome]) => (
-                <li key={t} className="flex items-center gap-4 py-3">
-                  <span className="tabular w-12 font-mono text-[12px] text-ink-3">{t}</span>
-                  <span className="flex-1 text-[14px] text-ink">{label}</span>
-                  <OutcomeTag outcome={outcome} />
-                </li>
-              ))}
-            </ol>
-            <div className="mt-2 rounded-md bg-paper p-4">
-              <p className="text-[14px] leading-relaxed text-ink-2">
-                <span className="font-medium text-ink">Why nitro hurt here.</span> V4R showed right ventricular
-                involvement. The RV depends on preload, so nitroglycerin dropped the pressure to 71/40. The fluid
-                bolus that followed was the right recovery.
-              </p>
-              <p className="mt-3 font-mono text-[11px] tracking-wide text-ink-3 uppercase">
-                AI explanation · physician reviewed
-              </p>
-            </div>
-          </figure>
+          <div className="relative">
+            <div className="absolute -inset-6 -z-10 rounded-[2rem] bg-pine-wash md:-inset-10" aria-hidden />
+            <HeroCall />
+            <p className="mt-3 text-center text-[12px] text-ink-3">Illustrative case. Follow your service&apos;s medical directives.</p>
+          </div>
         </Container>
       </section>
 
-      {/* Privacy */}
+      {/* ─── The gap, as a statement ──────────────────────────────────────── */}
       <section className="border-y border-rule bg-card">
-        <Container className="grid items-center gap-12 py-20 md:py-28 lg:grid-cols-[1fr_1fr] lg:gap-16">
-          <div className="order-2 lg:order-1">
-            <PrivacyLayersLazy />
+        <Container className="grid gap-10 py-24 md:grid-cols-[1fr_1.2fr] md:py-32">
+          <h2 className="font-display text-[clamp(2.2rem,4.4vw,3.8rem)] leading-[1] font-medium tracking-[-0.03em] text-ink">
+            The calls that matter most are the ones you see least.
+          </h2>
+          <div className="space-y-6 text-[18px] leading-relaxed text-ink-2 md:pt-3">
+            <p>
+              A paediatric arrest. Anaphylaxis at a school. A tricyclic overdose. Some crews meet these once a year, some
+              never before the night it counts. Recertification day can&apos;t close that gap, and the road is the wrong
+              place to learn.
+            </p>
+            <p className="text-ink">
+              Imedica gives those calls somewhere to happen first: ten-minute scenarios, run between calls on a phone or
+              a station computer, each written and checked by an emergency physician.
+            </p>
           </div>
-          <div className="order-1 lg:order-2">
-            <SectionHeading
-              title="Names and scores never sit in the same place."
-              lead="Who you are lives in one database schema. What you did in training lives in another, under a keyed one-way hash. Reporting reads only the second one, and refuses to show any group smaller than five people."
-            />
-            <dl className="mt-8 grid gap-6 sm:grid-cols-2">
-              {[
-                ["PIPEDA and PHIPA by design", "Separation is enforced in the data model, not by policy."],
-                ["Built for Canadian hosting", "Designed to run entirely in Canadian data centres."],
-                ["Every change on the record", "Who edited a scenario or invited a user, and when."],
-                ["Nothing sold, nothing shared", "Training data stays with the service that owns it."],
-              ].map(([k, v]) => (
-                <div key={k}>
-                  <dt className="text-[15px] font-medium text-ink">{k}</dt>
-                  <dd className="mt-1 text-[14px] leading-relaxed text-ink-3">{v}</dd>
+        </Container>
+      </section>
+
+      {/* ─── Dispatch → Decide → Debrief (scroll-driven) ──────────────────── */}
+      <section className="py-16 md:py-24">
+        <Container>
+          <CallSequence />
+        </Container>
+      </section>
+
+      {/* ─── Rules decide, Claude explains ───────────────────────────────── */}
+      <section data-nav="dark" className="relative overflow-hidden bg-[#06110e] py-28 md:py-40">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 opacity-40" aria-hidden>
+          <EcgTrace rhythm="sinus" height={120} stroke="rgb(159 240 196 / 0.35)" />
+        </div>
+        <Container className="relative">
+          <Statement
+            lines={[
+              { text: "Physicians write the rules." },
+              { text: "The rules decide the score." },
+              { text: "Claude explains why.", accent: true },
+            ]}
+          />
+          <p className="mt-12 max-w-xl text-[18px] leading-relaxed text-paper/65">
+            The grade comes from deterministic rules a physician wrote for that moment in the call. Claude then writes the
+            debrief in plain language. It can&apos;t change a score, it never sees who you are, and physicians review what
+            it writes.
+          </p>
+        </Container>
+      </section>
+
+      {/* ─── The debrief ─────────────────────────────────────────────────── */}
+      <section className="py-24 md:py-36">
+        <Container className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_0.9fr] lg:gap-24">
+          <figure className="relative">
+            <div className="absolute -inset-4 -z-10 rotate-[-1.5deg] rounded-[1.75rem] bg-paper-2 md:-inset-8" aria-hidden />
+            <div className="rounded-2xl border border-rule bg-card p-6 shadow-[var(--shadow-float)] md:p-8">
+              <figcaption className="flex items-end justify-between border-b border-rule pb-5">
+                <div>
+                  <p className="text-[13px] text-ink-3">Debrief · Inferior STEMI</p>
+                  <p className="font-display text-[1.6rem] text-ink">Developing</p>
                 </div>
-              ))}
-            </dl>
+                <p className="tabular font-display text-[3.4rem] leading-none text-ink">78%</p>
+              </figcaption>
+              <ol className="divide-y divide-rule-2">
+                {(
+                  [
+                    ["00:48", "12-lead ECG", "CORRECT"],
+                    ["01:30", "ASA 162 mg chewed", "CORRECT"],
+                    ["02:05", "Right-sided leads V4R", "ACCEPTABLE"],
+                    ["03:40", "Nitroglycerin 0.4 mg SL", "HARMFUL"],
+                    ["05:10", "IV fluid bolus 250 mL", "CORRECT"],
+                  ] as const
+                ).map(([t, label, outcome]) => (
+                  <li key={t} className="flex items-center gap-4 py-3">
+                    <span className="tabular w-12 font-mono text-[12px] text-ink-3">{t}</span>
+                    <span className="flex-1 text-[15px] text-ink">{label}</span>
+                    <OutcomeTag outcome={outcome} />
+                  </li>
+                ))}
+              </ol>
+              <div className="mt-3 rounded-xl bg-paper p-5">
+                <p className="text-[15px] leading-relaxed text-ink-2">
+                  <span className="font-medium text-ink">Why nitro hurt here.</span> V4R showed right-ventricular
+                  involvement. The RV depends on preload, so nitroglycerin dropped the pressure to 71/40. The fluid bolus
+                  that followed was the right recovery.
+                </p>
+                <p className="mt-3 font-mono text-[10px] tracking-[0.14em] text-ink-3 uppercase">Claude · physician reviewed</p>
+              </div>
+            </div>
+          </figure>
+          <div>
+            <h2 className="font-display text-[clamp(2.4rem,4.8vw,4.4rem)] leading-[0.98] font-medium tracking-[-0.035em] text-ink">
+              Not just a score. <em className="font-normal text-pine-3">The reason.</em>
+            </h2>
+            <p className="mt-6 text-[18px] leading-relaxed text-ink-2">
+              Each decision is tagged in triage colours, with the physician&apos;s rationale, the directive it comes from,
+              and the step you missed. Then a short written debrief ties the run together.
+            </p>
             <Link
-              href="/security"
-              className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-medium text-pine underline decoration-pine/30 hover:decoration-pine"
+              href="/how-it-works"
+              className="group mt-8 inline-flex items-center gap-2 text-[16px] font-medium text-pine underline decoration-pine/30 underline-offset-[6px] hover:decoration-pine"
             >
-              Read how the privacy model works <ArrowRight className="size-4" />
+              See how a scenario is built <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
         </Container>
       </section>
 
-      {/* Team */}
-      <section className="py-20 md:py-28">
+      {/* ─── Privacy ─────────────────────────────────────────────────────── */}
+      <section className="border-y border-rule bg-card">
+        <Container className="grid items-center gap-14 py-24 md:py-32 lg:grid-cols-2 lg:gap-20">
+          <div>
+            <h2 className="font-display text-[clamp(2.4rem,4.8vw,4.4rem)] leading-[0.98] font-medium tracking-[-0.035em] text-ink">
+              Names and scores never share a table.
+            </h2>
+            <p className="mt-6 text-[18px] leading-relaxed text-ink-2">
+              Who you are lives in one database schema. What you did lives in another, under a keyed one-way hash.
+              Reporting reads only the de-identified copy, and refuses to show any group smaller than five people.
+            </p>
+            <dl className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+              {[
+                ["PIPEDA and PHIPA", "Separation enforced in the data model, not by policy."],
+                ["Built for Canadian hosting", "Designed to run entirely in Canadian data centres."],
+                ["On the record", "Every edit, invitation and sign-in is audited."],
+                ["Nothing sold", "Training data stays with the service that owns it."],
+              ].map(([k, v]) => (
+                <div key={k} className="border-t border-rule pt-4">
+                  <dt className="text-[15px] font-medium text-ink">{k}</dt>
+                  <dd className="mt-1 text-[14px] leading-relaxed text-ink-3">{v}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+          <PrivacyLayersLazy />
+        </Container>
+      </section>
+
+      {/* ─── Team ────────────────────────────────────────────────────────── */}
+      <section className="py-24 md:py-36">
         <Container>
-          <SectionHeading
-            title="Built by clinicians, not an edtech studio."
-            lead="Imedica was founded in Toronto by clinicians who know what the first ten minutes of an emergency ask of a crew."
-          />
-          <ul className="mt-12 grid gap-8 sm:grid-cols-3">
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <h2 className="max-w-3xl font-display text-[clamp(2.4rem,5.2vw,4.8rem)] leading-[0.96] font-medium tracking-[-0.035em] text-ink">
+              Built by clinicians, <em className="font-normal text-pine-3">not an edtech studio.</em>
+            </h2>
+            <Link href="/about" className="group inline-flex items-center gap-2 text-[15px] font-medium text-pine">
+              About Imedica <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+          <ul className="mt-14 grid gap-5 md:grid-cols-3">
             {team.map((p) => (
-              <li key={p.name}>
-                <div className="relative aspect-[4/5] overflow-hidden rounded-lg bg-pine">
+              <li key={p.name} className="group relative overflow-hidden rounded-2xl bg-pine">
+                <div className="relative aspect-[4/5]">
                   <Image
                     src={p.photo}
                     alt={p.name}
                     fill
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                    className="object-cover"
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover transition-transform duration-700 ease-[var(--ease-out-expo)] group-hover:scale-[1.03]"
                   />
+                  <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#06110e]/90 to-transparent" aria-hidden />
                 </div>
-                <h3 className="mt-4 text-[17px] font-medium text-ink">{p.name}</h3>
-                <p className="text-[14px] text-pine-3">{p.role}</p>
-                <p className="mt-2 text-[14px] leading-relaxed text-ink-3">{p.note}</p>
+                <div className="absolute inset-x-0 bottom-0 p-6 text-paper">
+                  <p className="font-mono text-[10px] tracking-[0.16em] text-[#9ff0c4] uppercase">{p.role}</p>
+                  <h3 className="mt-1.5 font-display text-[1.6rem] leading-tight">{p.name}</h3>
+                  <p className="mt-2 text-[14px] leading-relaxed text-paper/70">{p.note}</p>
+                </div>
               </li>
             ))}
           </ul>
         </Container>
       </section>
 
-      {/* Close */}
-      <section className="bg-pine text-paper">
-        <Container className="grid items-end gap-10 py-20 md:grid-cols-[1.4fr_1fr] md:py-24">
-          <div>
-            <h2 className="font-display text-[clamp(2rem,4vw,3.25rem)] leading-[1.04] font-medium tracking-[-0.02em]">
-              Run a pilot with your service.
-            </h2>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-paper/80">
-              Six months, your paramedics, a scenario set matched to your directives, and a before-and-after look at
-              where the team improved.
+      {/* ─── Close ───────────────────────────────────────────────────────── */}
+      <section data-nav="dark" className="relative overflow-hidden bg-pine text-paper">
+        <div className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-30" aria-hidden>
+          <EcgTrace rhythm="sinus" height={180} stroke="rgb(247 246 241 / 0.5)" />
+        </div>
+        <Container className="relative py-28 md:py-40">
+          <h2 className="max-w-4xl font-display text-[clamp(3rem,7.4vw,7rem)] leading-[0.92] font-medium tracking-[-0.045em]">
+            Run a pilot with <em className="font-normal text-[#9ff0c4]">your service.</em>
+          </h2>
+          <div className="mt-10 flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
+            <p className="max-w-lg text-[18px] leading-relaxed text-paper/75">
+              Six months, your paramedics, scenarios matched to your directives, and a before-and-after view of where the
+              team improved. Pilots open in Ontario for 2026.
             </p>
-          </div>
-          <div className="flex flex-wrap gap-3 md:justify-end">
-            <ButtonLink href="/demo" size="lg" variant="light">
-              Request a demo
-            </ButtonLink>
+            <Link
+              href="/demo"
+              className="group inline-flex h-16 items-center gap-3 self-start rounded-full bg-paper pr-3 pl-8 text-[17px] font-medium text-pine transition-colors hover:bg-white md:self-auto"
+            >
+              Book a demo
+              <span className="flex size-11 items-center justify-center rounded-full bg-pine text-paper transition-transform group-hover:rotate-45">
+                <ArrowUpRight className="size-5" />
+              </span>
+            </Link>
           </div>
         </Container>
       </section>
