@@ -12,6 +12,7 @@ const links = [
   { href: "/how-it-works", label: "How it works" },
   { href: "/for-services", label: "For services" },
   { href: "/security", label: "Privacy" },
+  { href: "/blog", label: "Blog" },
   { href: "/about", label: "About" },
 ];
 
@@ -63,11 +64,11 @@ export function SiteHeader() {
             <Link
               key={l.href}
               href={l.href}
-              aria-current={pathname === l.href ? "page" : undefined}
+              aria-current={pathname === l.href || pathname.startsWith(`${l.href}/`) ? "page" : undefined}
               className={cn(
                 "rounded-full px-3.5 py-2 text-[14px] transition-colors",
                 dark ? "text-paper/70 hover:bg-white/8 hover:text-paper" : "text-ink-2 hover:bg-paper-2 hover:text-ink",
-                pathname === l.href && (dark ? "bg-white/10 text-paper" : "bg-paper-2 text-ink"),
+                (pathname === l.href || pathname.startsWith(`${l.href}/`)) && (dark ? "bg-white/10 text-paper" : "bg-paper-2 text-ink"),
               )}
             >
               {l.label}
