@@ -160,7 +160,9 @@ export function createVcg(host: HTMLElement, opts: { still: boolean }) {
     // Desktop: the instrument sits right of the headline. Phone: in the open
     // space under the buttons, clear of the text.
     const wide = w >= 900;
-    rig.position.set(wide ? 1.85 : 0.35, wide ? 0.3 : -1.5, 0);
+    // Half the visible width at the origin, so the loop never runs off the edge.
+    const halfWidth = Math.tan(((camera.fov / 2) * Math.PI) / 180) * camera.position.z * camera.aspect;
+    rig.position.set(wide ? halfWidth * 0.44 : 0.35, wide ? 0.3 : -1.5, 0);
     rig.scale.setScalar(wide ? 1.05 : 0.58);
   };
   size();
