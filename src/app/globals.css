@@ -1,26 +1,149 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ==========================================================================
+   Imedica — clinical instrument
+   Paper of the patient care record, ink of the chart, the deep green of the
+   team's studio portraits, and ECG red kept for the trace and real alarms.
+   Outcome colours follow Canadian triage tags.
+   ========================================================================== */
+
+@theme {
+  --color-paper: #f7f6f1;
+  --color-paper-2: #efede5;
+  --color-card: #fffefb;
+  --color-ink: #10201c;
+  --color-ink-2: #3c4a46;
+  --color-ink-3: #5e6b67;
+  --color-rule: #d9d6cb;
+  --color-rule-2: #e7e4da;
+
+  --color-pine: #123d31;
+  --color-pine-2: #1b5444;
+  --color-pine-3: #2a6b58;
+  --color-pine-wash: #e3ece7;
+
+  --color-signal: #c2302a;
+  --color-signal-wash: #f8e4e1;
+
+  /* Triage tags */
+  --color-tag-green: #2d7d4f;
+  --color-tag-green-wash: #e2f0e6;
+  --color-tag-yellow: #8a6500;
+  --color-tag-yellow-wash: #f8efcf;
+  --color-tag-red: #b3261e;
+  --color-tag-red-wash: #f9e2df;
+  --color-tag-black: #1b1b1b;
+
+  --font-display: var(--font-serif), "Georgia", serif;
+  --font-sans: var(--font-plex), ui-sans-serif, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --shadow-lift: 0 1px 2px rgb(16 32 28 / 0.06), 0 8px 24px -12px rgb(16 32 28 / 0.18);
+  --shadow-float: 0 2px 4px rgb(16 32 28 / 0.05), 0 24px 48px -24px rgb(16 32 28 / 0.28);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+  }
+
+  ::selection {
+    background: var(--color-pine);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-pine-3);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  input,
+  textarea,
+  select {
+    caret-color: var(--color-signal);
+  }
+
+  a {
+    text-underline-offset: 0.22em;
+    text-decoration-thickness: 1px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Numbers in tables, vitals and scores line up. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-rule) transparent;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ECG chart paper: 1 mm minor grid, 5 mm major grid. */
+@utility ecg-paper {
+  background-color: var(--color-card);
+  background-image:
+    linear-gradient(to right, rgb(194 48 42 / 0.13) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(194 48 42 / 0.13) 1px, transparent 1px),
+    linear-gradient(to right, rgb(194 48 42 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(194 48 42 / 0.055) 1px, transparent 1px);
+  background-size:
+    40px 40px,
+    40px 40px,
+    8px 8px,
+    8px 8px;
+}
+
+@keyframes ecg-sweep {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes verdict-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+    filter: blur(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
