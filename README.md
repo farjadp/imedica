@@ -89,7 +89,7 @@ Cookie auth for the web app; `Authorization: Bearer <token>` from `POST /auth/lo
 The claim on the website is that Imedica is designed to run entirely in Canada, so keep it true:
 
 - App: a Canadian region (Vercel `yul1` Montréal, or a container in Toronto or Montréal).
-- Database: managed Postgres in the same Canadian region. Run `npm run db:deploy` on release.
+- Database: managed Postgres in the same Canadian region. Migrations run on start (see `railway.json`); seed a fresh environment once with `SEED_ON_DEPLOY=true` and `SEED_PASSWORD` set, then remove `SEED_ON_DEPLOY`.
 - Secrets: `DATABASE_URL`, `DEIDENTIFICATION_SECRET`, `APP_URL`, and optionally `ANTHROPIC_API_KEY`, `RESEND_API_KEY`, `EMAIL_FROM`.
 - Rate limiting is in memory (`src/server/rate-limit.ts`); move it to Redis or Postgres before running more than one instance.
 
