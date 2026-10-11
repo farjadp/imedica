@@ -22,7 +22,7 @@ const parse = vi.hoisted(() => vi.fn());
 vi.mock("@anthropic-ai/sdk", () => {
   class Anthropic {
     static RateLimitError = class extends Error {};
-    beta = { messages: { parse } };
+    beta = { messages: { stream: (params: unknown) => ({ finalMessage: () => parse(params) }) } };
   }
   return { default: Anthropic };
 });
