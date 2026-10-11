@@ -13,11 +13,13 @@ import { apps } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Mobile app for iPhone and Android",
-  description: "Run Imedica scenarios between calls on your phone. The iPhone and Android apps launch on October 20, 2026.",
+  description: "Run Imedica scenarios between calls on your phone. Pilot services get the beta from October 20, 2026; the App Store and Google Play follow on November 3.",
   alternates: { canonical: "/download" },
 };
 
-const launch = new Date(`${apps.launchDate}T12:00:00`).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+const day = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-CA", { month: "long", day: "numeric", year: "numeric" });
+const launch = day(apps.launchDate);
+const beta = day(apps.betaDate);
 
 /** A phone showing the call runtime: monitor, the moment, and a verdict. */
 function Phone() {
@@ -106,13 +108,13 @@ export default function DownloadPage() {
   return (
     <>
       <PageHero
-        chrome={["Imedica for iPhone and Android", `Launch · ${launch}`]}
+        chrome={["Imedica for iPhone and Android", `Pilot beta · ${beta}`]}
         title={
           <>
             The hard calls, <Accent>in your pocket.</Accent>
           </>
         }
-        lead="Physician-written scenarios, scored the moment you decide, on the phone you already carry. The new apps for iPhone and Android launch together."
+        lead={`Physician-written scenarios, scored the moment you decide, on the phone you already carry. Pilot services get the beta for iPhone and Android from ${beta}; both stores follow on ${launch}.`}
         aside={<Phone />}
         actions={
           <>

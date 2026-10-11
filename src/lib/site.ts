@@ -18,7 +18,10 @@ export const site = {
 // The rebuilt mobile apps. Store links stay null until each listing is live,
 // so the download page shows "coming" instead of a dead link.
 export const apps = {
-  launchDate: "2026-10-20",
+  // Pilot services get the beta (TestFlight / Play testing) first; the store
+  // listings go public once both reviews have passed.
+  betaDate: "2026-10-20",
+  launchDate: "2026-11-03",
   ios: { url: null as string | null },
   android: { url: null as string | null },
 };
