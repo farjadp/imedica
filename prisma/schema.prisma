@@ -94,6 +94,7 @@ model User {
 
   sessions    AuthSession[]
   resetTokens PasswordResetToken[]
+  pushDevices PushDevice[]
 
   @@index([organizationId])
   @@schema("identity")
@@ -179,6 +180,32 @@ model InboundMessage {
   createdAt    DateTime    @default(now())
 
   @@index([kind, handled, createdAt])
+  @@schema("identity")
+}
+
+// A phone that can receive push notifications for a signed-in user. Expo push
+// tokens identify a device, so they live with identity.
+model PushDevice {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   String // "ios" | "android"
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+  @@schema("identity")
+}
+
+// Fixed-window rate limit counters, shared by every app instance. The key is a
+// SHA-256 of e.g. "login:<email>", so no address is stored here.
+model RateLimitBucket {
+  key     String   @id
+  count   Int
+  resetAt DateTime
+
+  @@index([resetAt])
   @@schema("identity")
 }
 

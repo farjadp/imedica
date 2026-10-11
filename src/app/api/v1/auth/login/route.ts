@@ -16,7 +16,7 @@ const schema = z.object({ email: z.string().trim().toLowerCase().email(), passwo
  */
 export const POST = route(async (req) => {
   const { email, password } = schema.parse(await readJson(req));
-  if (limited(`login:${await clientIp()}`, 20, 15 * 60_000) || limited(`login:${email}`, 8, 15 * 60_000)) {
+  if ((await limited(`login:${await clientIp()}`, 20, 15 * 60_000)) || (await limited(`login:${email}`, 8, 15 * 60_000))) {
     throw new HttpError(429, "Too many attempts. Wait fifteen minutes and try again.");
   }
 

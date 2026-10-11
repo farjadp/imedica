@@ -8,6 +8,8 @@ const schema = z.object({
   ANTHROPIC_API_KEY: z.string().optional().transform((v) => v || undefined),
   ANTHROPIC_MODEL: z.string().default("claude-opus-5-5"),
   RESEND_API_KEY: z.string().optional().transform((v) => v || undefined),
+  // Optional: only needed once "Enhanced push security" is on in the Expo project.
+  EXPO_ACCESS_TOKEN: z.string().optional().transform((v) => v || undefined),
   EMAIL_FROM: z.string().default("Imedica <no-reply@imedica.ca>"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });

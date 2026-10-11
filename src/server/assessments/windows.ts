@@ -1,4 +1,5 @@
 import "server-only";
+import { after } from "next/server";
 import { z } from "zod";
 
 import { audit } from "../audit";
@@ -7,6 +8,7 @@ import type { CurrentUser } from "../auth/session";
 import { db } from "../db";
 import { cohortKeyFor } from "../privacy/deidentify";
 import { K_ANONYMITY } from "../privacy/hash";
+import { notifyWindowOpened } from "../push";
 
 // ============================================================================
 // Assessment windows. A training lead opens the pre-test for their service,
@@ -118,6 +120,7 @@ export async function openWindow(user: CurrentUser, body: unknown) {
     });
   });
   await audit(user, "assessment.window_open", { type: "AssessmentWindow", id: window.id }, { phase: input.phase });
+  after(() => notifyWindowOpened(orgId, input.phase, window.id));
   return window;
 }
 

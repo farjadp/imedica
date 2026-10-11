@@ -26,7 +26,7 @@ export async function requestDemo(_prev: FormState, formData: FormData): Promise
   }
   const { website, ...data } = parsed.data;
   if (website) return { ok: true };
-  if (limited(`demo:${await clientIp()}`, 5, 60 * 60_000)) {
+  if (await limited(`demo:${await clientIp()}`, 5, 60 * 60_000)) {
     return { message: "We've received several requests from you already. We'll be in touch." };
   }
 

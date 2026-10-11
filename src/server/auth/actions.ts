@@ -32,7 +32,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
 
   const ip = await clientIp();
-  if (limited(`login:${ip}`, 20, 15 * 60_000) || limited(`login:${parsed.data.email}`, 8, 15 * 60_000)) {
+  if ((await limited(`login:${ip}`, 20, 15 * 60_000)) || (await limited(`login:${parsed.data.email}`, 8, 15 * 60_000))) {
     return { message: "Too many attempts. Wait fifteen minutes and try again." };
   }
 
@@ -121,7 +121,7 @@ const forgotSchema = z.object({ email: z.string().trim().toLowerCase().email("En
 export async function requestPasswordReset(_prev: FormState, formData: FormData): Promise<FormState> {
   const parsed = forgotSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
-  if (limited(`reset:${await clientIp()}`, 5, 15 * 60_000)) {
+  if (await limited(`reset:${await clientIp()}`, 5, 15 * 60_000)) {
     return { message: "Too many requests. Wait fifteen minutes and try again." };
   }
 
