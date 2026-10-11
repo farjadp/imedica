@@ -9,6 +9,7 @@ import * as attempts from "@/app/api/v1/attempts/route";
 import * as decisions from "@/app/api/v1/sessions/[id]/decisions/route";
 import * as explanation from "@/app/api/v1/sessions/[id]/explanation/route";
 import * as review from "@/app/api/v1/sessions/[id]/review/route";
+import * as runtime from "@/app/api/v1/sessions/[id]/route";
 import * as sessions from "@/app/api/v1/sessions/route";
 import { db } from "@/server/db";
 
@@ -153,6 +154,42 @@ describe("the full journey", () => {
     expect(res.data.quiz[0]).toMatchObject({ correctIndex: 0, rationale: expect.any(String) });
     expect(res.data.quizScorePct).toBe(100);
     expect((await call("GET", review.GET, { as: medic, params: { id: preRunId } })).status).toBe(200);
+  });
+});
+
+describe("assessment runs give nothing away while they're played", () => {
+  it("decisions come back without a verdict, here and in the runtime", async () => {
+    const windowId = (await call("GET", attempts.GET, { as: colleague })).data.find((x: { phase: string }) => x.phase === "POST").windowId;
+    const attemptId = await start(colleague, windowId);
+    const run = await call("POST", runs.POST, { as: colleague, params: { id: attemptId }, body: { scenarioId: s2.id } });
+    const verdict = await call("POST", decisions.POST, {
+      as: colleague,
+      params: { id: run.data.id },
+      body: { actionId: s2.actions.asa.id },
+    });
+    expect(verdict.status).toBe(201);
+    expect(verdict.data).toMatchObject({ outcome: null, late: false, repeated: false, ended: false });
+
+    const live = await call("GET", runtime.GET, { as: colleague, params: { id: run.data.id } });
+    expect(live.data.assessment).toBe(true);
+    expect(live.data.decisions).toHaveLength(1);
+    expect(live.data.decisions[0].outcome).toBeNull();
+    // Still scored, so the paired report works.
+    const row = await db.sessionDecision.findFirstOrThrow({ where: { sessionId: run.data.id } });
+    expect(row.outcome).not.toBeNull();
+  });
+
+  it("a practice run still gets its verdict", async () => {
+    const practice = await call("POST", sessions.POST, { as: colleague, body: { scenarioId: s2.id } });
+    const verdict = await call("POST", decisions.POST, {
+      as: colleague,
+      params: { id: practice.data.id },
+      body: { actionId: s2.actions.asa.id },
+    });
+    expect(verdict.data.outcome).not.toBeNull();
+    const live = await call("GET", runtime.GET, { as: colleague, params: { id: practice.data.id } });
+    expect(live.data.assessment).toBe(false);
+    expect(live.data.decisions[0].outcome).not.toBeNull();
   });
 });
 

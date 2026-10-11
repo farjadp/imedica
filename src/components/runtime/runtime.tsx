@@ -30,10 +30,12 @@ export type RuntimeData = {
     actions: { id: string; category: string; label: string; detail: string | null }[];
   };
   state: { id: string; title: string; narrative: string; vitals: Vitals; isTerminal: boolean } | null;
-  decisions: { id: string; actionId: string; outcome: Outcome; elapsedMs: number }[];
+  // Assessment runs come without verdicts (outcome null) until the post-test is done.
+  assessment?: boolean;
+  decisions: { id: string; actionId: string; outcome: Outcome | null; elapsedMs: number }[];
 };
 
-type Verdict = { outcome: Outcome; late: boolean; repeated: boolean; ended: boolean };
+type Verdict = { outcome: Outcome | null; late: boolean; repeated: boolean; ended: boolean };
 
 function VitalCell({ label, value, unit, alarm }: { label: string; value: string; unit?: string; alarm?: boolean }) {
   return (
@@ -194,7 +196,7 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
                   <li key={d.id} className="flex items-center gap-3 px-4 py-2 text-[14px]">
                     <span className="tabular w-11 font-mono text-[12px] text-ink-3">{clock(d.elapsedMs)}</span>
                     <span className="flex-1 text-ink">{actionLabel.get(d.actionId)?.label}</span>
-                    <OutcomeTag outcome={d.outcome} />
+                    {d.outcome ? <OutcomeTag outcome={d.outcome} /> : <span className="font-mono text-[11px] text-ink-3">Recorded</span>}
                   </li>
                 ))}
               </ol>
@@ -210,7 +212,9 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
                 key={`${verdict.label}-${data.decisions.length}`}
                 className={cn(
                   "flex items-center justify-between gap-3 rounded-lg border px-4 py-3 motion-safe:animate-[verdict-in_360ms_var(--ease-out-expo)]",
-                  verdict.outcome === "HARMFUL" || verdict.outcome === "CRITICAL"
+                  verdict.outcome === null
+                    ? "border-rule bg-paper-2"
+                    : verdict.outcome === "HARMFUL" || verdict.outcome === "CRITICAL"
                     ? "border-tag-red/30 bg-tag-red-wash"
                     : verdict.outcome === "SUBOPTIMAL"
                       ? "border-tag-yellow/30 bg-tag-yellow-wash"
@@ -220,7 +224,11 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
                 <div className="min-w-0">
                   <p className="truncate text-[14px] font-medium text-ink">{verdict.label}</p>
                   <p className="text-[12px] text-ink-2">
-                    {verdict.ended
+                    {verdict.outcome === null
+                      ? verdict.ended
+                        ? "The call is over. Results open once the post-test is handed in."
+                        : "Recorded. Results open once the post-test is handed in."
+                      : verdict.ended
                       ? "The call is over. Opening your debrief…"
                       : verdict.late
                         ? "Right call, but later than it should have been."
@@ -229,7 +237,7 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
                           : "The reason is in your debrief."}
                   </p>
                 </div>
-                <OutcomeTag outcome={verdict.outcome} />
+                {verdict.outcome ? <OutcomeTag outcome={verdict.outcome} /> : null}
               </div>
             ) : (
               <p className="rounded-lg border border-dashed border-rule px-4 py-3 text-[14px] text-ink-3">

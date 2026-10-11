@@ -11,11 +11,13 @@ import { Avatar } from "@/components/avatar";
 import { Body, Display, Mono, Serif } from "@/components/type";
 import { api, errorMessage } from "@/lib/api";
 import { useAuth, useMe } from "@/lib/auth";
+import { useLock } from "@/lib/lock";
 import { chooseAvatar, removeAvatar } from "@/lib/avatar";
 import { categoryLabel } from "@/lib/labels";
 import { useSavedPapers, useScenarios, useSessions } from "@/lib/queries";
 import { trainingStats } from "@/lib/stats";
 import { color, radius } from "@/lib/theme";
+import { usePull } from "@/lib/use-pull";
 
 const levelLabel: Record<string, string> = {
   PCP: "Primary Care Paramedic",
@@ -34,8 +36,10 @@ export default function Profile() {
   const sessions = useSessions();
   const scenarios = useScenarios();
   const saved = useSavedPapers();
+  const pull = usePull(() => Promise.all([sessions.refetch(), refresh()]));
   const [busy, setBusy] = useState(false);
   const [notify, setNotify] = useState(me.notifyAssessments);
+  const lock = useLock();
 
   const stats = useMemo(() => trainingStats(sessions.data ?? []), [sessions.data]);
   const allCategories = useMemo(() => [...new Set((scenarios.data ?? []).map((s) => s.category))], [scenarios.data]);
@@ -90,7 +94,7 @@ export default function Profile() {
     <ScrollView
       style={{ backgroundColor: color.paper }}
       contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 48 }}
-      refreshControl={<RefreshControl refreshing={sessions.isRefetching} onRefresh={() => void Promise.all([sessions.refetch(), refresh()])} tintColor={color.pine} />}
+      refreshControl={<RefreshControl {...pull} tintColor={color.pine} />}
     >
       {/* Identity */}
       <View style={styles.pad}>
@@ -202,6 +206,30 @@ export default function Profile() {
           <Switch value={notify} onValueChange={(v) => void toggleNotify(v)} trackColor={{ true: color.pine3, false: color.rule }} thumbColor={color.card} />
         </View>
       </Section>
+
+      {lock.method ? (
+        <Section title="SECURITY">
+          <View style={styles.row}>
+            <Feather name="shield" size={18} color={color.ink2} />
+            <View style={{ flex: 1 }}>
+              <Body tone={color.ink}>Lock with {lock.method}</Body>
+              <Body size={13} tone={color.ink3}>
+                Asks again when you come back to the app.
+              </Body>
+            </View>
+            <Switch
+              value={lock.enabled}
+              onValueChange={async (v) => {
+                const problem = await lock.setEnabled(v);
+                if (problem) Alert.alert("App lock not changed", problem);
+              }}
+              trackColor={{ true: color.pine3, false: color.rule }}
+              thumbColor={color.card}
+              accessibilityLabel={`Lock with ${lock.method}`}
+            />
+          </View>
+        </Section>
+      ) : null}
 
       <Section title="ACCOUNT">
         <Row icon="mail" label="Email" value={me.email} />

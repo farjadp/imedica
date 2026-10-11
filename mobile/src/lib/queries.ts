@@ -1,12 +1,14 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { PaperBrief, PaperDetail, PaperRef, PaperSearch, Review, SavedPaper, ScenarioSummary, SessionSummary } from "./types";
+import type { Attempt, OpenAssessment, PaperBrief, PaperDetail, PaperRef, PaperSearch, Review, SavedPaper, ScenarioSummary, SessionSummary } from "./types";
 
 export const keys = {
   scenarios: ["scenarios"] as const,
   sessions: ["sessions"] as const,
   review: (id: string) => ["review", id] as const,
+  assessments: ["assessments"] as const,
+  attempt: (id: string) => ["attempt", id] as const,
   papers: (q: string, open: boolean) => ["papers", q, open] as const,
   paper: (p: PaperRef) => ["paper", p.source, p.extId] as const,
   saved: ["papers", "saved"] as const,
@@ -68,5 +70,18 @@ export function useToggleSaved(ref: PaperRef) {
       qc.setQueryData<PaperDetail>(keys.paper(ref), (p) => (p ? { ...p, saved } : p));
       void qc.invalidateQueries({ queryKey: ["papers"] });
     },
+  });
+}
+
+/** Pre/post tests open for the person's service right now. */
+export function useOpenAssessments() {
+  return useQuery({ queryKey: keys.assessments, queryFn: () => api<OpenAssessment[]>("GET", "/attempts") });
+}
+
+export function useAttempt(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.attempt(id ?? ""),
+    queryFn: () => api<Attempt>("GET", `/attempts/${id}`),
+    enabled: Boolean(id),
   });
 }

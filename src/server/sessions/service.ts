@@ -122,14 +122,17 @@ export async function getRuntime(user: CurrentUser, sessionId: string) {
     select: { id: true, actionId: true, outcome: true, elapsedMs: true },
   });
 
+  // An assessment run is a baseline: no verdicts until the post-test is done.
+  const assessment = Boolean(session.attemptId);
   return {
     id: session.id,
     status: session.status,
     startedAt: session.startedAt.toISOString(),
     serverNow: new Date().toISOString(),
+    assessment,
     scenario,
     state,
-    decisions,
+    decisions: assessment ? decisions.map((d) => ({ ...d, outcome: null })) : decisions,
   };
 }
 
@@ -196,6 +199,8 @@ export async function decide(user: CurrentUser, sessionId: string, body: unknown
 
   if (verdict.endsScenario) await finish(user, sessionId, "COMPLETED");
 
+  // Assessment runs are scored but say nothing back, so the baseline isn't a lesson.
+  if (session.attemptId) return { outcome: null, late: false, repeated: false, ended: verdict.endsScenario };
   return {
     outcome: verdict.outcome,
     late: verdict.late,

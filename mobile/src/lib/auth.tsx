@@ -3,6 +3,8 @@ import * as SecureStore from "expo-secure-store";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { api, setToken, setUnauthorizedHandler } from "./api";
+import { useLock } from "./lock";
+import { registerForPush, unregisterPush } from "./push";
 import type { Me } from "./types";
 
 const TOKEN_KEY = "imedica.session";
@@ -25,14 +27,16 @@ const Ctx = createContext<AuthContext | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const { reset: resetLock } = useLock();
   const [state, setState] = useState<AuthState>({ status: "loading" });
 
   const clear = useCallback(async () => {
     setToken(null);
     await SecureStore.deleteItemAsync(TOKEN_KEY).catch(() => {});
+    await resetLock();
     queryClient.clear();
     setState({ status: "signedOut" });
-  }, [queryClient]);
+  }, [queryClient, resetLock]);
 
   useEffect(() => {
     setUnauthorizedHandler(() => void clear());
@@ -42,6 +46,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(saved);
       try {
         setState({ status: "signedIn", user: await api<Me>("GET", "/me") });
+        // Refresh the push token quietly; asking happens at sign-in.
+        void registerForPush({ ask: false });
       } catch {
         // Offline or expired: either way, sign in again.
         await clear();
@@ -54,9 +60,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(token);
     await SecureStore.setItemAsync(TOKEN_KEY, token);
     setState({ status: "signedIn", user: await api<Me>("GET", "/me") });
+    // Right after signing in is the moment to ask for notifications.
+    void registerForPush({ ask: true });
   }, []);
 
   const signOut = useCallback(async () => {
+    // While the token still works: this phone stops getting their notices.
+    await unregisterPush();
     await api("POST", "/auth/logout").catch(() => {});
     await clear();
   }, [clear]);
