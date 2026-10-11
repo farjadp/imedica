@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Home, LayoutDashboard, Library, UserRound } from "lucide-react";
+import { ClipboardCheck, History, Home, LayoutDashboard, Library, UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { AppShell, type NavItem } from "./app-shell";
@@ -9,6 +9,7 @@ const base: NavItem[] = [
   { href: "/app", label: "Today", icon: Home, exact: true },
   { href: "/app/scenarios", label: "Scenario library", icon: Library },
   { href: "/app/history", label: "My runs", icon: History },
+  { href: "/app/assessments", label: "Assessments", icon: ClipboardCheck },
   { href: "/app/account", label: "Account", icon: UserRound },
 ];
 

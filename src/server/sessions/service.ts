@@ -16,6 +16,34 @@ import { anonymousHashFor, cohortKeyFor, projectSessionToAnalytics } from "../pr
 
 const decideSchema = z.object({ actionId: z.string().min(1) });
 
+/**
+ * Assessment runs keep their debrief back until the person has finished the
+ * post-test, so the baseline isn't a lesson. Carries the attempt to return to.
+ */
+export class DebriefLocked extends HttpError {
+  constructor(public attemptId: string) {
+    super(403, "The debrief for assessment runs opens after you finish your post-test.");
+  }
+}
+
+async function assertDebriefOpen(user: CurrentUser, session: { attemptId: string | null }) {
+  if (!session.attemptId) return;
+  const attempt = await db.assessmentAttempt.findUnique({
+    where: { id: session.attemptId },
+    select: { id: true, assessmentId: true },
+  });
+  if (!attempt) return;
+  const postDone = await db.assessmentAttempt.count({
+    where: {
+      assessmentId: attempt.assessmentId,
+      anonymousHash: anonymousHashFor(user.id),
+      phase: "POST",
+      completedAt: { not: null },
+    },
+  });
+  if (!postDone) throw new DebriefLocked(attempt.id);
+}
+
 async function ownedSession(user: CurrentUser, sessionId: string) {
   const session = await db.trainingSession.findUnique({ where: { id: sessionId } });
   // Someone else's run looks exactly like a missing one.
@@ -37,7 +65,7 @@ function engineRules(rules: EngineRule[]): EngineRule[] {
   }));
 }
 
-export async function startSession(user: CurrentUser, scenarioId: string) {
+export async function startSession(user: CurrentUser, scenarioId: string, opts: { attemptId?: string } = {}) {
   const scenario = await db.scenario.findUnique({
     where: { id: scenarioId },
     include: { states: { where: { isStart: true }, take: 1 }, rules: true },
@@ -48,8 +76,10 @@ export async function startSession(user: CurrentUser, scenarioId: string) {
 
   const anonymousHash = anonymousHashFor(user.id);
   // One live run per scenario: starting again abandons the previous attempt.
+  // Practice and assessment runs are kept apart, so practice never voids an assessment.
+  const attemptId = opts.attemptId ?? null;
   await db.trainingSession.updateMany({
-    where: { anonymousHash, scenarioId, status: "IN_PROGRESS" },
+    where: { anonymousHash, scenarioId, status: "IN_PROGRESS", attemptId },
     data: { status: "ABANDONED", endedAt: new Date() },
   });
 
@@ -60,6 +90,7 @@ export async function startSession(user: CurrentUser, scenarioId: string) {
       cohortKey: cohortKeyFor(user.organizationId),
       currentStateId: start.id,
       maxScore: maxScore(engineRules(scenario.rules)),
+      attemptId,
     },
     select: { id: true },
   });
@@ -190,6 +221,9 @@ async function finish(user: CurrentUser, sessionId: string, status: "COMPLETED" 
   if (result.count === 0) return; // someone else already finished it
 
   await projectSessionToAnalytics(sessionId, { level: user.level, yearsExperience: user.yearsExperience });
+  // Assessment runs get no AI explanation: there's no debrief to explain until the post-test.
+  const { attemptId } = await db.trainingSession.findUniqueOrThrow({ where: { id: sessionId }, select: { attemptId: true } });
+  if (attemptId) return;
   await db.aiFeedback.create({ data: { sessionId } });
   // Respond first; write the explanation after the response is sent.
   after(() => generateExplanation(sessionId));
@@ -200,6 +234,7 @@ async function finish(user: CurrentUser, sessionId: string, status: "COMPLETED" 
 export async function getReview(user: CurrentUser, sessionId: string) {
   const session = await ownedSession(user, sessionId);
   if (session.status === "IN_PROGRESS") throw new HttpError(409, "Finish the run to see the debrief.");
+  await assertDebriefOpen(user, session);
 
   const scenario = await db.scenario.findUniqueOrThrow({
     where: { id: session.scenarioId },
@@ -255,14 +290,16 @@ export async function getReview(user: CurrentUser, sessionId: string) {
 }
 
 export async function getAiStatus(user: CurrentUser, sessionId: string) {
-  await ownedSession(user, sessionId);
+  const session = await ownedSession(user, sessionId);
+  await assertDebriefOpen(user, session);
   const ai = await db.aiFeedback.findUnique({ where: { sessionId } });
   return ai ? { status: ai.status, content: ai.status === "READY" ? ai.content : null } : { status: "PENDING", content: null };
 }
 
 export async function listMySessions(user: CurrentUser, take = 20) {
   const sessions = await db.trainingSession.findMany({
-    where: { anonymousHash: anonymousHashFor(user.id), status: { not: "ABANDONED" } },
+    // Assessment runs live on the assessment page, not in practice history.
+    where: { anonymousHash: anonymousHashFor(user.id), status: { not: "ABANDONED" }, attemptId: null },
     orderBy: { startedAt: "desc" },
     take,
     include: { scenario: { select: { id: true, title: true, category: true } } },

@@ -24,7 +24,11 @@ export async function libraryFor(user: CurrentUser) {
       },
     }),
     db.trainingSession.findMany({
-      where: { anonymousHash: anonymousHashFor(user.id), status: { in: ["COMPLETED", "TIMED_OUT", "IN_PROGRESS"] } },
+      where: {
+        anonymousHash: anonymousHashFor(user.id),
+        status: { in: ["COMPLETED", "TIMED_OUT", "IN_PROGRESS"] },
+        attemptId: null,
+      },
       orderBy: { startedAt: "desc" },
       select: { id: true, scenarioId: true, status: true, score: true, maxScore: true, startedAt: true },
     }),

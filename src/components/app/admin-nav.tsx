@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, BookOpen, Building2, ClipboardCheck, ClipboardList, Gauge, Inbox, Mail, Newspaper, Sparkles, Users } from "lucide-react";
+import { Activity, BookOpen, Building2, ClipboardCheck, ClipboardList, Gauge, Inbox, Mail, Newspaper, Sparkles, Timer, Users } from "lucide-react";
 import type { ReactNode } from "react";
 
 import type { Role } from "@/generated/prisma/enums";
@@ -14,6 +14,7 @@ const items: (NavItem & { roles: Role[] })[] = [
   { href: "/admin/blog", label: "Blog", icon: Newspaper, roles: ["PHYSICIAN", "ADMIN"] },
   { href: "/admin/ai", label: "AI review", icon: Sparkles, roles: ["PHYSICIAN", "ADMIN"] },
   { href: "/admin/analytics", label: "Team readiness", icon: Activity, roles: ["INSTRUCTOR", "ADMIN"] },
+  { href: "/admin/assessment-windows", label: "Pre/post tests", icon: Timer, roles: ["INSTRUCTOR", "ADMIN"] },
   { href: "/admin/people", label: "People", icon: Users, roles: ["INSTRUCTOR", "ADMIN"] },
   { href: "/admin/organizations", label: "Organizations", icon: Building2, roles: ["ADMIN"] },
   { href: "/admin/leads", label: "Demo requests", icon: Inbox, roles: ["ADMIN"] },

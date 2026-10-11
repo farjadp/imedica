@@ -178,7 +178,7 @@ model AssessmentWindow {
   - one attempt per window (`@@unique`); the attempt holds `anonymousHash`, never the user id;
   - the quiz returned to the learner has no `correctIndex` or `rationale`;
   - assessment-mode runs: only the assessment's scenarios, one run per scenario per attempt, `attemptId` set;
-  - **PRE runs:** `GET /sessions/:id/review` and `/explanation` → 409 "available after your post-test"; no `AiFeedback` row is created;
+  - **PRE runs:** `GET /sessions/:id/review` and `/explanation` → 403 (`DebriefLocked`, carries the attempt id so the debrief page can send the person back to it); no `AiFeedback` row is created;
   - after the person completes POST, their PRE and POST debriefs and quiz rationales are available;
   - a closed window refuses new attempts and answers.
 - [ ] Implement: `startSession(user, scenarioId, { attemptId })` variant; `finish()` skips `aiFeedback` + `generateExplanation` when `attemptId` is set; `getReview`/`getAiStatus` check the attempt's phase and whether that person's POST attempt is complete.
@@ -205,3 +205,15 @@ model AssessmentWindow {
 
 - [ ] Report panel on `/admin/assessment-windows` with the 15% target line; print-friendly for the pilot case study.
 - [ ] README section; Notion page update; board card "Pre/post assessment flow" → Done.
+
+---
+
+## Rulings made while building
+
+- Locked debriefs return **403**, not 409: 409 already means "run still in progress" and the debrief page redirects to the runtime on it. — Cost if wrong: one status code in the mobile client.
+- Opening the POST window **closes the PRE window**, so nobody takes the baseline after training starts. — Cost if wrong: a lead who wanted overlap has to ask us.
+- Assessment runs and practice runs are kept apart: starting a practice run never abandons an assessment run, and assessment runs stay out of practice history and library stats. — Cost if wrong: a person's assessment runs aren't in "My runs" (they're on the assessment page).
+- An assessment run that was **abandoned** can be started again; a finished one can't. — Cost if wrong: someone could peek at a scenario and restart, but the PRE debrief is hidden anyway.
+- Audit entries for starting/finishing an attempt name the **assessment, not the attempt**, so the identity schema never links a person to their anonymous scores.
+- Window completion counts below k show as "fewer than 5".
+- Known limit: a paramedic can practise an assessment scenario in the library before their PRE run. The report notes the practice effect; hiding those scenarios during the PRE window is a possible follow-up.

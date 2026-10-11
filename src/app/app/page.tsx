@@ -4,6 +4,7 @@ import Link from "next/link";
 import { EmptyState } from "@/components/app/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { categoryLabel, difficultyLabel, formatDate } from "@/lib/labels";
+import { myAssessments } from "@/server/assessments/taking";
 import { requireUserPage } from "@/server/auth/guards";
 import { libraryFor } from "@/server/sessions/queries";
 import { listMySessions } from "@/server/sessions/service";
@@ -12,7 +13,8 @@ export const metadata = { title: "Today" };
 
 export default async function TodayPage() {
   const user = await requireUserPage("/app");
-  const [library, recent] = await Promise.all([libraryFor(user), listMySessions(user, 5)]);
+  const [library, recent, assessments] = await Promise.all([libraryFor(user), listMySessions(user, 5), myAssessments(user)]);
+  const due = assessments.find((a) => !a.completed);
 
   const live = library.find((s) => s.liveSessionId);
   const next = library.filter((s) => s.attempts === 0).slice(0, 3);
@@ -31,6 +33,20 @@ export default async function TodayPage() {
           A scenario takes ten to fifteen minutes. Your results are yours: your service only ever sees team totals.
         </p>
       </header>
+
+      {due ? (
+        <section className="flex flex-col gap-4 rounded-lg border border-rule bg-card p-5 md:flex-row md:items-center md:justify-between">
+          <div>
+            <p className="text-[13px] font-medium text-pine-3">
+              {due.phase === "PRE" ? "Before-training assessment" : "After-training assessment"} is open
+            </p>
+            <p className="mt-0.5 text-[17px] font-medium text-ink">{due.assessment.title}</p>
+          </div>
+          <ButtonLink href="/app/assessments" variant="secondary">
+            {due.attemptId ? "Continue" : "Take it"}
+          </ButtonLink>
+        </section>
+      ) : null}
 
       {live ? (
         <section className="flex flex-col gap-4 rounded-lg border border-signal/30 bg-signal-wash p-5 md:flex-row md:items-center md:justify-between">
