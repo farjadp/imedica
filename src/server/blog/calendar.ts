@@ -4,7 +4,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { db } from "../db";
-import { type CalendarArticle, monthsBetween, parseArticle } from "./frontmatter";
+import { type CalendarArticle, monthsBetween, parseArticle, plannedKey } from "./frontmatter";
 
 export const CALENDAR = { start: "2025-01", end: "2026-12" } as const;
 const DIR = join(process.cwd(), "content/blog");
@@ -29,7 +29,7 @@ export async function readCalendarFiles(): Promise<CalendarFile[]> {
   );
 }
 
-/** One row per month: the planned article (if any) and the post it became (if any). */
+/** One row per month (the planned article, if any, and the post it became), then that month's extras. */
 export async function getCalendar() {
   const [files, posts] = await Promise.all([
     readCalendarFiles(),
@@ -38,9 +38,14 @@ export async function getCalendar() {
       select: { id: true, slug: true, title: true, status: true, publishedAt: true, plannedFor: true },
     }),
   ]);
-  return monthsBetween(CALENDAR.start, CALENDAR.end).map((month) => ({
-    month,
-    file: files.find((f) => f.file.startsWith(month) && !f.article?.extra),
-    post: posts.find((p) => p.plannedFor === month),
-  }));
+  return monthsBetween(CALENDAR.start, CALENDAR.end).flatMap((month) => {
+    const slot = { key: month, month, file: files.find((f) => f.file.startsWith(month) && !f.article?.extra), post: posts.find((p) => p.plannedFor === month) };
+    const extras = files
+      .filter((f) => f.file.startsWith(month) && f.article?.extra)
+      .map((f) => {
+        const key = plannedKey(f.article!);
+        return { key, month, file: f, post: posts.find((p) => p.plannedFor === key) };
+      });
+    return [slot, ...extras];
+  });
 }
