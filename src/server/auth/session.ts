@@ -18,6 +18,15 @@ export type CurrentUser = {
   role: Role;
   level: ParamedicLevel | null;
   yearsExperience: number | null;
+  preferredName: string | null;
+  pronouns: string | null;
+  station: string | null;
+  bio: string | null;
+  certifications: string[];
+  notifyAssessments: boolean;
+  /** Changes whenever the photo does, so clients can bust their cache. Null: no photo. */
+  avatarVersion: string | null;
+  memberSince: string;
   organizationId: string | null;
   organizationName: string | null;
 };
@@ -88,6 +97,14 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
     role: u.role,
     level: u.level,
     yearsExperience: u.yearsExperience,
+    preferredName: u.preferredName,
+    pronouns: u.pronouns,
+    station: u.station,
+    bio: u.bio,
+    certifications: u.certifications,
+    notifyAssessments: u.notifyAssessments,
+    avatarVersion: u.avatarUpdatedAt ? String(u.avatarUpdatedAt.getTime()) : null,
+    memberSince: u.createdAt.toISOString(),
     organizationId: u.organizationId,
     organizationName: u.organization?.name ?? null,
   };

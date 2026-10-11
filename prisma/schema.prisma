@@ -85,6 +85,14 @@ model User {
   role            Role            @default(PARAMEDIC)
   level           ParamedicLevel?
   yearsExperience Int?
+  // Profile details the person chooses to add. None of them reach analytics.
+  preferredName     String?
+  pronouns          String?
+  station           String? // base, station or unit
+  bio               String?
+  certifications    String[]  @default([])
+  notifyAssessments Boolean   @default(true)
+  avatarUpdatedAt   DateTime?
   organizationId  String?
   organization    Organization?   @relation(fields: [organizationId], references: [id])
   active          Boolean         @default(true)
@@ -95,6 +103,8 @@ model User {
   sessions    AuthSession[]
   resetTokens PasswordResetToken[]
   pushDevices PushDevice[]
+  avatar      UserAvatar?
+  savedPapers SavedPaper[]
 
   @@index([organizationId])
   @@schema("identity")
@@ -195,6 +205,37 @@ model PushDevice {
   lastSeenAt DateTime @default(now())
 
   @@index([userId])
+  @@schema("identity")
+}
+
+// A profile photo, cropped square and resized on the phone. Kept in Postgres
+// for the same reason as blog images: the app's disk is wiped on deploy.
+model UserAvatar {
+  userId    String   @id
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mime      String
+  bytes     Bytes
+  size      Int
+  updatedAt DateTime @updatedAt
+
+  @@schema("identity")
+}
+
+// A paper someone keeps on their reading list. Lives with identity because
+// what a person reads is about them.
+model SavedPaper {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  source    String // Europe PMC source: MED, PMC, PPR, ...
+  extId     String
+  title     String
+  journal   String?
+  year      Int?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, source, extId])
+  @@index([userId, createdAt])
   @@schema("identity")
 }
 
@@ -482,6 +523,24 @@ model AiFeedback {
 
   @@index([status])
   @@index([review])
+  @@schema("content")
+}
+
+// Claude's plain-language reading of a published paper, shared by everyone who
+// opens it. Nothing about the reader is stored here.
+model PaperBrief {
+  id           String   @id @default(cuid())
+  source       String
+  extId        String
+  basedOn      String // "abstract" | "full text"
+  content      Json
+  model        String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costMicroUsd Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@unique([source, extId])
   @@schema("content")
 }
 
