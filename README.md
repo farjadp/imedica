@@ -62,6 +62,10 @@ The database has three Postgres schemas with no relations between them (`prisma/
 
 Draft → in review → published, with readiness checks (one start state, an end state, enough actions, a required rule, every state reachable). The author can't publish their own scenario. Published scenarios are locked until unpublished.
 
+### Pre/post assessments
+
+How a pilot measures change. Physicians write an assessment (Admin → Assessments): a fixed set of published scenarios plus a quiz of five or more questions, published under the same two-person rule. A training lead opens the before round for their service (Admin → Pre/post tests), trains, then opens the after round, which closes the before round. Paramedics take each round once: the quiz, then each scenario in assessment mode. Nothing is revealed (quiz answers, scores, debriefs, AI notes) until they finish the after round. The report pairs people by anonymous hash, compares only those who did both rounds, shows nothing below five paired people, and checks the change against the 15% pilot target. The same content is used both times, so the report notes the practice effect.
+
 ### AI debrief
 
 `src/server/ai/feedback.ts` sends the scenario, the decisions and the physicians' rationales (nothing that identifies the paramedic) to Claude Opus 5.5 with structured output, server-side refusal fallback (`fallbacks: "default"`), and a guard that withholds anything resembling PII or a claim to change the score. Tokens and cost are stored per run; physicians approve or flag explanations in Admin → AI review.
@@ -86,6 +90,16 @@ Cookie auth for the web app; `Authorization: Bearer <token>` from `POST /auth/lo
 | POST | `/sessions/:id/end` | Hand over care |
 | GET | `/sessions/:id/review`, `/sessions/:id/explanation` | Debrief, AI notes |
 | GET | `/analytics?organizationId=&days=` | Team readiness (instructors, admins) |
+| GET, POST | `/assessments` | Physicians: all / create. Training leads: published, no answers |
+| GET, PATCH, DELETE | `/assessments/:id` | |
+| POST | `/assessments/:id/status` | Same actions as scenarios |
+| POST, PATCH, DELETE, PUT | `/assessments/:id/questions[/:questionId \| /order]` | Quiz questions (drafts only) |
+| GET | `/assessments/:id/report?organizationId=` | Paired before/after change, k ≥ 5 |
+| GET, POST | `/assessment-windows` | A service's rounds / open `{ assessmentId, phase }` |
+| POST | `/assessment-windows/:id/close` | |
+| GET, POST | `/attempts` | Rounds open for you / start `{ windowId }` |
+| GET | `/attempts/:id` | Quiz without answers until your after round is done |
+| POST | `/attempts/:id/answers`, `/attempts/:id/runs`, `/attempts/:id/finish` | `{ questionId, choice }`, `{ scenarioId }`, hand in |
 
 ## Deployment
 

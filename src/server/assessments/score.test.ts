@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MIN_QUESTIONS, assessmentProblems, quizScore } from "./score";
+import { MIN_QUESTIONS, assessmentProblems, pairedChange, quizScore } from "./score";
 
 const q = (id: string, correctIndex: number) => ({ id, correctIndex, options: ["a", "b", "c", "d"] });
 
@@ -58,5 +58,35 @@ describe("assessmentProblems", () => {
     expect(assessmentProblems({ ...ready, questions: [...ready.questions, broken] })).toContain(
       `Question ${MIN_QUESTIONS + 1} needs a correct answer chosen from its options.`,
     );
+  });
+});
+
+describe("pairedChange", () => {
+  const pre = [
+    { who: "a", value: 50 },
+    { who: "b", value: 60 },
+    { who: "c", value: 70 },
+  ];
+  const post = [
+    { who: "a", value: 60 },
+    { who: "b", value: 75 },
+    { who: "d", value: 100 }, // no baseline: left out
+  ];
+
+  it("compares only people who did both", () => {
+    expect(pairedChange(pre, post)).toEqual({ people: 2, preAvg: 55, postAvg: 68, delta: 13, relativePct: 23 });
+  });
+
+  it("uses the person's latest value if they appear twice", () => {
+    const twice = [...pre, { who: "a", value: 40 }];
+    expect(pairedChange(twice, post).preAvg).toBe(50);
+  });
+
+  it("has no relative change from a zero baseline", () => {
+    expect(pairedChange([{ who: "a", value: 0 }], [{ who: "a", value: 40 }]).relativePct).toBeNull();
+  });
+
+  it("is empty with nobody paired", () => {
+    expect(pairedChange(pre, [])).toEqual({ people: 0, preAvg: null, postAvg: null, delta: null, relativePct: null });
   });
 });

@@ -8,7 +8,7 @@ import { OutcomeTag } from "@/components/ui/outcome-tag";
 import { cn } from "@/lib/cn";
 import { clock } from "@/lib/labels";
 import { HttpError, requireUserPage } from "@/server/auth/guards";
-import { getReview } from "@/server/sessions/service";
+import { DebriefLocked, getReview } from "@/server/sessions/service";
 
 export const metadata = { title: "Debrief" };
 
@@ -19,6 +19,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ id: str
   try {
     r = await getReview(user, id);
   } catch (error) {
+    if (error instanceof DebriefLocked) redirect(`/app/assessments/${error.attemptId}`);
     if (error instanceof HttpError && error.status === 404) notFound();
     if (error instanceof HttpError && error.status === 409) redirect(`/run/${id}`);
     throw error;
