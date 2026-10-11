@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:ital,opsz,wght@0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  /* One App Store screenshot: a headline over the real app screen. Size comes from ?w=&h= */
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: var(--w); height: var(--h); overflow: hidden; background: #06110e; }
+  body { position: relative; font-family: "Source Serif 4", Georgia, serif; color: #e8f3ee; }
+  .glow { position: absolute; inset: 0; background: radial-gradient(120% 60% at 50% 0%, rgba(159,240,196,.10), rgba(6,17,14,0) 60%); }
+  .grid { position: absolute; inset: 0; opacity: .07;
+    background-image: linear-gradient(#9ff0c4 1px, transparent 1px), linear-gradient(90deg, #9ff0c4 1px, transparent 1px);
+    background-size: calc(var(--w) / 24) calc(var(--w) / 24); }
+  .kicker { position: absolute; left: 8%; top: calc(var(--h) * .045); font: 500 calc(var(--w) * .026)/1 "IBM Plex Mono", monospace;
+    letter-spacing: .18em; color: #9ff0c4; display: flex; align-items: center; gap: .6em; }
+  .kicker svg { width: 1.4em; height: 1.4em; }
+  h1 { position: absolute; left: 8%; right: 8%; top: calc(var(--h) * .075); font-weight: 500;
+    font-size: calc(var(--w) * .085); line-height: 1.02; letter-spacing: -.035em; }
+  h1 em { font-style: italic; font-weight: 400; color: #9ff0c4; }
+  .phone { position: absolute; left: 50%; top: calc(var(--h) * var(--top, .265)); width: calc(var(--w) * var(--pw, .8));
+    transform: translateX(-50%); border-radius: calc(var(--w) * .065); padding: calc(var(--w) * .012);
+    background: #1a2622; box-shadow: 0 0 0 2px #2c3b36, 0 calc(var(--w) * .03) calc(var(--w) * .09) rgba(0,0,0,.55); }
+  .phone img { display: block; width: 100%; border-radius: calc(var(--w) * .054); }
+</style></head>
+<body>
+<div class="glow"></div><div class="grid"></div>
+<div class="kicker"><svg viewBox="0 0 512 512"><g fill="none" stroke="#9ff0c4" stroke-width="56"><path d="M141 86V185a80 80 0 0 0 80 80h134a99 99 0 0 1 0 198H57V150a99 99 0 0 1 198 0v90"/><path d="M57 300a68 68 0 0 0 68 68h205" stroke-linecap="round"/></g></svg><span id="k"></span></div>
+<h1 id="t"></h1>
+<div class="phone"><img id="img" alt=""></div>
+<script>
+  const q = new URLSearchParams(location.search);
+  document.documentElement.style.setProperty("--w", q.get("w") + "px");
+  document.documentElement.style.setProperty("--h", q.get("h") + "px");
+  if (q.get("top")) document.documentElement.style.setProperty("--top", q.get("top"));
+  if (q.get("pw")) document.documentElement.style.setProperty("--pw", q.get("pw"));
+  document.getElementById("k").textContent = q.get("k");
+  document.getElementById("t").innerHTML = q.get("t");
+  document.getElementById("img").src = q.get("img");
+</script>
+</body></html>

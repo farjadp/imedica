@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=Source+Serif+4:ital,opsz,wght@0,8..60,500;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  /* Google Play feature graphic, 1024×500: brand line left, the live call right. */
+  * { margin: 0; box-sizing: border-box; }
+  html, body { width: 1024px; height: 500px; overflow: hidden; background: #06110e; font-family: "Source Serif 4", Georgia, serif; color: #e8f3ee; }
+  .grid { position: absolute; inset: 0; opacity: .07;
+    background-image: linear-gradient(#9ff0c4 1px, transparent 1px), linear-gradient(90deg, #9ff0c4 1px, transparent 1px); background-size: 42px 42px; }
+  .glow { position: absolute; inset: 0; background: radial-gradient(70% 90% at 78% 40%, rgba(159,240,196,.13), rgba(6,17,14,0) 65%); }
+  .brand { position: absolute; left: 64px; top: 64px; display: flex; align-items: center; gap: 14px;
+    font: 500 15px/1 "IBM Plex Mono", monospace; letter-spacing: .2em; color: #9ff0c4; }
+  .brand svg { width: 34px; height: 34px; }
+  h1 { position: absolute; left: 64px; top: 122px; width: 520px; font-weight: 500; font-size: 80px; line-height: 1; letter-spacing: -.035em; }
+  h1 em { font-style: italic; font-weight: 400; color: #9ff0c4; }
+  p { position: absolute; left: 64px; top: 388px; width: 440px; font: 400 19px/1.4 "Source Serif 4", serif; color: #8aa39a; }
+  .ecg { position: absolute; left: 0; right: 0; top: 330px; height: 40px; opacity: .55; }
+  .phone { position: absolute; right: 70px; top: 46px; width: 300px; border-radius: 34px; padding: 7px; background: #1a2622;
+    box-shadow: 0 0 0 2px #2c3b36, 0 24px 60px rgba(0,0,0,.6); transform: rotate(-4deg); }
+  .phone img { display: block; width: 100%; border-radius: 28px; }
+</style></head>
+<body>
+<div class="glow"></div><div class="grid"></div>
+<svg class="ecg" viewBox="0 0 1024 40" preserveAspectRatio="none"><path fill="none" stroke="#9ff0c4" stroke-width="2" d="M0 24 H120 l6 -4 6 4 h14 l5 6 7 -26 7 32 5 -12 h22 l8 -5 8 5 H360 l6 -4 6 4 h14 l5 6 7 -26 7 32 5 -12 h22 l8 -5 8 5 H600"/></svg>
+<div class="brand"><svg viewBox="0 0 512 512"><g fill="none" stroke="#9ff0c4" stroke-width="56"><path d="M141 86V185a80 80 0 0 0 80 80h134a99 99 0 0 1 0 198H57V150a99 99 0 0 1 198 0v90"/><path d="M57 300a68 68 0 0 0 68 68h205" stroke-linecap="round"/></g></svg>IMEDICA · PARAMEDIC</div>
+<h1>Decide <em>before</em><br>the call.</h1>
+<p>Physician-written scenarios, scored the moment you decide.</p>
+<div class="phone"><img src="../android/raw-03-call.png" alt=""></div>
+</body></html>
