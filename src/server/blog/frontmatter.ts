@@ -16,6 +16,8 @@ const schema = z.object({
   metaDescription: z.string().max(170).optional(),
   faq: z.array(z.object({ q: z.string(), a: z.string() })).default([]),
   sources: z.array(z.object({ title: z.string(), url: z.url() })).default([]),
+  // An article beyond the month's one calendar slot (e.g. a series published together).
+  extra: z.boolean().default(false),
 });
 
 export type CalendarArticle = z.infer<typeof schema> & { body: string };
@@ -27,6 +29,11 @@ export function parseArticle(source: string): CalendarArticle {
   const body = m[2].trim();
   if (body.length < 200) throw new Error("Body is too short");
   return { ...data, tags: data.tags.map((t) => t.toLowerCase()), body };
+}
+
+/** What BlogPost.plannedFor holds: the month for its calendar slot, "month/slug" for an extra. */
+export function plannedKey(a: Pick<CalendarArticle, "month" | "slug" | "extra">): string {
+  return a.extra ? `${a.month}/${a.slug}` : a.month;
 }
 
 /** Every month from start to end inclusive, as YYYY-MM. */
