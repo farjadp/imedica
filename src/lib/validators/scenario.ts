@@ -65,7 +65,13 @@ export const vitalsSchema = z.object({
   gcs: vital,
   temp: vital,
   glucose: vital,
-  rhythm: z.enum(["sinus", "tachycardia", "stemi", "bradycardia", "vfib", "asystole"]).optional().nullable(),
+  rhythm: z.enum(["sinus", "tachycardia", "bradycardia", "afib", "stemi", "vfib", "asystole"]).optional().nullable(),
+  // A PTB-XL strip id (see components/clinical/ecg-strips.ts); empty means "closest to the heart rate".
+  ecgStrip: z
+    .string()
+    .regex(/^ptbxl-\d{5}$/, "Pick a strip from the list")
+    .optional()
+    .nullable(),
   skin: optionalText(80),
 });
 export type Vitals = {
@@ -78,7 +84,8 @@ export type Vitals = {
   gcs?: number | null;
   temp?: number | null;
   glucose?: number | null;
-  rhythm?: "sinus" | "tachycardia" | "stemi" | "bradycardia" | "vfib" | "asystole" | null;
+  rhythm?: "sinus" | "tachycardia" | "bradycardia" | "afib" | "stemi" | "vfib" | "asystole" | null;
+  ecgStrip?: string | null;
   skin?: string | null;
 };
 

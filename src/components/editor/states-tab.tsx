@@ -3,6 +3,9 @@
 import { ArrowDown, ArrowUp, Flag, Pencil, Play, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 
+import { rhythmLabel, type Rhythm } from "@/components/clinical/ecg";
+import { ECG_CREDIT, ecgStrips, pickStrip } from "@/components/clinical/ecg-strips";
+import { EcgTrace } from "@/components/clinical/ecg-trace";
 import { Button } from "@/components/ui/button";
 import { Field, FormError, Input, Select, Textarea } from "@/components/ui/field";
 import { api } from "@/lib/api-client";
@@ -85,17 +88,19 @@ function StateForm({ scenarioId, state, onDone }: { scenarioId: string; state?: 
             <Select
               className="mt-1 h-9"
               value={vitals.rhythm ?? "sinus"}
-              onChange={(e) => setVitals((v) => ({ ...v, rhythm: e.target.value as Vitals["rhythm"] }))}
+              onChange={(e) => setVitals((v) => ({ ...v, rhythm: e.target.value as Vitals["rhythm"], ecgStrip: null }))}
             >
               <option value="sinus">Sinus</option>
               <option value="tachycardia">Sinus tachycardia</option>
               <option value="bradycardia">Sinus bradycardia</option>
+              <option value="afib">Atrial fibrillation</option>
               <option value="stemi">ST elevation</option>
               <option value="vfib">VF</option>
               <option value="asystole">Asystole</option>
             </Select>
           </label>
         </div>
+        <StripPicker vitals={vitals} onChange={(ecgStrip) => setVitals((v) => ({ ...v, ecgStrip }))} />
         <label className="mt-3 block">
           <span className="font-mono text-[10px] tracking-wider text-ink-3 uppercase">Skin</span>
           <Input className="mt-1 h-9" value={vitals.skin ?? ""} onChange={(e) => setVital("skin", e.target.value)} placeholder="e.g. Pale, diaphoretic" />
@@ -225,5 +230,41 @@ export function IconButton({
     >
       {children}
     </button>
+  );
+}
+
+/** Pick which real PTB-XL strip the monitor plays; by default, the one closest to the heart rate. */
+function StripPicker({ vitals, onChange }: { vitals: Vitals; onChange: (id: string | null) => void }) {
+  const rhythm = (vitals.rhythm ?? "sinus") as Rhythm;
+  const pool = ecgStrips.filter((s) => s.rhythm === rhythm);
+  const shown = pickStrip(rhythm, vitals.hr, vitals.ecgStrip);
+
+  return (
+    <div className="mt-3 overflow-hidden rounded-md bg-[#0d1513]">
+      <div className="flex flex-wrap items-center justify-between gap-2 px-3 pt-2 font-mono text-[10px] tracking-wider text-paper/55 uppercase">
+        <span>II · {rhythmLabel[rhythm]}</span>
+        {pool.length > 0 ? (
+          <label className="flex items-center gap-2 normal-case">
+            <span className="sr-only">ECG strip</span>
+            <select
+              className="rounded border border-white/15 bg-transparent px-1.5 py-0.5 text-[11px] text-paper"
+              value={vitals.ecgStrip ?? ""}
+              onChange={(e) => onChange(e.target.value || null)}
+            >
+              <option value="">Real strip closest to HR{shown && !vitals.ecgStrip ? ` (${shown.hr} bpm)` : ""}</option>
+              {pool.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.id} · {s.hr} bpm
+                </option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <span className="normal-case">Drawn trace (no real recording for this rhythm)</span>
+        )}
+      </div>
+      <EcgTrace rhythm={rhythm} height={72} stroke="#9ff0c4" real hr={vitals.hr} strip={vitals.ecgStrip} />
+      {pool.length > 0 ? <p className="px-3 pb-1 text-right font-mono text-[9px] text-paper/35">{ECG_CREDIT}</p> : null}
+    </div>
   );
 }
