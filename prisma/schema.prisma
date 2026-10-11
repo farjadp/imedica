@@ -71,6 +71,7 @@ model Organization {
 
   users       User[]
   invitations Invitation[]
+  assessmentWindows AssessmentWindow[]
 
   @@schema("identity")
 }
@@ -387,11 +388,14 @@ model TrainingSession {
   startedAt      DateTime      @default(now())
   stateEnteredAt DateTime      @default(now())
   endedAt        DateTime?
+  // Set when the run is part of a pre/post assessment (content.AssessmentAttempt.id).
+  attemptId      String?
 
   decisions  SessionDecision[]
   aiFeedback AiFeedback?
 
   @@index([anonymousHash, startedAt])
+  @@index([attemptId])
   @@schema("content")
 }
 
@@ -568,4 +572,88 @@ model AnalyticsDecision {
 
   @@index([sessionId])
   @@schema("analytics")
+}
+
+// ─── assessments ────────────────────────────────────────────────────────────
+// A pre/post assessment: a fixed set of published scenarios plus a short quiz,
+// taken once before training and once after, so a service can measure change.
+// Authored by physicians under the same two-person rule as scenarios.
+
+enum AssessmentPhase {
+  PRE
+  POST
+
+  @@schema("content")
+}
+
+model Assessment {
+  id          String         @id @default(cuid())
+  title       String
+  summary     String
+  status      ScenarioStatus @default(DRAFT)
+  // Published scenarios, run in this order.
+  scenarioIds String[]       @default([])
+  authorId    String // identity.User.id (no relation: cross-schema)
+  reviewerId  String?
+  publishedAt DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  questions AssessmentQuestion[]
+  attempts  AssessmentAttempt[]
+
+  @@index([status])
+  @@schema("content")
+}
+
+model AssessmentQuestion {
+  id           String     @id @default(cuid())
+  assessmentId String
+  assessment   Assessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+  order        Int
+  stem         String
+  options      String[]
+  correctIndex Int
+  // Shown to the learner only after their post-test.
+  rationale    String
+  reference    String?
+
+  @@index([assessmentId, order])
+  @@schema("content")
+}
+
+// One person's go at one phase. Keyed by anonymous hash, like training runs.
+model AssessmentAttempt {
+  id            String          @id @default(cuid())
+  assessmentId  String
+  assessment    Assessment      @relation(fields: [assessmentId], references: [id])
+  windowId      String // identity.AssessmentWindow.id (no relation: cross-schema)
+  phase         AssessmentPhase
+  anonymousHash String
+  cohortKey     String?
+  // { [questionId]: chosen option index }
+  answers       Json            @default("{}")
+  quizScorePct  Int?
+  startedAt     DateTime        @default(now())
+  completedAt   DateTime?
+
+  @@unique([windowId, anonymousHash])
+  @@index([assessmentId, cohortKey, phase])
+  @@schema("content")
+}
+
+// A service opens a phase for its people. Organization configuration, no PII.
+model AssessmentWindow {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assessmentId   String // content.Assessment.id (no relation: cross-schema)
+  phase          String // "PRE" | "POST"; the enum lives in the content schema
+  opensAt        DateTime     @default(now())
+  closesAt       DateTime?
+  openedById     String
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, assessmentId, phase])
+  @@schema("identity")
 }

@@ -27,13 +27,13 @@ export const ACTION_CATEGORIES = [
 ] as const;
 export const OUTCOMES = ["CORRECT", "ACCEPTABLE", "SUBOPTIMAL", "HARMFUL", "CRITICAL"] as const;
 
-const text = (min: number, max: number, what: string) =>
+export const text = (min: number, max: number, what: string) =>
   z
     .string({ error: `${what} is required.` })
     .trim()
     .min(min, min <= 1 ? `${what} is required.` : `${what} needs at least ${min} characters.`)
     .max(max, `${what} must be ${max} characters or fewer.`);
-const optionalText = (max: number) =>
+export const optionalText = (max: number) =>
   z
     .string()
     .trim()
