@@ -729,6 +729,26 @@ model BankQuestion {
   @@schema("content")
 }
 
+// EMS call transcripts from EMSDialog (CC BY-NC 4.0), for internal testing
+// only (INTERNAL_DATASETS). A physician reads one and has Claude draft a
+// scenario from it, which they then edit and review like any other.
+model DialogueCall {
+  id              String   @id @default(cuid())
+  source          String // "EMSDialog-synthetic" | "EMSDialog-real"
+  sourceKey       String // file name, or split and row for the real calls
+  protocol        String
+  // [{ role, text }]
+  turns           Json
+  turnCount       Int
+  draftScenarioId String? // content.Scenario.id of the latest draft
+  draftNotes      String[] @default([])
+  importedAt      DateTime @default(now())
+
+  @@unique([source, sourceKey])
+  @@index([protocol])
+  @@schema("content")
+}
+
 // One person's go at one phase. Keyed by anonymous hash, like training runs.
 model AssessmentAttempt {
   id            String          @id @default(cuid())

@@ -5,12 +5,12 @@ import { type BankPage, QuestionBank } from "@/components/question-bank/question
 import { CONTENT_ROLES, requireRolePage } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { EMS_MCQA } from "@/server/question-bank/ems-mcqa";
-import { questionBankEnabled, searchBank } from "@/server/question-bank/service";
+import { internalDatasetsEnabled, searchBank } from "@/server/question-bank/service";
 
 export const metadata = { title: "Question bank" };
 
 export default async function QuestionBankPage() {
-  if (!questionBankEnabled()) notFound();
+  if (!internalDatasetsEnabled()) notFound();
   const user = await requireRolePage(CONTENT_ROLES, "/admin/question-bank");
   const initial = await searchBank(user, new URL("http://localhost/?level=paramedic"));
   const drafts = await db.assessment.findMany({

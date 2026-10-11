@@ -20,12 +20,13 @@ import { EMS_MCQA, parseEmsMcqa } from "./ems-mcqa";
 // the INTERNAL_DATASETS switch and answers 404 when it's off.
 // ============================================================================
 
-export function questionBankEnabled() {
+/** INTERNAL_DATASETS: features built on datasets not yet cleared for customers. */
+export function internalDatasetsEnabled() {
   return env().INTERNAL_DATASETS === "on";
 }
 
 function assertAuthor(user: CurrentUser) {
-  if (!questionBankEnabled()) throw new HttpError(404, "Not found.");
+  if (!internalDatasetsEnabled()) throw new HttpError(404, "Not found.");
   if (!CONTENT_ROLES.includes(user.role)) throw new HttpError(403, "Only physicians can use the question bank.");
 }
 
