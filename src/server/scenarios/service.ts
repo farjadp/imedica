@@ -32,13 +32,20 @@ function assertAuthor(user: CurrentUser) {
   if (!CONTENT_ROLES.includes(user.role)) throw new HttpError(403, "Only physicians can edit scenarios.");
 }
 
-/** Published scenarios are locked; unpublish first, so learners never see a half-edit. */
+/**
+ * Only drafts are editable. Published work is locked so learners never see a
+ * half-edit; work in review is locked so the reviewer publishes exactly what
+ * they checked, and can't slip in changes nobody else has seen.
+ */
 async function loadEditable(user: CurrentUser, scenarioId: string) {
   assertAuthor(user);
   const scenario = await db.scenario.findUnique({ where: { id: scenarioId } });
   if (!scenario) throw new HttpError(404, "Scenario not found.");
   if (scenario.status === "PUBLISHED") {
     throw new HttpError(409, "This scenario is published. Unpublish it before editing.");
+  }
+  if (scenario.status === "IN_REVIEW") {
+    throw new HttpError(409, "This scenario is in review. Send it back to draft before editing.");
   }
   if (scenario.status === "ARCHIVED") throw new HttpError(409, "Restore this scenario before editing.");
   return scenario;

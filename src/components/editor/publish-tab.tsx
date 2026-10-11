@@ -91,7 +91,7 @@ export function PublishTab({ scenario, me }: { scenario: EditorScenario; me: { i
             {scenario.status === "IN_REVIEW" ? (
               <>
                 {mine && me.role !== "ADMIN" ? (
-                  <p>Waiting for a second physician. You can still edit, or pull it back to draft.</p>
+                  <p>Waiting for a second physician. To change anything, pull it back to draft.</p>
                 ) : (
                   <>
                     <p>Check the rules and rationales against current directives, then publish to the library.</p>
