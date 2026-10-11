@@ -10,6 +10,7 @@ export type AuditAction =
   | "auth.login_failed"
   | "auth.logout"
   | "auth.password_reset"
+  | "account.delete"
   | "user.invite"
   | "user.join"
   | "user.update"
