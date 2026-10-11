@@ -35,9 +35,12 @@ Without `ANTHROPIC_API_KEY` runs still score and debrief; only the AI notes are 
 
 ```bash
 npm test          # unit tests: rule engine, publish checks, hashing, AI guard
+npm run test:integration  # route-level authorization against Postgres (database imedica_test)
 npm run lint
 npm run typecheck
 ```
+
+The integration suite calls the real route handlers and server actions: sign-in and session checks, who may author, the two-person publish rule, run ownership, and organization scoping with k-anonymity. It empties its database before each file, so it only runs against one whose name ends in `_test`. Create it once with `docker compose exec postgres createdb -U imedica imedica_test`, or point `TEST_DATABASE_URL` elsewhere.
 
 ## How it's built
 

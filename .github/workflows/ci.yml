@@ -8,6 +8,19 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: imedica_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci"
+          --health-interval 5s
+          --health-retries 10
     env:
       DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/ci
       DEIDENTIFICATION_SECRET: ci-only-secret-at-least-thirty-two-characters
@@ -21,4 +34,7 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:integration
+        env:
+          TEST_DATABASE_URL: postgresql://ci:ci@127.0.0.1:5432/imedica_test
       - run: npm run build

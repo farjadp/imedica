@@ -37,7 +37,7 @@ export function ScenarioEditor({
   const router = useRouter();
   const params = useSearchParams();
   const tab = (TABS.find((t) => t.key === (params.get("tab") ?? initialTab))?.key ?? "basics") as TabKey;
-  const locked = scenario.status === "PUBLISHED" || scenario.status === "ARCHIVED";
+  const locked = scenario.status !== "DRAFT";
 
   const counts: Partial<Record<TabKey, number>> = {
     states: scenario.states.length,
@@ -83,7 +83,9 @@ export function ScenarioEditor({
           <p>
             {scenario.status === "PUBLISHED"
               ? "Published scenarios are locked so learners never see a half-finished edit. Unpublish it from Review & publish to make changes."
-              : "Archived. Restore it from Review & publish to edit again."}
+              : scenario.status === "IN_REVIEW"
+                ? "In review, so the reviewer publishes exactly what they checked. Send it back to draft from Review & publish to make changes."
+                : "Archived. Restore it from Review & publish to edit again."}
           </p>
         </div>
       ) : null}
