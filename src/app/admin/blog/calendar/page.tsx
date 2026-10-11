@@ -64,10 +64,10 @@ export default async function CalendarPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-rule-2">
-            {rows.map(({ month, file, post }) => {
+            {rows.map(({ key, month, file, post }) => {
               const live = post && (post.status === "PUBLISHED" || post.status === "SCHEDULED") && post.publishedAt && post.publishedAt <= now;
               return (
-                <tr key={month} className={cn(!file && !post && "bg-tag-yellow-wash/40")}>
+                <tr key={key} className={cn(!file && !post && "bg-tag-yellow-wash/40")}>
                   <td className="tabular px-4 py-3 font-mono text-[13px] whitespace-nowrap text-ink-2">{monthLabel(month)}</td>
                   <td className="max-w-[420px] px-4 py-3">
                     {post ? (
