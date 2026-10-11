@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { EmptyState, PageHeader } from "@/components/app/page-header";
+import { ReportPanel } from "@/components/assessments/report-panel";
 import { CloseWindow, OpenWindow } from "@/components/assessments/window-actions";
 import { cn } from "@/lib/cn";
 import { formatDate } from "@/lib/labels";
+import { assessmentReport } from "@/server/assessments/report";
 import { listWindows } from "@/server/assessments/windows";
 import { ORG_MANAGER_ROLES, requireRolePage } from "@/server/auth/guards";
 import { db } from "@/server/db";
@@ -61,6 +63,12 @@ export default async function AssessmentWindowsPage({ searchParams }: { searchPa
 
   const data = await listWindows(user, orgId);
   const scoped = isAdmin ? orgId : undefined;
+  // A report only makes sense once the after round has opened.
+  const reports = new Map(
+    await Promise.all(
+      data.assessments.filter((a) => a.post).map(async (a) => [a.id, await assessmentReport(user, a.id, orgId)] as const),
+    ),
+  );
 
   return (
     <div className="space-y-6">
@@ -132,6 +140,13 @@ export default async function AssessmentWindowsPage({ searchParams }: { searchPa
                   ) : null}
                 </div>
               </div>
+
+              {reports.get(a.id) ? (
+                <div className="mt-5 border-t border-rule-2 pt-5">
+                  <h3 className="mb-4 text-[15px] font-medium text-ink">Before and after</h3>
+                  <ReportPanel report={reports.get(a.id)!} />
+                </div>
+              ) : null}
             </li>
           ))}
         </ul>

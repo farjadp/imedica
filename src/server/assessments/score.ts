@@ -38,3 +38,27 @@ export function assessmentProblems(input: {
 
   return problems;
 }
+
+type Point = { who: string; value: number };
+
+/**
+ * Before/after change over the people who have both. Each person counts once
+ * (their last value per phase); means are compared before rounding.
+ */
+export function pairedChange(pre: Point[], post: Point[]) {
+  const before = new Map(pre.map((p) => [p.who, p.value]));
+  const after = new Map(post.map((p) => [p.who, p.value]));
+  const both = [...before.keys()].filter((who) => after.has(who));
+  if (!both.length) return { people: 0, preAvg: null, postAvg: null, delta: null, relativePct: null };
+
+  const mean = (m: Map<string, number>) => both.reduce((sum, who) => sum + m.get(who)!, 0) / both.length;
+  const preMean = mean(before);
+  const postMean = mean(after);
+  return {
+    people: both.length,
+    preAvg: Math.round(preMean),
+    postAvg: Math.round(postMean),
+    delta: Math.round(postMean - preMean),
+    relativePct: preMean > 0 ? Math.round(((postMean - preMean) / preMean) * 100) : null,
+  };
+}
