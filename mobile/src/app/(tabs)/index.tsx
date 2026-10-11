@@ -68,7 +68,7 @@ export default function Library() {
           <View style={styles.pad}>
             <Mono>{(me.organizationName ?? "Imedica").toUpperCase()}</Mono>
             <Display size={38} style={{ marginTop: 6 }}>
-              {greeting()}, {me.firstName}.
+              {greeting()}, {me.preferredName ?? me.firstName}.
             </Display>
           </View>
 

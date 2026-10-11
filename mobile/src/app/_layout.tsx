@@ -64,6 +64,10 @@ function RootNavigator() {
           <Stack.Screen name="scenario/[id]" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
           <Stack.Screen name="run/[id]" options={{ animation: "fade", gestureEnabled: false }} />
           <Stack.Screen name="review/[id]" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="paper/[source]/[id]" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="profile/edit" options={{ presentation: "modal" }} />
+          <Stack.Screen name="profile/password" options={{ presentation: "modal" }} />
+          <Stack.Screen name="profile/delete" options={{ presentation: "modal" }} />
         </Stack.Protected>
         <Stack.Protected guard={signedIn && !paramedic}>
           <Stack.Screen name="staff" options={{ animation: "fade" }} />

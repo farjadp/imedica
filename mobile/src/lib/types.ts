@@ -12,9 +12,21 @@ export type Me = {
   role: Role;
   level: string | null;
   yearsExperience: number | null;
+  preferredName: string | null;
+  pronouns: string | null;
+  station: string | null;
+  bio: string | null;
+  certifications: string[];
+  notifyAssessments: boolean;
+  avatarVersion: string | null;
+  memberSince: string;
   organizationId: string | null;
   organizationName: string | null;
 };
+
+export type ProfilePatch = Partial<
+  Pick<Me, "firstName" | "lastName" | "preferredName" | "pronouns" | "station" | "bio" | "certifications" | "notifyAssessments" | "yearsExperience" | "level">
+>;
 
 export type ScenarioSummary = {
   id: string;
@@ -95,3 +107,45 @@ export type SessionSummary = {
   percent: number;
   scenario: { id: string; title: string; category: string };
 };
+
+// Research: src/server/research/*.
+
+export type PaperRef = { source: string; extId: string };
+
+export type PaperSummary = PaperRef & {
+  title: string;
+  authors: string | null;
+  journal: string | null;
+  year: number | null;
+  doi: string | null;
+  openAccess: boolean;
+  citedBy: number;
+  pubType: string | null;
+  saved: boolean;
+};
+
+export type PaperSearch = { total: number; results: PaperSummary[]; nextCursor: string | null };
+
+export type Brief = {
+  bottomLine: string;
+  design: string;
+  evidence: string;
+  population: string;
+  findings: string[];
+  limitations: string[];
+  onTheRoad: string;
+  terms: { term: string; meaning: string }[];
+};
+
+export type PaperBrief = { basedOn: "abstract" | "full text"; content: Brief; createdAt: string };
+
+export type PaperDetail = Omit<PaperSummary, "saved"> & {
+  abstract: string | null;
+  keywords: string[];
+  pubTypes: string[];
+  url: string;
+  saved: boolean;
+  brief: PaperBrief | null;
+};
+
+export type SavedPaper = PaperRef & { title: string; journal: string | null; year: number | null; savedAt: string };
