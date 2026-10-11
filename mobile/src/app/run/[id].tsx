@@ -15,6 +15,7 @@ import { Body, Mono, Serif } from "@/components/type";
 import { VitalsGrid } from "@/components/vitals";
 import { ApiError, api, errorMessage } from "@/lib/api";
 import { rhythmLabel, type Rhythm } from "@/lib/ecg";
+import { ECG_CREDIT, pickStrip } from "@/lib/ecg-strips";
 import { actionCategoryLabel, clock } from "@/lib/labels";
 import { keys } from "@/lib/queries";
 import { color, outcomeStyle, radius } from "@/lib/theme";
@@ -133,11 +134,18 @@ function Live({ initial }: { initial: Runtime }) {
         </View>
 
         <View style={{ marginTop: 12, marginHorizontal: -16 }}>
-          <EcgTrace width={width} height={60} rhythm={rhythm} hr={v.hr ?? 80} stroke={rhythm === "vfib" ? color.alarm : color.mint} />
+          <EcgTrace width={width} height={60} rhythm={rhythm} hr={v.hr ?? 80} real strip={v.ecgStrip} stroke={rhythm === "vfib" ? color.alarm : color.mint} />
         </View>
-        <Mono tone={color.screenInk2} size={10} style={{ marginBottom: 12 }}>
-          II · {(rhythmLabel[rhythm] ?? "").toUpperCase()}
-        </Mono>
+        <View style={styles.traceLabel}>
+          <Mono tone={color.screenInk2} size={10}>
+            II · {(rhythmLabel[rhythm] ?? "").toUpperCase()}
+          </Mono>
+          {pickStrip(rhythm) ? (
+            <Mono tone={color.mintDim} size={9}>
+              {ECG_CREDIT}
+            </Mono>
+          ) : null}
+        </View>
         <VitalsGrid v={v} />
       </View>
 
@@ -271,6 +279,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 const styles = StyleSheet.create({
   monitor: { backgroundColor: color.monitor, paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg },
   bar: { flexDirection: "row", alignItems: "center" },
+  traceLabel: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
   clock: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: color.monitor2 },
   clockLow: { backgroundColor: "#2a1210" },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.alarm },
