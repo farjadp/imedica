@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import { ScenarioEditor } from "@/components/editor/scenario-editor";
 import type { EditorScenario } from "@/components/editor/types";
 import { CONTENT_ROLES, HttpError, requireRolePage } from "@/server/auth/guards";
-import { getScenarioFull } from "@/server/scenarios/service";
+import { getScenarioForAuthor } from "@/server/scenarios/service";
 
 export const metadata = { title: "Edit scenario" };
 
@@ -21,7 +21,7 @@ export default async function EditScenarioPage({
 
   let scenario;
   try {
-    scenario = await getScenarioFull(user, id);
+    scenario = await getScenarioForAuthor(user, id);
   } catch (error) {
     if (error instanceof HttpError && error.status === 404) notFound();
     throw error;
