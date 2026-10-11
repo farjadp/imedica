@@ -23,5 +23,9 @@ export const apps = {
   betaDate: "2026-10-20",
   launchDate: "2026-11-03",
   ios: { url: null as string | null },
+  // TestFlight's public link for the pilot beta; works once Apple's beta review approves a build.
+  iosBeta: "https://testflight.apple.com/join/2q9wY5sg",
+  // The app's URL scheme (mobile/app.json "scheme"): opens the installed app.
+  scheme: "imedica://",
   android: { url: null as string | null },
 };

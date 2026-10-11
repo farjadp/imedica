@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 
@@ -111,7 +112,14 @@ export async function acceptInvitation(_prev: FormState, formData: FormData): Pr
     type: "Invitation",
     id: invite.id,
   });
+  // A paramedic who joined on a phone belongs in the app, not the mobile web.
+  if (user.role === "PARAMEDIC" && isPhone((await headers()).get("user-agent"))) redirect("/welcome");
   redirect(homeFor(user.role));
+}
+
+/** iPhone or Android phone (not a tablet or desktop browser). */
+function isPhone(ua: string | null): boolean {
+  return Boolean(ua && (/iPhone|iPod/.test(ua) || /Android.+Mobile/.test(ua)));
 }
 
 // ─── Password reset ─────────────────────────────────────────────────────────
