@@ -40,7 +40,7 @@ export async function getCalendar() {
   ]);
   return monthsBetween(CALENDAR.start, CALENDAR.end).map((month) => ({
     month,
-    file: files.find((f) => f.file.startsWith(month)),
+    file: files.find((f) => f.file.startsWith(month) && !f.article?.extra),
     post: posts.find((p) => p.plannedFor === month),
   }));
 }

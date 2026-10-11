@@ -8,6 +8,7 @@ import { type FormState, fieldErrors } from "@/lib/form";
 import { audit } from "../audit";
 import { CONTENT_ROLES, HttpError, requireRole } from "../auth/guards";
 import { db } from "../db";
+import { plannedKey } from "./frontmatter";
 import { readingMinutes, slugify } from "./markdown";
 
 function failure(error: unknown): FormState {
@@ -236,7 +237,8 @@ export async function importCalendar(): Promise<FormState> {
     let skipped = 0;
     for (const { article: a } of files) {
       if (!a) continue;
-      const exists = await db.blogPost.findFirst({ where: { OR: [{ plannedFor: a.month }, { slug: a.slug }] }, select: { id: true } });
+      const plannedFor = plannedKey(a);
+      const exists = await db.blogPost.findFirst({ where: { OR: [{ plannedFor }, { slug: a.slug }] }, select: { id: true } });
       if (exists) {
         skipped += 1;
         continue;
@@ -255,7 +257,7 @@ export async function importCalendar(): Promise<FormState> {
           focusKeyword: a.focusKeyword ?? null,
           metaDescription: a.metaDescription ?? null,
           status: "REVIEW",
-          plannedFor: a.month,
+          plannedFor,
           authorId: user.id,
           authorName: "Imedica Clinical Team",
           readingMinutes: readingMinutes(a.body),

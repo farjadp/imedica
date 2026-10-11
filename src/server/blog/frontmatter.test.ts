@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import { monthsBetween, parseArticle } from "./frontmatter";
+import { monthsBetween, parseArticle, plannedKey } from "./frontmatter";
 
 const dir = join(process.cwd(), "content/blog");
 
@@ -25,7 +25,16 @@ describe("parseArticle", () => {
     for (const { f, a } of parsed) expect(f.startsWith(a.month)).toBe(true);
     const slugs = parsed.map((p) => p.a.slug);
     expect(new Set(slugs).size).toBe(slugs.length);
-    expect(new Set(parsed.map((p) => p.a.month))).toEqual(new Set(monthsBetween("2025-01", "2026-12")));
+    const slots = parsed.filter((p) => !p.a.extra).map((p) => p.a.month);
+    expect(slots.length).toBe(new Set(slots).size);
+    expect(new Set(slots)).toEqual(new Set(monthsBetween("2025-01", "2026-12")));
+  });
+});
+
+describe("plannedKey", () => {
+  it("keeps the month for a calendar slot and adds the slug for an extra", () => {
+    expect(plannedKey({ month: "2026-10", slug: "a", extra: false })).toBe("2026-10");
+    expect(plannedKey({ month: "2026-10", slug: "a", extra: true })).toBe("2026-10/a");
   });
 });
 
