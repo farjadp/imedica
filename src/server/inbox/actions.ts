@@ -52,7 +52,7 @@ async function submit(kind: Kind, formData: FormData): Promise<FormState> {
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), message: "Check the highlighted fields." };
   const { website, ...data } = parsed.data as Record<string, string | undefined>;
   if (website) return { ok: true };
-  if (limited(`inbox:${kind}:${await clientIp()}`, 5, 60 * 60_000)) {
+  if (await limited(`inbox:${kind}:${await clientIp()}`, 5, 60 * 60_000)) {
     return { message: `We've already received several messages from you. We'll be in touch, or email ${site.contactEmail}.` };
   }
 

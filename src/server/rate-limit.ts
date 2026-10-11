@@ -1,9 +1,12 @@
 import "server-only";
 import { headers } from "next/headers";
 
-// Fixed-window limiter held in memory. Good enough for a single instance;
-// move to Redis or the database before running more than one.
-const buckets = new Map<string, { count: number; resetAt: number }>();
+import { hashToken } from "./auth/tokens";
+import { db } from "./db";
+
+// Fixed-window limiter kept in Postgres, so every app instance shares one count.
+// Keys are hashed before they're stored: "login:<email>" must not leave an
+// address behind in the identity schema.
 
 export async function clientIp(): Promise<string> {
   const h = await headers();
@@ -11,13 +14,18 @@ export async function clientIp(): Promise<string> {
 }
 
 /** Returns true when the caller is over the limit. */
-export function limited(key: string, max: number, windowMs: number): boolean {
-  const now = Date.now();
-  const bucket = buckets.get(key);
-  if (!bucket || bucket.resetAt < now) {
-    buckets.set(key, { count: 1, resetAt: now + windowMs });
-    return false;
+export async function limited(key: string, max: number, windowMs: number): Promise<boolean> {
+  const rows = await db.$queryRaw<{ count: number }[]>`
+    INSERT INTO "identity"."RateLimitBucket" ("key", "count", "resetAt")
+    VALUES (${hashToken(key)}, 1, now() + make_interval(secs => ${windowMs / 1000}))
+    ON CONFLICT ("key") DO UPDATE SET
+      "count" = CASE WHEN "RateLimitBucket"."resetAt" < now() THEN 1 ELSE "RateLimitBucket"."count" + 1 END,
+      "resetAt" = CASE WHEN "RateLimitBucket"."resetAt" < now() THEN EXCLUDED."resetAt" ELSE "RateLimitBucket"."resetAt" END
+    RETURNING "count"`;
+
+  // Expired buckets are dead weight; sweep them now and then.
+  if (Math.random() < 0.01) {
+    await db.rateLimitBucket.deleteMany({ where: { resetAt: { lt: new Date() } } });
   }
-  bucket.count += 1;
-  return bucket.count > max;
+  return rows[0].count > max;
 }
