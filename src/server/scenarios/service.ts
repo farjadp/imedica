@@ -105,7 +105,33 @@ export async function listScenarios(user: CurrentUser, filter: { status?: Scenar
   });
 }
 
-export async function getScenarioFull(user: CurrentUser, scenarioId: string) {
+/**
+ * What a learner sees before a run: the brief and nothing else. States carry
+ * the narrative, vitals and debrief, so handing them over would give away how
+ * the call unfolds and ends — fatal for training and pre/post assessments.
+ */
+const briefSelect = {
+  id: true,
+  title: true,
+  summary: true,
+  dispatch: true,
+  category: true,
+  difficulty: true,
+  timeLimitSec: true,
+  learningGoals: true,
+  protocolSource: true,
+  publishedAt: true,
+} satisfies Prisma.ScenarioSelect;
+
+export async function getScenarioBrief(scenarioId: string) {
+  const scenario = await db.scenario.findFirst({ where: { id: scenarioId, status: "PUBLISHED" }, select: briefSelect });
+  if (!scenario) throw new HttpError(404, "Scenario not found.");
+  return scenario;
+}
+
+/** Everything, for authors: states, actions, rules, feedback and publish problems. */
+export async function getScenarioForAuthor(user: CurrentUser, scenarioId: string) {
+  assertAuthor(user);
   const scenario = await db.scenario.findUnique({
     where: { id: scenarioId },
     include: {
@@ -116,12 +142,12 @@ export async function getScenarioFull(user: CurrentUser, scenarioId: string) {
     },
   });
   if (!scenario) throw new HttpError(404, "Scenario not found.");
-  // Learners may read a published scenario, but never its rules.
-  if (!CONTENT_ROLES.includes(user.role)) {
-    if (scenario.status !== "PUBLISHED") throw new HttpError(404, "Scenario not found.");
-    return { ...scenario, rules: [], feedback: [] };
-  }
   return { ...scenario, problems: publishProblems(scenario) };
+}
+
+/** GET /api/v1/scenarios/:id — the whole scenario for authors, the brief for learners. */
+export async function getScenarioFull(user: CurrentUser, scenarioId: string) {
+  return CONTENT_ROLES.includes(user.role) ? getScenarioForAuthor(user, scenarioId) : getScenarioBrief(scenarioId);
 }
 
 // ─── Scenario ───────────────────────────────────────────────────────────────

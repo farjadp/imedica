@@ -103,22 +103,44 @@ describe("learners only see published work, and never its answers", () => {
     ).toBe(404);
   });
 
-  it("a published scenario comes without rules or teaching notes", async () => {
+  it("a published scenario comes as the brief alone — no states, actions, rules or teaching notes", async () => {
     const published = await scenario(author.id, "PUBLISHED");
     const res = await call("GET", one.GET, { as: medic, params: { id: published.id } });
     expect(res.status).toBe(200);
-    expect(res.data.rules).toEqual([]);
-    expect(res.data.feedback).toEqual([]);
-    expect(res.data.problems).toBeUndefined();
+    expect(Object.keys(res.data).sort()).toEqual(
+      [
+        "category",
+        "difficulty",
+        "dispatch",
+        "id",
+        "learningGoals",
+        "protocolSource",
+        "publishedAt",
+        "summary",
+        "timeLimitSec",
+        "title",
+      ].sort(),
+    );
+    for (const key of ["states", "actions", "rules", "feedback", "problems"]) expect(res.data).not.toHaveProperty(key);
+    expect(res.data.dispatch).toBe(published.dispatch);
+  });
 
-    const rules = await call("GET", collection.GET, { as: medic, params: { id: published.id, collection: "rules" } });
-    expect(rules.data).toEqual([]);
+  it.each(["states", "actions", "rules", "feedback"])("a learner can't read a published scenario's %s", async (c) => {
+    const published = await scenario(author.id, "PUBLISHED");
+    const res = await call("GET", collection.GET, { as: medic, params: { id: published.id, collection: c } });
+    expect(res.status).toBe(403);
+    expect(res.data).not.toBeInstanceOf(Array);
   });
 
   it("an author sees the rules", async () => {
     const published = await scenario(author.id, "PUBLISHED");
     const res = await call("GET", one.GET, { as: reviewer, params: { id: published.id } });
     expect(res.data.rules).toHaveLength(1);
+    expect(res.data.states.length).toBeGreaterThan(0);
+
+    const states = await call("GET", collection.GET, { as: reviewer, params: { id: published.id, collection: "states" } });
+    expect(states.status).toBe(200);
+    expect(states.data.length).toBe(res.data.states.length);
   });
 });
 
