@@ -9,7 +9,22 @@ import { Mono } from "./type";
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
-export function ScoreRing({ percent, size = 112, stroke = 8, tone = color.pine, label = true }: { percent: number; size?: number; stroke?: number; tone?: string; label?: boolean }) {
+export function ScoreRing({
+  percent,
+  size = 112,
+  stroke = 8,
+  tone = color.pine,
+  label = true,
+  onDark = false,
+}: {
+  percent: number;
+  size?: number;
+  stroke?: number;
+  tone?: string;
+  label?: boolean;
+  /** On the dark monitor: a lighter track and number. */
+  onDark?: boolean;
+}) {
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
   const p = useSharedValue(0);
@@ -21,13 +36,13 @@ export function ScoreRing({ percent, size = 112, stroke = 8, tone = color.pine, 
   return (
     <View style={{ width: size, height: size, alignItems: "center", justifyContent: "center" }} accessible accessibilityLabel={`${percent} percent`}>
       <Svg width={size} height={size} style={{ position: "absolute", transform: [{ rotate: "-90deg" }] }}>
-        <Circle cx={size / 2} cy={size / 2} r={r} stroke={color.rule} strokeWidth={stroke} fill="none" />
+        <Circle cx={size / 2} cy={size / 2} r={r} stroke={onDark ? color.monitorRule : color.rule} strokeWidth={stroke} fill="none" />
         <AnimatedCircle cx={size / 2} cy={size / 2} r={r} stroke={tone} strokeWidth={stroke} fill="none" strokeLinecap="round" strokeDasharray={c} animatedProps={props} />
       </Svg>
       {label ? (
-        <Mono tone={color.ink} size={size / 4.2} medium>
+        <Mono tone={onDark ? color.screenInk : color.ink} size={size / 4.2} medium>
           {percent}
-          <Mono tone={color.ink3} size={size / 9}>
+          <Mono tone={onDark ? color.screenInk2 : color.ink3} size={size / 9}>
             %
           </Mono>
         </Mono>

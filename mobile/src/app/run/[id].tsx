@@ -30,21 +30,24 @@ const feel: Record<string, Haptics.NotificationFeedbackType> = {
 };
 
 export default function Run() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  // `windowId`: the assessment this run belongs to, which it returns to (its debrief stays locked).
+  const { id, windowId } = useLocalSearchParams<{ id: string; windowId?: string }>();
   // Always fresh: a cached runtime would show an old state and a wrong clock.
   const run = useQuery({ queryKey: ["run", id], queryFn: () => api<Runtime>("GET", `/sessions/${id}`), staleTime: 0, gcTime: 0 });
   const over = run.data && run.data.status !== "IN_PROGRESS";
 
   useEffect(() => {
-    if (over) router.replace(`/review/${id}`);
-  }, [over, id]);
+    if (!over) return;
+    if (run.data?.assessment) router.replace(windowId ? `/assessment/${windowId}` : "/");
+    else router.replace(`/review/${id}`);
+  }, [over, id, windowId, run.data?.assessment]);
 
   if (run.error) return <Problem message={errorMessage(run.error)} onRetry={() => run.refetch()} />;
   if (!run.data || over) return <Loading dark />;
-  return <Live initial={run.data} />;
+  return <Live initial={run.data} windowId={windowId} />;
 }
 
-function Live({ initial }: { initial: Runtime }) {
+function Live({ initial, windowId }: { initial: Runtime; windowId?: string }) {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
@@ -61,8 +64,14 @@ function Live({ initial }: { initial: Runtime }) {
 
   const toReview = useCallback(() => {
     void queryClient.invalidateQueries({ queryKey: keys.sessions });
+    if (data.assessment) {
+      // No debrief yet: back to the assessment, which now shows this scenario done.
+      void queryClient.invalidateQueries({ queryKey: ["attempt"] });
+      router.replace(windowId ? `/assessment/${windowId}` : "/");
+      return;
+    }
     router.replace(`/review/${data.id}`);
-  }, [data.id, queryClient]);
+  }, [data.id, data.assessment, windowId, queryClient]);
 
   const finish = useCallback(async () => {
     if (ending.current) return;
@@ -89,7 +98,8 @@ function Live({ initial }: { initial: Runtime }) {
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       const v = await api<Verdict>("POST", `/sessions/${data.id}/decisions`, { actionId });
-      void Haptics.notificationAsync(feel[v.outcome] ?? Haptics.NotificationFeedbackType.Warning);
+      if (v.outcome) void Haptics.notificationAsync(feel[v.outcome] ?? Haptics.NotificationFeedbackType.Warning);
+      else void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setVerdict({ ...v, label: labelOf.get(actionId) ?? "", key: ++verdictSeq.current });
       if (v.ended) {
         ending.current = true;
@@ -109,7 +119,7 @@ function Live({ initial }: { initial: Runtime }) {
   }
 
   function handOver() {
-    Alert.alert("Hand over care?", "This ends the run and opens your debrief.", [
+    Alert.alert("Hand over care?", data.assessment ? "This ends the run. You go back to your assessment." : "This ends the run and opens your debrief.", [
       { text: "Keep going", style: "cancel" },
       { text: "Hand over", style: "destructive", onPress: () => void finish() },
     ]);
@@ -128,6 +138,7 @@ function Live({ initial }: { initial: Runtime }) {
             <Feather name="chevron-down" size={24} color={color.screenInk2} />
           </Pressable>
           <Mono tone={color.screenInk2} numberOfLines={1} style={{ flex: 1, marginHorizontal: 12 }}>
+            {data.assessment ? "ASSESSMENT · " : ""}
             {data.scenario.title.toUpperCase()}
           </Mono>
           <Clock endsAt={new Date(data.startedAt).getTime() + data.scenario.timeLimitSec * 1000} offset={offset} onExpire={finish} />
@@ -244,7 +255,9 @@ function Clock({ endsAt, offset, onExpire }: { endsAt: number; offset: number; o
 }
 
 function VerdictToast({ verdict, bottom }: { verdict: Verdict & { label: string }; bottom: number }) {
-  const s = outcomeStyle[verdict.outcome];
+  // Assessment runs: recorded, no verdict, so the baseline isn't a lesson.
+  const blind = verdict.outcome === null;
+  const s = blind ? { fg: color.rule } : outcomeStyle[verdict.outcome!];
   const notes = [verdict.late ? "too late" : null, verdict.repeated ? "already done" : null].filter(Boolean).join(" · ");
   return (
     <Animated.View
@@ -253,13 +266,25 @@ function VerdictToast({ verdict, bottom }: { verdict: Verdict & { label: string 
       style={[styles.toast, { bottom, borderColor: s.fg }]}
       accessibilityLiveRegion="assertive"
     >
-      <OutcomeTag outcome={verdict.outcome} />
+      {blind ? (
+        <Mono medium size={10.5} tone={color.ink2}>
+          RECORDED
+        </Mono>
+      ) : (
+        <OutcomeTag outcome={verdict.outcome!} />
+      )}
       <View style={{ flex: 1 }}>
         <Body size={14.5} tone={color.ink} medium numberOfLines={1}>
           {verdict.label}
         </Body>
         <Body size={12.5} tone={color.ink3}>
-          {verdict.ended ? "The call is over. Opening your debrief…" : notes || "Scored. The reason is in your debrief."}
+          {blind
+            ? verdict.ended
+              ? "The call is over. Back to your assessment…"
+              : "Results open once the post-test is handed in."
+            : verdict.ended
+              ? "The call is over. Opening your debrief…"
+              : notes || "Scored. The reason is in your debrief."}
         </Body>
       </View>
     </Animated.View>

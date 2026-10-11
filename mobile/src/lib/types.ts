@@ -63,10 +63,12 @@ export type Runtime = {
   serverNow: string;
   scenario: { id: string; title: string; dispatch: string; category: string; timeLimitSec: number; actions: Action[] };
   state: { id: string; title: string; narrative: string; vitals: Vitals; isTerminal: boolean } | null;
-  decisions: { id: string; actionId: string; outcome: Outcome; elapsedMs: number }[];
+  // Assessment runs come without verdicts until the post-test is done.
+  assessment?: boolean;
+  decisions: { id: string; actionId: string; outcome: Outcome | null; elapsedMs: number }[];
 };
 
-export type Verdict = { outcome: Outcome; late: boolean; repeated: boolean; ended: boolean };
+export type Verdict = { outcome: Outcome | null; late: boolean; repeated: boolean; ended: boolean };
 
 export type AiContent = {
   summary: string;
@@ -151,3 +153,39 @@ export type PaperDetail = Omit<PaperSummary, "saved"> & {
 };
 
 export type SavedPaper = PaperRef & { title: string; journal: string | null; year: number | null; savedAt: string };
+
+// ─── Pre/post assessments (src/server/assessments/taking.ts) ────────────────
+
+export type OpenAssessment = {
+  windowId: string;
+  phase: "PRE" | "POST";
+  assessment: { id: string; title: string; summary: string; scenarioCount: number; questionCount: number };
+  attemptId: string | null;
+  completed: boolean;
+};
+
+export type Attempt = {
+  id: string;
+  phase: "PRE" | "POST";
+  open: boolean;
+  completed: boolean;
+  reveal: boolean;
+  quizScorePct: number | null;
+  assessment: { id: string; title: string; summary: string };
+  quiz: {
+    id: string;
+    stem: string;
+    options: string[];
+    answer: number | null;
+    correctIndex?: number;
+    rationale?: string;
+    reference?: string | null;
+  }[];
+  scenarios: {
+    id: string;
+    title: string;
+    category: string;
+    timeLimitSec: number;
+    run: { id: string; status: string; percent: number | null } | null;
+  }[];
+};

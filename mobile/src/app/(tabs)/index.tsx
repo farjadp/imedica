@@ -12,9 +12,10 @@ import { Body, Display, Mono, Serif } from "@/components/type";
 import { errorMessage } from "@/lib/api";
 import { useMe } from "@/lib/auth";
 import { categoryLabel, difficultyLabel, minutes } from "@/lib/labels";
-import { useScenarios, useSessions } from "@/lib/queries";
+import { useOpenAssessments, useScenarios, useSessions } from "@/lib/queries";
 import { color, radius } from "@/lib/theme";
-import type { ScenarioSummary, SessionSummary } from "@/lib/types";
+import type { OpenAssessment, ScenarioSummary, SessionSummary } from "@/lib/types";
+import { usePull } from "@/lib/use-pull";
 
 function greeting() {
   const h = new Date().getHours();
@@ -40,7 +41,10 @@ export default function Library() {
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const scenarios = useScenarios();
+  const assessments = useOpenAssessments();
+  const due = (assessments.data ?? []).filter((a) => !a.completed);
   const sessions = useSessions();
+  const pull = usePull(() => Promise.all([scenarios.refetch(), sessions.refetch(), assessments.refetch()]));
   const [filter, setFilter] = useState<string | null>(null);
 
   const results = useMemo(() => lastResults(sessions.data), [sessions.data]);
@@ -59,6 +63,7 @@ export default function Library() {
   const refresh = () => {
     void scenarios.refetch();
     void sessions.refetch();
+    void assessments.refetch();
   };
 
   return (
@@ -67,7 +72,7 @@ export default function Library() {
       contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 32 }}
       data={shown}
       keyExtractor={(s) => s.id}
-      refreshControl={<RefreshControl refreshing={scenarios.isRefetching} onRefresh={refresh} tintColor={color.pine} />}
+      refreshControl={<RefreshControl {...pull} tintColor={color.pine} />}
       ListHeaderComponent={
         <View>
           <View style={styles.pad}>
@@ -78,6 +83,12 @@ export default function Library() {
           </View>
 
           {scenarios.error ? <Problem message={errorMessage(scenarios.error)} onRetry={refresh} /> : null}
+
+          {due.map((a) => (
+            <Animated.View key={a.windowId} entering={FadeInDown.duration(600)}>
+              <AssessmentCard a={a} />
+            </Animated.View>
+          ))}
 
           {live || fresh ? (
             <Animated.View entering={FadeInDown.duration(600)}>
@@ -113,6 +124,40 @@ export default function Library() {
         )
       }
     />
+  );
+}
+
+/** An open pre- or post-test. It comes first: the service is waiting on it. */
+function AssessmentCard({ a }: { a: OpenAssessment }) {
+  const started = Boolean(a.attemptId);
+  return (
+    <Pressable
+      onPress={() => router.push(`/assessment/${a.windowId}`)}
+      accessibilityRole="button"
+      style={({ pressed }) => [styles.test, { opacity: pressed ? 0.92 : 1 }]}
+    >
+      <View style={styles.nextTop}>
+        <Mono tone={color.mint} medium>
+          {a.phase === "PRE" ? "PRE-TEST · BEFORE TRAINING" : "POST-TEST · AFTER TRAINING"}
+        </Mono>
+        <View style={styles.live}>
+          <View style={[styles.dot, { backgroundColor: color.mint }]} />
+          <Mono tone={color.mint}>OPEN</Mono>
+        </View>
+      </View>
+      <Display tone={color.paper} size={23} style={{ marginTop: 10 }}>
+        {a.assessment.title}
+      </Display>
+      <Mono tone={color.pineWash} style={{ marginTop: 8, opacity: 0.8 }}>
+        {a.assessment.questionCount} QUESTIONS · {a.assessment.scenarioCount} {a.assessment.scenarioCount === 1 ? "SCENARIO" : "SCENARIOS"}
+      </Mono>
+      <View style={[styles.nextCta, { borderTopColor: "rgba(159,240,196,0.18)" }]}>
+        <Body tone={color.mint} medium>
+          {started ? "Carry on" : "Start the test"}
+        </Body>
+        <Feather name="arrow-right" size={18} color={color.mint} />
+      </View>
+    </Pressable>
   );
 }
 
@@ -188,6 +233,7 @@ function Row({ scenario, last, index }: { scenario: ScenarioSummary; last: Sessi
 
 const styles = StyleSheet.create({
   pad: { paddingHorizontal: 20 },
+  test: { marginHorizontal: 20, marginTop: 22, backgroundColor: color.pine, borderRadius: radius.lg, padding: 20 },
   next: { marginHorizontal: 20, marginTop: 22, backgroundColor: color.monitor, borderRadius: radius.lg, padding: 20, overflow: "hidden" },
   nextTop: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   live: { flexDirection: "row", alignItems: "center", gap: 6 },
