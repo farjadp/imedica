@@ -49,6 +49,8 @@ export type Vitals = {
   temp?: number;
   glucose?: number;
   rhythm?: string;
+  // A PTB-XL strip id; empty means "closest to the heart rate".
+  ecgStrip?: string | null;
   skin?: string;
 };
 

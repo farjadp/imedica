@@ -13,6 +13,8 @@ npx expo run:ios            # dev build in the iOS simulator (needs Xcode)
 npx expo run:android        # dev build in the Android emulator; use http://10.0.2.2:3000 for a local API
 ```
 
+Android needs JDK 17 (`JAVA_HOME`); JDK 25 fails at the CMake step with "A restricted method in java.lang.System has been called". To reach a local API from the emulator, `adb reverse tcp:3000 tcp:3000` lets `localhost` work there too.
+
 If `pod install` fails with `Unicode Normalization not appropriate for ASCII-8BIT`, export `LANG=en_US.UTF-8` first.
 
 Sign in with a seeded paramedic (`medic1@lakeshore.test`, local password in the root README). Staff accounts see a note pointing them to the web.

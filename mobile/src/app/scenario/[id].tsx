@@ -1,7 +1,7 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/button";
@@ -45,7 +45,10 @@ export default function ScenarioBrief() {
 
   return (
     <View style={{ flex: 1, backgroundColor: color.paper }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 18, paddingBottom: 140 }}>
+      <ScrollView
+        // iOS shows this as a sheet below the status bar; Android draws the modal full screen.
+        contentContainerStyle={{ padding: 20, paddingTop: 18 + (Platform.OS === "android" ? insets.top : 0), paddingBottom: 140 }}
+      >
         <View style={styles.grabber} />
         <View style={styles.top}>
           <Mono>
