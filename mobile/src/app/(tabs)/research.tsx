@@ -11,6 +11,7 @@ import { errorMessage } from "@/lib/api";
 import { usePaperSearch, useSavedPapers } from "@/lib/queries";
 import { color, font, radius } from "@/lib/theme";
 import type { PaperRef } from "@/lib/types";
+import { usePull } from "@/lib/use-pull";
 
 // Starting points for paramedics, matched to the call types in the library.
 const TOPICS = [
@@ -45,6 +46,7 @@ export default function Research() {
 
   const search = usePaperSearch(query, openOnly);
   const saved = useSavedPapers();
+  const pull = usePull(() => saved.refetch());
   const results = search.data?.pages.flatMap((p) => p.results) ?? [];
 
   const run = (q: string) => {
@@ -112,7 +114,7 @@ export default function Research() {
         contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 32 }}
         data={saved.data ?? []}
         keyExtractor={(p) => `${p.source}:${p.extId}`}
-        refreshControl={<RefreshControl refreshing={saved.isRefetching} onRefresh={() => saved.refetch()} tintColor={color.pine} />}
+        refreshControl={<RefreshControl {...pull} tintColor={color.pine} />}
         ListHeaderComponent={header}
         renderItem={({ item, index }) => (
           <PaperRow title={item.title} meta={[item.journal, item.year].filter(Boolean).join(" · ")} index={index} onPress={() => openPaper(item)} />

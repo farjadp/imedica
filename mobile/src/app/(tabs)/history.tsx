@@ -11,10 +11,12 @@ import { errorMessage } from "@/lib/api";
 import { categoryLabel, shortDate } from "@/lib/labels";
 import { useSessions } from "@/lib/queries";
 import { color } from "@/lib/theme";
+import { usePull } from "@/lib/use-pull";
 
 export default function History() {
   const insets = useSafeAreaInsets();
   const sessions = useSessions();
+  const pull = usePull(() => sessions.refetch());
 
   if (sessions.isPending) return <Loading />;
   const done = (sessions.data ?? []).filter((s) => s.status !== "IN_PROGRESS");
@@ -26,7 +28,7 @@ export default function History() {
       contentContainerStyle={{ paddingTop: insets.top + 20, paddingBottom: 32 }}
       data={sessions.data ?? []}
       keyExtractor={(s) => s.id}
-      refreshControl={<RefreshControl refreshing={sessions.isRefetching} onRefresh={() => sessions.refetch()} tintColor={color.pine} />}
+      refreshControl={<RefreshControl {...pull} tintColor={color.pine} />}
       ListHeaderComponent={
         <View style={styles.pad}>
           <Mono>YOUR LAST 20 RUNS</Mono>
