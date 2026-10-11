@@ -6,6 +6,8 @@ import { Prisma } from "@/generated/prisma/client";
 import { fieldErrors } from "@/lib/form";
 
 import { HttpError } from "./auth/guards";
+import { env } from "./env";
+import { isSameOrigin } from "./origin";
 
 type Ctx<P> = { params: Promise<P> };
 
@@ -34,12 +36,7 @@ export function route<P = Record<string, string>>(
  * another site is refused; the mobile app (bearer token, no Origin) passes.
  */
 function assertSameOrigin(req: Request) {
-  if (req.method === "GET" || req.method === "HEAD") return;
-  const origin = req.headers.get("origin");
-  if (!origin) return;
-  if (new URL(origin).host !== new URL(req.url).host) {
-    throw new HttpError(403, "Cross-site requests aren't allowed.");
-  }
+  if (!isSameOrigin(req, [new URL(env().APP_URL).host])) throw new HttpError(403, "Cross-site requests aren't allowed.");
 }
 
 export function toErrorResponse(error: unknown): NextResponse {
