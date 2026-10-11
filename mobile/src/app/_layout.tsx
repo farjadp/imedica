@@ -69,6 +69,7 @@ function RootNavigator() {
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: color.paper } }}>
         <Stack.Protected guard={!signedIn}>
           <Stack.Screen name="sign-in" options={{ animation: "fade" }} />
+          <Stack.Screen name="invite/[token]" options={{ animation: "fade" }} />
         </Stack.Protected>
         <Stack.Protected guard={paramedic}>
           <Stack.Screen name="(tabs)" options={{ animation: "fade" }} />

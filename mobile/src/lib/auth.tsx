@@ -16,6 +16,8 @@ type AuthState =
 
 type AuthContext = AuthState & {
   signIn: (email: string, password: string) => Promise<void>;
+  /** Signs in with a session token the server just issued, e.g. after joining from an invitation. */
+  signInWithToken: (token: string) => Promise<void>;
   signOut: () => Promise<void>;
   /** Re-reads /me after the profile changes. */
   refresh: () => Promise<void>;
@@ -64,6 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void registerForPush({ ask: true });
   }, []);
 
+  const signInWithToken = useCallback(async (token: string) => {
+    setToken(token);
+    await SecureStore.setItemAsync(TOKEN_KEY, token);
+    setState({ status: "signedIn", user: await api<Me>("GET", "/me") });
+    void registerForPush({ ask: true });
+  }, []);
+
   const signOut = useCallback(async () => {
     // While the token still works: this phone stops getting their notices.
     await unregisterPush();
@@ -81,8 +90,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo(
-    () => ({ ...state, signIn, signOut, refresh, replaceToken }),
-    [state, signIn, signOut, refresh, replaceToken],
+    () => ({ ...state, signIn, signInWithToken, signOut, refresh, replaceToken }),
+    [state, signIn, signInWithToken, signOut, refresh, replaceToken],
   );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
