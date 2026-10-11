@@ -35,6 +35,15 @@ export default function DisclaimerPage() {
         respond to treatment in ways a scenario can&apos;t capture. A good score in Imedica is evidence of practice, not of
         competence or certification, unless your service has formally recognized it as such.
       </p>
+      <h2>ECG recordings</h2>
+      <p>
+        Most rhythms on the scenario monitor are real lead II recordings from the{" "}
+        <a href="https://physionet.org/content/ptb-xl/1.0.3/">PTB-XL ECG database</a> (Wagner et al., <em>Scientific Data</em>{" "}
+        7, 154, 2020), published on PhysioNet under the{" "}
+        <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> licence. We trimmed each recording to whole
+        beats and may play it slightly faster or slower to match the scenario&apos;s heart rate. VF and asystole are drawn,
+        not recorded.
+      </p>
       <h2>AI-written explanations</h2>
       <p>
         Debrief explanations are written by an AI model from the physician-written rules and your decisions. The model

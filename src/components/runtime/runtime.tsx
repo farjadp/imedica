@@ -8,6 +8,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { LogoMark } from "@/components/brand/logo";
 import { EcgTrace } from "@/components/clinical/ecg-trace";
 import { rhythmLabel, type Rhythm } from "@/components/clinical/ecg";
+import { ECG_CREDIT, pickStrip } from "@/components/clinical/ecg-strips";
 import { Button } from "@/components/ui/button";
 import { OutcomeTag } from "@/components/ui/outcome-tag";
 import type { Outcome } from "@/generated/prisma/enums";
@@ -158,7 +159,8 @@ export function Runtime({ initial }: { initial: RuntimeData }) {
               <span>II · {rhythmLabel[rhythm]}</span>
               <span>Monitor</span>
             </div>
-            <EcgTrace rhythm={rhythm} height={96} stroke="#9ff0c4" className="mx-1" />
+            <EcgTrace rhythm={rhythm} height={96} stroke="#9ff0c4" className="mx-1" real hr={v.hr} strip={v.ecgStrip} />
+            {pickStrip(rhythm) ? <p className="px-4 pb-1 text-right font-mono text-[9px] text-paper/35">{ECG_CREDIT}</p> : null}
             <dl className="grid grid-cols-2 divide-x divide-white/10 border-t border-white/10 sm:grid-cols-4">
               <VitalCell label="HR" value={v.hr != null ? String(v.hr) : "--"} unit="bpm" alarm={v.hr != null && (v.hr > 120 || v.hr < 50)} />
               <VitalCell
