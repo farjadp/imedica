@@ -34,7 +34,15 @@
         }
       ],
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Imedica uses your photos so you can choose a profile picture.",
+          "cameraPermission": "Imedica uses the camera so you can take a profile picture."
+        }
+      ],
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

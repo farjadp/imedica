@@ -79,7 +79,7 @@ export async function notifyUsers(userIds: string[], message: PushMessage) {
 /** Tells a service's paramedics that a pre- or post-test is open for them. */
 export async function notifyWindowOpened(organizationId: string, phase: "PRE" | "POST", windowId: string) {
   const people = await db.user.findMany({
-    where: { organizationId, role: "PARAMEDIC", active: true },
+    where: { organizationId, role: "PARAMEDIC", active: true, notifyAssessments: true },
     select: { id: true },
   });
   await notifyUsers(

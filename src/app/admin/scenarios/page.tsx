@@ -1,11 +1,14 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 
+import { InlineAction } from "@/components/app/inline-action";
 import { EmptyState, PageHeader, StatusPill } from "@/components/app/page-header";
 import { ButtonLink } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { categoryLabel, difficultyLabel, formatDate } from "@/lib/labels";
 import { CONTENT_ROLES, requireRolePage } from "@/server/auth/guards";
+import { importLibrary } from "@/server/scenarios/library/actions";
+import { missingFromLibrary } from "@/server/scenarios/library/missing";
 import { listScenarios } from "@/server/scenarios/service";
 
 export const metadata = { title: "Scenarios" };
@@ -22,7 +25,7 @@ export default async function ScenariosPage({ searchParams }: { searchParams: Pr
   const user = await requireRolePage(CONTENT_ROLES, "/admin/scenarios");
   const { status } = await searchParams;
   const active = tabs.find((t) => t.key === status)?.key;
-  const scenarios = await listScenarios(user, { status: active });
+  const [scenarios, missing] = await Promise.all([listScenarios(user, { status: active }), missingFromLibrary()]);
 
   return (
     <div className="space-y-6">
@@ -30,9 +33,20 @@ export default async function ScenariosPage({ searchParams }: { searchParams: Pr
         title="Scenarios"
         description="Write a call, set its rules, and send it to a second physician to publish."
         actions={
-          <ButtonLink href="/admin/scenarios/new">
-            <Plus className="size-4" /> New scenario
-          </ButtonLink>
+          <>
+            {missing.length ? (
+              <InlineAction
+                action={importLibrary}
+                fields={{}}
+                label={`Add ${missing.length} library scenario${missing.length === 1 ? "" : "s"}`}
+                variant="secondary"
+                confirmText={`Add ${missing.map((d) => d.title).join(", ")}? They arrive In review with you as author, so another physician must check and publish each one.`}
+              />
+            ) : null}
+            <ButtonLink href="/admin/scenarios/new">
+              <Plus className="size-4" /> New scenario
+            </ButtonLink>
+          </>
         }
       />
 

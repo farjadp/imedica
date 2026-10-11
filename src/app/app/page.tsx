@@ -27,7 +27,7 @@ export default async function TodayPage() {
     <div className="space-y-10">
       <header>
         <h1 className="font-display text-[2.2rem] leading-tight font-medium tracking-[-0.015em] text-ink">
-          Ready when you are, {user.firstName}.
+          Ready when you are, {user.preferredName ?? user.firstName}.
         </h1>
         <p className="mt-2 text-[15px] text-ink-2">
           A scenario takes ten to fifteen minutes. Your results are yours: your service only ever sees team totals.

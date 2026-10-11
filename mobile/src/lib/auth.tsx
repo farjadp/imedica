@@ -15,6 +15,10 @@ type AuthState =
 type AuthContext = AuthState & {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Re-reads /me after the profile changes. */
+  refresh: () => Promise<void>;
+  /** Swaps in a new session token, e.g. after a password change. */
+  replaceToken: (token: string) => Promise<void>;
 };
 
 const Ctx = createContext<AuthContext | null>(null);
@@ -57,7 +61,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await clear();
   }, [clear]);
 
-  const value = useMemo(() => ({ ...state, signIn, signOut }), [state, signIn, signOut]);
+  const refresh = useCallback(async () => {
+    setState({ status: "signedIn", user: await api<Me>("GET", "/me") });
+  }, []);
+
+  const replaceToken = useCallback(async (next: string) => {
+    setToken(next);
+    await SecureStore.setItemAsync(TOKEN_KEY, next);
+  }, []);
+
+  const value = useMemo(
+    () => ({ ...state, signIn, signOut, refresh, replaceToken }),
+    [state, signIn, signOut, refresh, replaceToken],
+  );
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
 

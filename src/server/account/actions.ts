@@ -6,35 +6,45 @@ import { z } from "zod";
 import { type FormState, fieldErrors } from "@/lib/form";
 
 import { audit } from "../audit";
-import { requireUser } from "../auth/guards";
+import { HttpError, requireUser } from "../auth/guards";
 import { hashPassword, passwordSchema, verifyPassword } from "../auth/password";
 import { createSession, revokeAllSessions } from "../auth/session";
 import { db } from "../db";
 
-const profileSchema = z.object({
-  firstName: z.string().trim().min(1, "Enter your first name.").max(80),
-  lastName: z.string().trim().min(1, "Enter your last name.").max(80),
-  level: z.enum(["PCP", "ACP", "CCP", "EMR", "STUDENT", "OTHER", ""]),
-  yearsExperience: z.union([z.literal(""), z.coerce.number().int().min(0).max(60)]),
-});
+import { profileSchema, removeOwnAvatar, setOwnAvatar } from "./profile";
 
 export async function updateProfile(_prev: FormState, formData: FormData): Promise<FormState> {
   const user = await requireUser();
-  const parsed = profileSchema.safeParse(Object.fromEntries(formData));
-  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
-  const d = parsed.data;
-  await db.user.update({
-    where: { id: user.id },
-    data: {
-      firstName: d.firstName,
-      lastName: d.lastName,
-      level: d.level || null,
-      yearsExperience: d.yearsExperience === "" ? null : d.yearsExperience,
-    },
+  const raw = Object.fromEntries(formData) as Record<string, string>;
+  const parsed = profileSchema.safeParse({
+    ...raw,
+    certifications: (raw.certifications ?? "").split(",").map((c) => c.trim()).filter(Boolean),
+    notifyAssessments: raw.notifyAssessments === "on",
   });
+  if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error) };
+  await db.user.update({ where: { id: user.id }, data: parsed.data });
   await audit(user, "user.update", { type: "User", id: user.id }, { self: true });
   revalidatePath("/app", "layout");
   return { ok: true, message: "Saved." };
+}
+
+/** Profile photo from the web account page. */
+export async function uploadAvatar(_prev: FormState, formData: FormData): Promise<FormState> {
+  const user = await requireUser();
+  try {
+    await setOwnAvatar(user, formData.get("file") as File | null);
+  } catch (error) {
+    if (error instanceof HttpError) return { message: error.message };
+    throw error;
+  }
+  revalidatePath("/app", "layout");
+  return { ok: true, message: "Photo updated." };
+}
+
+export async function deleteAvatar(): Promise<FormState> {
+  await removeOwnAvatar(await requireUser());
+  revalidatePath("/app", "layout");
+  return { ok: true, message: "Photo removed." };
 }
 
 const passwordChangeSchema = z
