@@ -11,7 +11,9 @@ import { db } from "../db";
 import { sendEmail } from "../email";
 import { clientIp, limited } from "../rate-limit";
 import { env } from "../env";
+import { HttpError } from "./guards";
 import { homeFor } from "./home";
+import { acceptInvite, acceptSchema } from "./invitations";
 import { dummyHash, hashPassword, passwordSchema, verifyPassword } from "./password";
 import { createSession, destroySession, getCurrentUser, revokeAllSessions } from "./session";
 import { hashToken, newToken } from "./tokens";
@@ -65,53 +67,21 @@ export async function logout() {
 
 // ─── Invitations ────────────────────────────────────────────────────────────
 
-const acceptSchema = z
-  .object({
-    token: z.string().min(20),
-    firstName: z.string().trim().min(1, "Enter your first name.").max(80),
-    lastName: z.string().trim().min(1, "Enter your last name.").max(80),
-    level: z.enum(["PCP", "ACP", "CCP", "EMR", "STUDENT", "OTHER"]).optional().or(z.literal("")),
-    yearsExperience: z.coerce.number().int().min(0).max(60).optional().or(z.literal("")),
-    password: passwordSchema,
-    confirm: z.string(),
-  })
-  .refine((d) => d.password === d.confirm, { path: ["confirm"], message: "The passwords don't match." });
-
 export async function acceptInvitation(_prev: FormState, formData: FormData): Promise<FormState> {
-  const parsed = acceptSchema.safeParse(Object.fromEntries(formData));
+  const raw = Object.fromEntries(formData);
+  const token = typeof raw.token === "string" ? raw.token : "";
+  const parsed = acceptSchema.safeParse(raw);
   if (!parsed.success) return { fieldErrors: fieldErrors(parsed.error), message: "Check the highlighted fields." };
-  const d = parsed.data;
 
-  const invite = await db.invitation.findUnique({ where: { tokenHash: hashToken(d.token) } });
-  if (!invite || invite.acceptedAt || invite.expiresAt < new Date()) {
-    return { message: "This invitation has expired or was already used. Ask for a new one." };
+  let user;
+  try {
+    user = await acceptInvite(token, parsed.data);
+  } catch (error) {
+    if (error instanceof HttpError) return { message: error.message };
+    throw error;
   }
-  if (await db.user.findUnique({ where: { email: invite.email } })) {
-    return { message: "An account already exists for this email. Sign in instead." };
-  }
-
-  const user = await db.$transaction(async (tx) => {
-    const created = await tx.user.create({
-      data: {
-        email: invite.email,
-        passwordHash: await hashPassword(d.password),
-        firstName: d.firstName,
-        lastName: d.lastName,
-        role: invite.role,
-        level: d.level ? d.level : null,
-        yearsExperience: d.yearsExperience === "" || d.yearsExperience === undefined ? null : d.yearsExperience,
-        organizationId: invite.organizationId,
-      },
-    });
-    await tx.invitation.update({ where: { id: invite.id }, data: { acceptedAt: new Date() } });
-    return created;
-  });
 
   await createSession(user.id);
-  await audit({ id: user.id, role: user.role, organizationId: user.organizationId }, "user.join", {
-    type: "Invitation",
-    id: invite.id,
-  });
   // A paramedic who joined on a phone belongs in the app, not the mobile web.
   if (user.role === "PARAMEDIC" && isPhone((await headers()).get("user-agent"))) redirect("/welcome");
   redirect(homeFor(user.role));

@@ -10,6 +10,12 @@ const schema = z.object({
   RESEND_API_KEY: z.string().optional().transform((v) => v || undefined),
   // Optional: only needed once "Enhanced push security" is on in the Expo project.
   EXPO_ACCESS_TOKEN: z.string().optional().transform((v) => v || undefined),
+  // Universal links / App Links: which apps may open www.imedica.tech/invite/… links.
+  APPLE_APP_ID: z.string().default("JN57DU6B4M.ca.imedica.app"),
+  ANDROID_PACKAGE: z.string().default("ca.imedica.app"),
+  // Comma-separated SHA-256 signing-certificate fingerprints: the EAS upload key and, once
+  // the app is on Google Play, the Play app-signing key (Play Console → Setup → App signing).
+  ANDROID_CERT_SHA256: z.string().optional().transform((v) => (v ? v.split(",").map((f) => f.trim()).filter(Boolean) : [])),
   EMAIL_FROM: z.string().default("Imedica <no-reply@imedica.ca>"),
   // "on" turns on features built from open datasets whose licence we haven't
   // cleared for customers yet (the question bank). Off everywhere a customer can reach.
