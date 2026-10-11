@@ -45,6 +45,7 @@ export const mainNav: NavGroup[] = [
 export const legalNav: NavLink[] = [
   { href: "/legal/privacy", label: "Privacy policy" },
   { href: "/legal/terms", label: "Terms of use" },
+  { href: "/legal/delete-account", label: "Delete your account" },
   { href: "/legal/disclaimer", label: "Medical disclaimer" },
   { href: "/pipeda", label: "PIPEDA & PHIPA" },
   { href: "/brand", label: "Brand sheet" },

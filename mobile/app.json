@@ -26,6 +26,12 @@
         "android.permission.RECORD_AUDIO",
         "android.permission.USE_BIOMETRIC",
         "android.permission.USE_FINGERPRINT"
+      ],
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "plugins": [
@@ -44,7 +50,8 @@
         "expo-image-picker",
         {
           "photosPermission": "Imedica uses your photos so you can choose a profile picture.",
-          "cameraPermission": "Imedica uses the camera so you can take a profile picture."
+          "cameraPermission": "Imedica uses the camera so you can take a profile picture.",
+          "microphonePermission": false
         }
       ],
       "expo-web-browser",
