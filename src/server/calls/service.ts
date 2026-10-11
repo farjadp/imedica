@@ -169,7 +169,8 @@ export async function draftScenario(user: CurrentUser, callId: string) {
   let response;
   try {
     const client = new Anthropic({ apiKey: ANTHROPIC_API_KEY });
-    response = await client.beta.messages.parse({
+    // Streamed: a draft can run long, and the SDK refuses large non-streaming requests.
+    const stream = client.beta.messages.stream({
       model: ANTHROPIC_MODEL,
       max_tokens: 32000,
       betas: ["server-side-fallback-2026-07-01"],
@@ -183,6 +184,7 @@ export async function draftScenario(user: CurrentUser, callId: string) {
         },
       ],
     });
+    response = await stream.finalMessage();
   } catch (error) {
     console.error("[calls] draft failed", callId, error);
     throw new HttpError(
