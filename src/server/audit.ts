@@ -38,6 +38,7 @@ export type AuditAction =
   | "blog.update"
   | "blog.status"
   | "blog.delete"
+  | "bank.import"
   | "blog.image_upload"
   | "blog.category"
   | "inbox.receive"

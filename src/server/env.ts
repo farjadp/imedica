@@ -11,6 +11,9 @@ const schema = z.object({
   // Optional: only needed once "Enhanced push security" is on in the Expo project.
   EXPO_ACCESS_TOKEN: z.string().optional().transform((v) => v || undefined),
   EMAIL_FROM: z.string().default("Imedica <no-reply@imedica.ca>"),
+  // "on" turns on features built from open datasets whose licence we haven't
+  // cleared for customers yet (the question bank). Off everywhere a customer can reach.
+  INTERNAL_DATASETS: z.enum(["on", "off"]).default("off"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

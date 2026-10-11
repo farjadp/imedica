@@ -708,6 +708,27 @@ model AssessmentQuestion {
   @@schema("content")
 }
 
+// Multiple-choice questions imported from open datasets, for internal testing
+// only: the feature is off unless INTERNAL_DATASETS is "on". A physician copies
+// one into a draft assessment; the copy names its source in `reference`.
+model BankQuestion {
+  id           String   @id @default(cuid())
+  source       String // dataset, e.g. "EMS-MCQA"
+  sourceKey    String // stable hash of the original question and choices
+  origin       String? // where the dataset says the question came from
+  levels       String[] @default([])
+  categories   String[] @default([])
+  stem         String
+  options      String[]
+  correctIndex Int
+  explanation  String?
+  importedAt   DateTime @default(now())
+
+  @@unique([source, sourceKey])
+  @@index([source])
+  @@schema("content")
+}
+
 // One person's go at one phase. Keyed by anonymous hash, like training runs.
 model AssessmentAttempt {
   id            String          @id @default(cuid())
