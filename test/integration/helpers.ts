@@ -153,3 +153,34 @@ export function form(fields: Record<string, string>) {
   for (const [k, v] of Object.entries(fields)) data.set(k, v);
   return data;
 }
+
+// ─── Assessments ────────────────────────────────────────────────────────────
+
+/** A ready-to-review assessment: one published scenario and enough questions. */
+export async function assessment(
+  authorId: string,
+  scenarioIds: string[],
+  status: "DRAFT" | "IN_REVIEW" | "PUBLISHED" = "DRAFT",
+) {
+  seq += 1;
+  return db.assessment.create({
+    data: {
+      title: `Test assessment ${seq}`,
+      summary: "Before and after the pilot.",
+      status,
+      scenarioIds,
+      authorId,
+      ...(status === "PUBLISHED" ? { publishedAt: new Date() } : {}),
+      questions: {
+        create: Array.from({ length: 5 }, (_, i) => ({
+          order: i,
+          stem: `Question ${i + 1}?`,
+          options: ["Right", "Wrong", "Also wrong"],
+          correctIndex: 0,
+          rationale: "Because the directive says so.",
+        })),
+      },
+    },
+    include: { questions: { orderBy: { order: "asc" } } },
+  });
+}
