@@ -44,7 +44,12 @@ export default function Library() {
   const [filter, setFilter] = useState<string | null>(null);
 
   const results = useMemo(() => lastResults(sessions.data), [sessions.data]);
-  const live = sessions.data?.find((s) => s.status === "IN_PROGRESS");
+  // A run only counts as live while its clock still has time; an abandoned one
+  // the server hasn't closed yet would otherwise open straight onto "timed out".
+  const limits = useMemo(() => new Map((scenarios.data ?? []).map((s) => [s.id, s.timeLimitSec])), [scenarios.data]);
+  const isLive = (s: SessionSummary) =>
+    s.status === "IN_PROGRESS" && new Date(s.startedAt).getTime() + (limits.get(s.scenario.id) ?? 0) * 1000 > sessions.dataUpdatedAt;
+  const live = sessions.data?.find(isLive);
   const fresh = scenarios.data?.find((s) => !results.has(s.id));
   const categories = useMemo(() => [...new Set((scenarios.data ?? []).map((s) => s.category))], [scenarios.data]);
   const shown = (scenarios.data ?? []).filter((s) => !filter || s.category === filter);
@@ -95,7 +100,10 @@ export default function Library() {
           <View style={[styles.pad, styles.rule]} />
         </View>
       }
-      renderItem={({ item, index }) => <Row scenario={item} last={results.get(item.id)} index={index} />}
+      renderItem={({ item, index }) => {
+        const last = results.get(item.id);
+        return <Row scenario={item} last={last && (last.status !== "IN_PROGRESS" || isLive(last)) ? last : undefined} index={index} />;
+      }}
       ListEmptyComponent={
         scenarios.error ? null : (
           <View style={[styles.pad, { paddingVertical: 32 }]}>

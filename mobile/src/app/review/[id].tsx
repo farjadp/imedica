@@ -50,8 +50,8 @@ export default function ReviewScreen() {
         </Pressable>
 
         <Mono style={{ marginTop: 20 }}>
-          DEBRIEF · {(categoryLabel[r.scenario.category] ?? "").toUpperCase()} · {clock(r.durationSec * 1000)}
-          {r.status === "TIMED_OUT" ? " · TIMED OUT" : ""}
+          DEBRIEF · {(categoryLabel[r.scenario.category] ?? "").toUpperCase()} ·{" "}
+          {r.status === "TIMED_OUT" ? "TIMED OUT" : clock(r.durationSec * 1000)}
         </Mono>
         <Serif size={18} tone={color.ink2} style={{ marginTop: 6 }}>
           {r.scenario.title}
@@ -63,7 +63,7 @@ export default function ReviewScreen() {
               {r.grade}.
             </Display>
             <Mono style={{ marginTop: 10 }}>
-              {r.score} OF {r.maxScore} POINTS · {r.decisions.length} DECISIONS
+              {r.score} OF {r.maxScore} POINTS · {r.decisions.length} {r.decisions.length === 1 ? "DECISION" : "DECISIONS"}
             </Mono>
           </View>
           <ScoreRing percent={r.percent} tone={tone} />
