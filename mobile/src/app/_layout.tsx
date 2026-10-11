@@ -3,16 +3,19 @@ import { IBMPlexSans_400Regular, IBMPlexSans_500Medium } from "@expo-google-font
 import { SourceSerif4_400Regular, SourceSerif4_400Regular_Italic, SourceSerif4_500Medium } from "@expo-google-fonts/source-serif-4";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import * as Notifications from "expo-notifications";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { SafeAreaProvider, initialWindowMetrics } from "react-native-safe-area-context";
 
+import { LockScreen } from "@/components/lock-screen";
 import { SplashIntro } from "@/components/splash-intro";
 import { ApiError } from "@/lib/api";
 import { AuthProvider, useAuth } from "@/lib/auth";
+import { LockProvider, useLock } from "@/lib/lock";
 import { color } from "@/lib/theme";
 
 // Hold the native splash until fonts and the saved session are known.
@@ -39,12 +42,20 @@ function RootNavigator() {
     IBMPlexMono_400Regular,
     IBMPlexMono_500Medium,
   });
+  const lock = useLock();
+  const notice = Notifications.useLastNotificationResponse();
   const [introDone, setIntroDone] = useState(false);
   const ready = (fontsLoaded || Boolean(fontError)) && auth.status !== "loading";
 
   useEffect(() => {
     if (ready) SplashScreen.hide();
   }, [ready]);
+
+  // Tapping "your pre-test is open" goes straight to it.
+  const windowId = notice?.notification.request.content.data?.windowId;
+  useEffect(() => {
+    if (ready && auth.status === "signedIn" && typeof windowId === "string") router.push(`/assessment/${windowId}`);
+  }, [ready, auth.status, windowId]);
   const finishIntro = useCallback(() => setIntroDone(true), []);
 
   if (!ready) return <View style={{ flex: 1, backgroundColor: color.monitor }} />;
@@ -64,6 +75,8 @@ function RootNavigator() {
           <Stack.Screen name="scenario/[id]" options={{ animation: "slide_from_bottom", presentation: "modal" }} />
           <Stack.Screen name="run/[id]" options={{ animation: "fade", gestureEnabled: false }} />
           <Stack.Screen name="review/[id]" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="assessment/[windowId]" options={{ animation: "slide_from_right" }} />
+          <Stack.Screen name="assessment/quiz/[id]" options={{ animation: "slide_from_bottom", gestureEnabled: false }} />
           <Stack.Screen name="paper/[source]/[id]" options={{ animation: "slide_from_right" }} />
           <Stack.Screen name="profile/edit" options={{ presentation: "modal" }} />
           <Stack.Screen name="profile/password" options={{ presentation: "modal" }} />
@@ -73,6 +86,7 @@ function RootNavigator() {
           <Stack.Screen name="staff" options={{ animation: "fade" }} />
         </Stack.Protected>
       </Stack>
+      {signedIn && lock.locked ? <LockScreen /> : null}
       {introDone ? null : <SplashIntro onDone={finishIntro} />}
     </View>
   );
@@ -82,9 +96,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
+        <LockProvider>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </LockProvider>
       </QueryClientProvider>
     </SafeAreaProvider>
   );

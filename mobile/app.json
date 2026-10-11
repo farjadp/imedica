@@ -42,7 +42,19 @@
           "cameraPermission": "Imedica uses the camera so you can take a profile picture."
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-notifications",
+        {
+          "color": "#123D31"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Imedica uses Face ID to unlock the app, if you turn the lock on."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
