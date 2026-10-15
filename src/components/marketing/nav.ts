@@ -10,7 +10,7 @@ export const mainNav: NavGroup[] = [
     items: [
       { href: "/product", label: "The product", blurb: "What Imedica is and what's inside" },
       { href: "/how-it-works", label: "How it works", blurb: "From a physician's rules to a debrief" },
-      { href: "/download", label: "Mobile app", blurb: "iPhone and Android, launching Oct 20" },
+      { href: "/download", label: "Mobile app", blurb: "On the App Store and Google Play" },
       { href: "/roadmap", label: "Roadmap", blurb: "What's shipped, what's next" },
     ],
   },

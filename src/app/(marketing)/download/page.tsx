@@ -1,19 +1,20 @@
-import { Apple, BellRing, History, MonitorSmartphone, Play, ShieldCheck, Timer } from "lucide-react";
+import { ArrowUpRight, BellRing, Fingerprint, History, MonitorSmartphone, ShieldCheck, Timer } from "lucide-react";
 import type { Metadata } from "next";
 
 import { EcgTrace } from "@/components/clinical/ecg-trace";
-import { LogoMark } from "@/components/brand/logo";
+import { AppTour, PhoneShot, type TourStep } from "@/components/marketing/app-tour";
 import { WaitlistForm } from "@/components/marketing/forms";
 import { LaunchCountdown } from "@/components/marketing/launch-countdown";
 import { Accent, PageHero } from "@/components/marketing/page-hero";
 import { PilotClose } from "@/components/marketing/pilot-close";
 import { Container } from "@/components/marketing/section";
-import { OutcomeTag } from "@/components/ui/outcome-tag";
+import { StoreBadge } from "@/components/marketing/store-badge";
 import { apps } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Mobile app for iPhone and Android",
-  description: "Run Imedica scenarios between calls on your phone. Pilot services get the beta from October 20, 2026; the App Store and Google Play follow on November 3.",
+  description:
+    "Run Imedica scenarios between calls on your phone: physician-written calls, scored the moment you decide, with the physician's reason in the debrief. On the App Store and Google Play.",
   alternates: { canonical: "/download" },
 };
 
@@ -21,140 +22,193 @@ const day = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString("en-
 const launch = day(apps.launchDate);
 const beta = day(apps.betaDate);
 
-/** A phone showing the call runtime: monitor, the moment, and a verdict. */
-function Phone() {
+const tour: TourStep[] = [
+  {
+    shot: "/screens/library.webp",
+    alt: "The Imedica library: an open post-test, the next call, and scenarios by category",
+    time: "00:00",
+    title: "Pick up a call.",
+    body: "Your service's scenarios, by category, with the next call waiting and any open assessment at the top. Short enough to finish on a break.",
+  },
+  {
+    shot: "/screens/call.webp",
+    alt: "A live call: real ECG strip, vitals, the scene and the actions you can take",
+    time: "00:15",
+    title: "Decide on the clock.",
+    body: "A real 12-lead strip from PTB-XL, vitals that move with what you do, and the scene in plain words. The timer is running.",
+  },
+  {
+    shot: "/screens/verdict.webp",
+    alt: "A decision scored as correct the moment it's made, with the vitals improving",
+    time: "00:39",
+    title: "Scored the moment you commit.",
+    body: "Every action is checked against rules a physician wrote for your directives. The patient responds, for better or worse.",
+  },
+  {
+    shot: "/screens/debrief.webp",
+    alt: "The debrief: score, how the call ended, and each decision with the physician's reason",
+    time: "00:52",
+    title: "Read the physician's reason.",
+    body: "How the call ended, every decision on a timeline, and why it was right or wrong, with a teaching note to go deeper.",
+  },
+  {
+    shot: "/screens/test.webp",
+    alt: "A post-test: five questions and two scenarios, the same as before training",
+    time: "After",
+    title: "Show what changed.",
+    body: "Before-and-after assessments run in the app. You see your own answers; your service only ever sees team totals.",
+  },
+];
+
+const features = [
+  { icon: Timer, title: "Ten minutes between calls", body: "Most calls run ten to twelve minutes on the clock: one break, one scenario." },
+  { icon: MonitorSmartphone, title: "One account everywhere", body: "Start on the station computer, finish on your phone. History follows you." },
+  { icon: Fingerprint, title: "Face ID and fingerprint", body: "Lock the app with your phone's biometrics, so a shared tablet stays yours." },
+  { icon: History, title: "Debriefs on hand", body: "Every call you've run, with its verdicts and reasons, ready before your next shift." },
+  { icon: BellRing, title: "Told when it matters", body: "A notification when your training lead opens an assessment round." },
+  { icon: ShieldCheck, title: "Same privacy model", body: "Identity is kept apart from training data, exactly as on the web." },
+];
+
+/** Three real screens fanned out: library, the live call in front, the debrief. */
+function PhoneFan() {
   return (
-    <div className="relative mx-auto w-[280px] md:w-[300px]" aria-hidden>
-      <div className="absolute -inset-10 rounded-full bg-[radial-gradient(closest-side,rgb(159_240_196/0.18),transparent)]" />
-      <div className="relative rounded-[3rem] border border-white/15 bg-[#030806] p-3 shadow-[0_60px_120px_-40px_rgb(0_0_0/0.9)]">
-        <div className="overflow-hidden rounded-[2.4rem] bg-[#0b1714]">
-          <div className="flex items-center justify-between px-6 pt-4 pb-2 font-mono text-[10px] text-paper/50">
-            <span>9:41</span>
-            <span className="h-5 w-20 rounded-full bg-black" />
-            <span>5G</span>
-          </div>
-          <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-            <LogoMark className="size-5 text-[#9ff0c4]" />
-            <p className="truncate text-[12px] text-paper">Anaphylaxis after a wasp sting</p>
-            <span className="tabular ml-auto rounded bg-[#c2302a]/20 px-1.5 font-mono text-[11px] text-[#ff8a80]">06:12</span>
-          </div>
-          <div className="grid grid-cols-4 border-b border-white/10 font-mono">
-            {[
-              ["HR", "128"],
-              ["BP", "84/50"],
-              ["SpO₂", "89"],
-              ["RR", "30"],
-            ].map(([k, v]) => (
-              <div key={k} className="border-r border-white/10 px-2.5 py-2 last:border-r-0">
-                <p className="text-[8px] tracking-[0.14em] text-paper/45 uppercase">{k}</p>
-                <p className="tabular text-[15px] text-paper">{v}</p>
-              </div>
-            ))}
-          </div>
-          <EcgTrace rhythm="sinus" height={52} stroke="rgb(159 240 196 / 0.9)" />
-          <div className="space-y-2 p-4">
-            <p className="font-mono text-[9px] tracking-[0.14em] text-paper/45 uppercase">What do you do first?</p>
-            {["Epinephrine IM", "Diphenhydramine IV", "Salbutamol neb", "Load and go"].map((a, i) => (
-              <div key={a} className={`flex items-center justify-between rounded-xl border px-3 py-2.5 text-[12px] ${i === 0 ? "border-[#9ff0c4]/50 bg-[#9ff0c4]/10 text-paper" : "border-white/10 text-paper/75"}`}>
-                {a}
-                {i === 0 ? <OutcomeTag outcome="CORRECT" className="h-5 px-1.5 text-[9px]" /> : null}
-              </div>
-            ))}
-          </div>
-          <div className="px-4 pb-6">
-            <p className="rounded-xl bg-white/[0.04] p-3 text-[11px] leading-relaxed text-paper/65">
-              Airway swelling and hypotension: epinephrine first, without waiting.
-            </p>
-          </div>
-        </div>
+    <div className="relative mx-auto h-[400px] w-full max-w-[560px] sm:h-[560px] md:h-[640px]" aria-hidden>
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 opacity-40">
+        <EcgTrace rhythm="sinus" height={120} stroke="rgb(159 240 196 / 0.55)" />
       </div>
+      <div className="absolute top-1/2 left-1/2 size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(159_240_196/0.16),transparent)]" />
+      <PhoneShot
+        src="/screens/library.webp"
+        alt=""
+        className="absolute top-[10%] left-[2%] w-[38%] -rotate-[9deg] opacity-80 motion-safe:animate-[drift_9s_ease-in-out_infinite]"
+      />
+      <PhoneShot
+        src="/screens/debrief.webp"
+        alt=""
+        className="absolute top-[10%] right-[2%] w-[38%] rotate-[9deg] opacity-80 motion-safe:animate-[drift_9s_ease-in-out_-4.5s_infinite]"
+      />
+      <PhoneShot
+        src="/screens/call.webp"
+        alt=""
+        priority
+        className="absolute top-0 left-1/2 w-[46%] -translate-x-1/2 shadow-[0_70px_140px_-40px_rgb(0_0_0/0.95)]"
+      />
     </div>
   );
 }
 
-function StoreButton({ store, url }: { store: "ios" | "android"; url: string | null }) {
-  const Icon = store === "ios" ? Apple : Play;
-  const label = store === "ios" ? "App Store" : "Google Play";
-  const body = (
-    <>
-      <Icon className="size-6" aria-hidden />
-      <span className="text-left leading-tight">
-        <span className="block text-[11px] opacity-70">{url ? (store === "ios" ? "Download on the" : "Get it on") : `Coming ${launch}`}</span>
-        <span className="block text-[17px] font-medium">{label}</span>
-      </span>
-    </>
-  );
-  const cls = "inline-flex h-14 items-center gap-3 rounded-2xl border px-5 transition-colors";
-  return url ? (
-    <a href={url} target="_blank" rel="noopener noreferrer" className={`${cls} border-white/20 bg-white text-[#06110e] hover:bg-[#9ff0c4]`}>
-      {body}
-    </a>
-  ) : (
-    <span className={`${cls} cursor-default border-white/15 text-paper/70`} aria-disabled="true">
-      {body}
-    </span>
+function Badges({ tone = "dark" }: { tone?: "dark" | "light" }) {
+  return (
+    <div className="flex flex-wrap gap-3">
+      <StoreBadge store="ios" tone={tone} />
+      <StoreBadge store="android" tone={tone} />
+    </div>
   );
 }
 
-const features = [
-  { icon: Timer, title: "Ten minutes between calls", body: "Scenarios are short enough to finish on a break, and pick up where you left off." },
-  { icon: MonitorSmartphone, title: "Same account everywhere", body: "Start on the station computer, finish on your phone. Runs and history follow you." },
-  { icon: History, title: "Your debriefs, on hand", body: "Every decision, its verdict and the physician's reason, ready to review before your next shift." },
-  { icon: ShieldCheck, title: "Same privacy model", body: "The app uses the same API and the same separation of identity from training data as the web." },
-];
-
 export default function DownloadPage() {
-  const live = Boolean(apps.ios.url || apps.android.url);
+  const live = Boolean(apps.ios.url && apps.android.url);
   return (
     <>
       <PageHero
-        chrome={["Imedica for iPhone and Android", `Pilot beta · ${beta}`]}
+        chrome={["Imedica for iPhone and Android", live ? "App Store · Google Play" : `In the stores ${launch}`]}
         title={
           <>
             The hard calls, <Accent>in your pocket.</Accent>
           </>
         }
-        lead={`Physician-written scenarios, scored the moment you decide, on the phone you already carry. Pilot services get the beta for iPhone and Android from ${beta}; both stores follow on ${launch}.`}
-        aside={<Phone />}
-        actions={
-          <>
-            <StoreButton store="ios" url={apps.ios.url} />
-            <StoreButton store="android" url={apps.android.url} />
-          </>
-        }
+        lead="Physician-written scenarios, scored the moment you decide, on the phone you already carry. Sign in with the account your training lead invited you to."
+        aside={<PhoneFan />}
+        actions={<Badges />}
       >
         {live ? null : (
-          <div className="mt-12 space-y-6 border-t border-white/10 pt-8">
-            <LaunchCountdown date={apps.launchDate} />
-            <div>
-              <p className="mb-3 flex items-center gap-2 text-[15px] text-paper/75">
-                <BellRing className="size-4 text-[#9ff0c4]" /> Get an email the day it&apos;s in the store.
-              </p>
-              <WaitlistForm />
-            </div>
-          </div>
+          <p className="mt-6 max-w-xl text-[15px] leading-relaxed text-paper/55">
+            Pilot services get the beta from {beta}:{" "}
+            <a href={apps.iosBeta} target="_blank" rel="noopener noreferrer" className="text-[#9ff0c4] underline-offset-4 hover:underline">
+              TestFlight on iPhone
+            </a>
+            , and a Google Play test invite on Android.
+          </p>
         )}
       </PageHero>
 
       <section className="py-24 md:py-32">
         <Container>
           <h2 className="max-w-3xl font-display text-[clamp(2.4rem,5.2vw,4.8rem)] leading-[0.96] font-medium tracking-[-0.035em] text-ink">
+            One call, <em className="font-normal text-pine-3">start to debrief.</em>
+          </h2>
+          <p className="mt-6 max-w-xl text-[18px] leading-relaxed text-ink-2">
+            These are the app&apos;s real screens, from a trauma call a physician wrote. Scroll through it.
+          </p>
+          <div className="mt-10 md:mt-16">
+            <AppTour steps={tour} />
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-t border-ink/10 bg-paper-2 py-24 md:py-32">
+        <Container>
+          <h2 className="max-w-3xl font-display text-[clamp(2.2rem,4.4vw,4rem)] leading-[0.98] font-medium tracking-[-0.035em] text-ink">
             Built for the <em className="font-normal text-pine-3">ten minutes you have.</em>
           </h2>
-          <ul className="mt-16 grid gap-x-12 gap-y-12 md:grid-cols-2">
+          <ul className="mt-14 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
             {features.map(({ icon: Icon, title, body }) => (
-              <li key={title} className="flex gap-5 border-t border-ink pt-6">
-                <Icon className="mt-1 size-6 shrink-0 text-pine-3" aria-hidden />
-                <div>
-                  <h3 className="font-display text-[1.7rem] leading-tight font-medium tracking-[-0.02em] text-ink">{title}</h3>
-                  <p className="mt-2 max-w-md text-[17px] leading-relaxed text-ink-2">{body}</p>
-                </div>
+              <li key={title} className="border-t border-ink pt-5">
+                <Icon className="size-6 text-pine-3" aria-hidden />
+                <h3 className="mt-4 font-display text-[1.55rem] leading-tight font-medium tracking-[-0.02em] text-ink">{title}</h3>
+                <p className="mt-2 text-[16px] leading-relaxed text-ink-2">{body}</p>
               </li>
             ))}
           </ul>
-          <p className="mt-14 max-w-2xl text-[15px] leading-relaxed text-ink-3">
-            The apps are for paramedics whose service uses Imedica: sign in with the account your training lead invited you
-            to. The earlier iMedica BLS app has been retired and is replaced by these.
+        </Container>
+      </section>
+
+      <section id="get" data-nav="dark" className="relative scroll-mt-24 overflow-hidden bg-[#06110e] text-paper">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 opacity-25" aria-hidden>
+          <EcgTrace rhythm="sinus" height={140} stroke="rgb(159 240 196 / 0.6)" />
+        </div>
+        <Container className="relative py-24 md:py-36">
+          <h2 className="max-w-4xl font-display text-[clamp(3rem,7.4vw,7rem)] leading-[0.92] font-medium tracking-[-0.045em]">
+            {live ? (
+              <>
+                Get Imedica <Accent>on your phone.</Accent>
+              </>
+            ) : (
+              <>
+                In both stores <Accent>{day(apps.launchDate).replace(/, \d{4}$/, "")}.</Accent>
+              </>
+            )}
+          </h2>
+          <div className="mt-12 grid gap-12 md:grid-cols-2 md:items-end">
+            <div className="space-y-8">
+              <Badges />
+              {live ? null : <LaunchCountdown date={apps.launchDate} />}
+            </div>
+            <div>
+              {live ? (
+                <p className="max-w-md text-[17px] leading-relaxed text-paper/70">
+                  Free to download. Your service&apos;s Imedica subscription unlocks the scenarios; ask your training lead for an
+                  invite.
+                </p>
+              ) : (
+                <>
+                  <p className="mb-3 flex items-center gap-2 text-[15px] text-paper/75">
+                    <BellRing className="size-4 text-[#9ff0c4]" /> Get an email the day it&apos;s in the stores.
+                  </p>
+                  <WaitlistForm />
+                </>
+              )}
+              <a
+                href="/how-it-works"
+                className="mt-8 inline-flex items-center gap-1.5 text-[15px] text-paper/60 transition-colors hover:text-paper"
+              >
+                How a scenario is built <ArrowUpRight className="size-4" />
+              </a>
+            </div>
+          </div>
+          <p className="mt-16 max-w-2xl text-[14px] leading-relaxed text-paper/45">
+            The apps are for paramedics whose service uses Imedica. The earlier iMedica BLS app has been retired and is replaced by
+            these.
           </p>
         </Container>
       </section>

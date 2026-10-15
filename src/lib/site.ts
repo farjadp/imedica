@@ -15,17 +15,24 @@ export const site = {
   },
 };
 
-// The rebuilt mobile apps. Store links stay null until each listing is live,
-// so the download page shows "coming" instead of a dead link.
+// The rebuilt mobile apps. Store links come from NEXT_PUBLIC_IOS_STORE_URL and
+// NEXT_PUBLIC_ANDROID_STORE_URL (set on Railway once each listing resolves), so a
+// store goes live on the site with a redeploy and no code change. Until then the
+// badges say "coming" instead of pointing at a dead link.
 export const apps = {
   // Pilot services get the beta (TestFlight / Play testing) first; the store
   // listings go public once both reviews have passed.
   betaDate: "2026-10-20",
   launchDate: "2026-11-03",
-  ios: { url: null as string | null },
+  ios: { url: process.env.NEXT_PUBLIC_IOS_STORE_URL || null },
   // TestFlight's public link for the pilot beta; works once Apple's beta review approves a build.
   iosBeta: "https://testflight.apple.com/join/2q9wY5sg",
   // The app's URL scheme (mobile/app.json "scheme"): opens the installed app.
   scheme: "imedica://",
-  android: { url: null as string | null },
+  android: { url: process.env.NEXT_PUBLIC_ANDROID_STORE_URL || null },
 };
+
+export type Store = "ios" | "android";
+
+/** Where a store button goes: the listing once it's live, otherwise the app page. */
+export const storeHref = (store: Store) => apps[store].url ?? "/download#get";
