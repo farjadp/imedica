@@ -7,8 +7,12 @@ import { useEffect, useRef, useState } from "react";
 
 import { LogoMark } from "@/components/brand/logo";
 import { cn } from "@/lib/cn";
+import { apps, storeHref, type Store } from "@/lib/site";
 
 import { isActive, mainNav } from "./nav";
+import { StoreGlyph, storeName } from "./store-badge";
+
+const stores: Store[] = ["ios", "android"];
 
 /**
  * A floating pill. Over a dark section (anything marked data-nav="dark")
@@ -141,6 +145,30 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-1 lg:flex">
+          <div
+            className={cn("mr-1 flex items-center rounded-full border p-0.5", dark ? "border-white/12" : "border-rule")}
+            role="group"
+            aria-label="Get the app"
+          >
+            {stores.map((store) => {
+              const live = Boolean(apps[store].url);
+              return (
+                <a
+                  key={store}
+                  href={storeHref(store)}
+                  {...(live ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                  aria-label={live ? `Imedica on the ${storeName(store)}` : `${storeName(store)}: launching soon`}
+                  title={live ? storeName(store) : `${storeName(store)}: launching soon`}
+                  className={cn(
+                    "inline-flex size-9 items-center justify-center rounded-full transition-colors",
+                    dark ? "text-paper/75 hover:bg-white/10 hover:text-paper" : "text-ink-2 hover:bg-paper-2 hover:text-ink",
+                  )}
+                >
+                  <StoreGlyph store={store} className={store === "ios" ? "size-[17px]" : "size-[15px]"} />
+                </a>
+              );
+            })}
+          </div>
           <Link
             href="/login"
             className={cn("rounded-full px-3.5 py-2 text-[14px]", dark ? "text-paper/75 hover:text-paper" : "text-ink-2 hover:text-ink")}
@@ -208,6 +236,17 @@ export function SiteHeader() {
             ),
           )}
           <div className="mt-2 grid grid-cols-2 gap-2">
+            {stores.map((store) => (
+              <a
+                key={store}
+                href={storeHref(store)}
+                {...(apps[store].url ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                className="flex items-center justify-center gap-2 rounded-full bg-[#06110e] py-3 text-[15px] text-paper"
+              >
+                <StoreGlyph store={store} className="size-4" />
+                {storeName(store)}
+              </a>
+            ))}
             <Link href="/login" className="rounded-full border border-rule py-3 text-center text-[15px] text-ink">
               Sign in
             </Link>
