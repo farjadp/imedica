@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 };
 
 const principles = [
-  ["Accountability", "Imedica HealthTech Inc. is responsible for the personal information it holds. Questions go to our privacy contact below, and every administrative action is written to an audit log."],
+  ["Accountability", "Ashavid Inc., which makes Imedica, is responsible for the personal information it holds. Questions go to our privacy contact below, and every administrative action is written to an audit log."],
   ["Identifying purposes", "We collect what's needed to run training: your name, email, role and organization to sign you in and manage seats, and your decisions in scenarios to score and explain them. Nothing else."],
   ["Consent", "Your organization invites you; you create your own account and accept the terms. Training data is used for your training and your service's de-identified reporting, never sold or used for advertising."],
   ["Limiting collection", "No health information about patients is collected: scenarios are fictional. We don't collect location, contacts or device identifiers beyond what sign-in needs."],

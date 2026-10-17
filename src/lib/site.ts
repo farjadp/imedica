@@ -1,6 +1,6 @@
 // Public contact details, from imedica.tech/contact (October 2026).
 export const site = {
-  legalName: "Imedica HealthTech Inc.",
+  legalName: "Ashavid Inc.",
   contactEmail: "hi@imedica.tech",
   // No separate privacy inbox exists yet; privacy questions go to the main one.
   privacyEmail: "hi@imedica.tech",
