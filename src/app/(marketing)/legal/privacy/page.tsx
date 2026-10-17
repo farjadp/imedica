@@ -8,9 +8,9 @@ export const metadata: Metadata = { title: "Privacy policy" };
 
 export default function PrivacyPolicyPage() {
   return (
-    <LegalPage title="Privacy policy" updated="11 October 2026">
+    <LegalPage title="Privacy policy" updated="16 October 2026">
       <p>
-        Imedica HealthTech Inc. (&ldquo;Imedica&rdquo;) provides decision-training software to paramedic services and
+        Ashavid Inc. (&ldquo;Ashavid&rdquo;, &ldquo;we&rdquo;) makes Imedica, which provides decision-training software to paramedic services and
         other healthcare organizations in Canada. This policy explains what personal information we hold, why, and
         the choices you have, in line with PIPEDA and, where it applies, Ontario&apos;s PHIPA.
       </p>

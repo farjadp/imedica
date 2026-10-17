@@ -14,7 +14,7 @@ export function coverUrl(coverImageId: string | null) {
 
 const publisher = () => ({
   "@type": "Organization",
-  name: "Imedica HealthTech Inc.",
+  name: "Ashavid Inc.",
   url: absolute("/"),
 });
 
