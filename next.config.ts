@@ -21,6 +21,17 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // The bare domain points at this same Railway service; send it to www.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "imedica.tech" }],
+        destination: "https://www.imedica.tech/:path*",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
