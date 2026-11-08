@@ -1,5 +1,6 @@
 // Every scenario Imedica ships with. New ones arrive as "In review": a
 // physician checks them in the editor and a second physician publishes.
+import { adultBlsArrest, paediatricBlsArrest } from "./arrest";
 import { severeAsthma } from "./asthma";
 import { anaphylaxis, hypoglycemia, stemi } from "./core";
 import { limbHemorrhage } from "./hemorrhage";
@@ -17,4 +18,6 @@ export const LIBRARY: ScenarioDef[] = [
   paediatricSeizure,
   severeAsthma,
   limbHemorrhage,
+  adultBlsArrest,
+  paediatricBlsArrest,
 ];
