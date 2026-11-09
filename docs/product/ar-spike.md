@@ -66,7 +66,7 @@ The skeleton is removed deliberately. Static meshes are the most portable input 
 | SFSafariViewController (`WebBrowser.openBrowserAsync`) hands `.usdz` to Quick Look | ❌ Not verified | Offered as a second button for the device test |
 | Android `Linking.openURL` with `https://arvr.google.com/scene-viewer/...` opens Scene Viewer rather than the browser | ❌ Not verified | The `intent://` form is a second button for the device test |
 
-**Hosting requirement found during verification:** the server must send `model/vnd.usdz+zip` for `.usdz` (and should send `model/gltf-binary` for `.glb`). With Python's default `application/octet-stream`, Quick Look opened but showed "Zero KB". Any production host (Next.js `public/`, CDN, R2) needs these MIME types configured. For `public/ar-spike/` they are set in `next.config.ts`; `next dev` returns `model/vnd.usdz+zip` and `model/gltf-binary` (checked locally).
+**Hosting requirement found during verification:** the server must send `model/vnd.usdz+zip` for `.usdz` (and should send `model/gltf-binary` for `.glb`). With Python's default `application/octet-stream`, Quick Look opened but showed "Zero KB". Any production host (Next.js `public/`, CDN, R2) needs these MIME types configured. These now apply to every `.usdz`/`.glb` on the site (`src/lib/model-headers.ts`, used by `next.config.ts`), with a one-year immutable cache under `/models/`. The MVP data model and hosting are in `docs/architecture/data-ar-model.md`.
 
 ## iPhone vs Android
 

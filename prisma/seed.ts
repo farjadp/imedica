@@ -97,6 +97,27 @@ async function main() {
     await upsertScenario(def, author, reviewer);
   }
 
+  // Local/dev only: the AR spike's CC0 placeholder on one scenario, UNREVIEWED,
+  // so the admin "3D model" tab has something to show and no learner ever gets it.
+  if (!deployed) {
+    const hemorrhage = await db.scenario.findUnique({ where: { slug: "catastrophic-limb-hemorrhage" }, select: { id: true } });
+    if (hemorrhage) {
+      await db.scenarioArModel.create({
+        data: {
+          scenarioId: hemorrhage.id,
+          version: 1,
+          glbUrl: "/ar-spike/models/placeholder-casualty.glb",
+          usdzUrl: "/ar-spike/models/placeholder-casualty.usdz",
+          posterUrl: "/ar-spike/models/placeholder-casualty-preview.png",
+          heightMeters: 1.75,
+          licence: "CC0-1.0",
+          source: "Quaternius, Ultimate Modular Men (Casual.glb). PLACEHOLDER, not clinical content",
+          createdById: author,
+        },
+      });
+    }
+  }
+
   // De-identified history so the instructor view has something to show.
   // Toxicology has only three people, so it stays below the k-anonymity floor.
   await db.analyticsSession.deleteMany({});
