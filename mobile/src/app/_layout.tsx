@@ -82,6 +82,7 @@ function RootNavigator() {
           <Stack.Screen name="profile/edit" options={{ presentation: "modal" }} />
           <Stack.Screen name="profile/password" options={{ presentation: "modal" }} />
           <Stack.Screen name="profile/delete" options={{ presentation: "modal" }} />
+          <Stack.Screen name="sources" options={{ presentation: "modal" }} />
         </Stack.Protected>
         <Stack.Protected guard={signedIn && !paramedic}>
           <Stack.Screen name="staff" options={{ animation: "fade" }} />
