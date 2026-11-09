@@ -6,8 +6,10 @@ import { ReadinessMonitor } from "@/components/marketing/readiness-monitor";
 import { Container } from "@/components/marketing/section";
 
 export const metadata: Metadata = {
-  title: "For services",
-  description: "What training directors at EMS, fire and hospital services get from Imedica, and how a pilot runs.",
+  title: "Paramedic training for EMS services",
+  description:
+    "Scenario-based decision training for paramedic services: what training leads and medical directors get from Imedica, the readiness data, and how a pilot runs.",
+  alternates: { canonical: "/for-services" },
 };
 
 const gets = [
