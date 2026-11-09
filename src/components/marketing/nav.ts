@@ -47,6 +47,7 @@ export const legalNav: NavLink[] = [
   { href: "/legal/terms", label: "Terms of use" },
   { href: "/legal/delete-account", label: "Delete your account" },
   { href: "/legal/disclaimer", label: "Medical disclaimer" },
+  { href: "/sources", label: "Sources & references" },
   { href: "/pipeda", label: "PIPEDA & PHIPA" },
   { href: "/brand", label: "Brand sheet" },
 ];
