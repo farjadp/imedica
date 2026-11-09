@@ -1,0 +1,165 @@
+{
+  "model": "poc-casualty-regions",
+  "placeholder": true,
+  "scenario": "catastrophic-limb-hemorrhage",
+  "units": "m",
+  "up": "Y",
+  "hotspots": [
+    {
+      "node": "abdomen",
+      "label": "Abdomen",
+      "region": "abdomen",
+      "anchor": [
+        0.0,
+        0.14,
+        -0.155
+      ],
+      "radius": 0.183
+    },
+    {
+      "node": "airway",
+      "label": "Airway and neck",
+      "region": "airway",
+      "anchor": [
+        0.0,
+        0.114,
+        -0.543
+      ],
+      "radius": 0.192
+    },
+    {
+      "node": "arm_left",
+      "label": "Left arm",
+      "region": "arm",
+      "anchor": [
+        0.212,
+        0.175,
+        -0.174
+      ],
+      "radius": 0.331
+    },
+    {
+      "node": "arm_right",
+      "label": "Right arm",
+      "region": "arm",
+      "anchor": [
+        -0.212,
+        0.175,
+        -0.174
+      ],
+      "radius": 0.331
+    },
+    {
+      "node": "chest",
+      "label": "Chest",
+      "region": "chest",
+      "anchor": [
+        0.0,
+        0.13,
+        -0.354
+      ],
+      "radius": 0.191
+    },
+    {
+      "node": "foot_left",
+      "label": "Left foot",
+      "region": "leg",
+      "anchor": [
+        0.125,
+        0.219,
+        0.81
+      ],
+      "radius": 0.135
+    },
+    {
+      "node": "foot_right",
+      "label": "Right foot",
+      "region": "leg",
+      "anchor": [
+        -0.125,
+        0.219,
+        0.81
+      ],
+      "radius": 0.135
+    },
+    {
+      "node": "head",
+      "label": "Head and face",
+      "region": "head",
+      "anchor": [
+        -0.0,
+        0.127,
+        -0.703
+      ],
+      "radius": 0.172
+    },
+    {
+      "node": "lower_leg_left",
+      "label": "Left lower leg",
+      "region": "leg",
+      "anchor": [
+        0.103,
+        0.132,
+        0.565
+      ],
+      "radius": 0.19
+    },
+    {
+      "node": "lower_leg_right",
+      "label": "Right lower leg",
+      "region": "leg",
+      "anchor": [
+        -0.103,
+        0.132,
+        0.565
+      ],
+      "radius": 0.19
+    },
+    {
+      "node": "pelvis",
+      "label": "Pelvis",
+      "region": "pelvis",
+      "anchor": [
+        -0.0,
+        0.134,
+        -0.003
+      ],
+      "radius": 0.164
+    },
+    {
+      "node": "thigh_left",
+      "label": "Left thigh, above the wound",
+      "region": "leg",
+      "anchor": [
+        0.089,
+        0.135,
+        0.236
+      ],
+      "radius": 0.231,
+      "action": "tq"
+    },
+    {
+      "node": "thigh_right",
+      "label": "Right thigh",
+      "region": "leg",
+      "anchor": [
+        -0.089,
+        0.135,
+        0.236
+      ],
+      "radius": 0.231
+    },
+    {
+      "node": "wound_thigh_left",
+      "label": "Bleeding wound, left thigh",
+      "region": "leg",
+      "anchor": [
+        0.087,
+        0.234,
+        0.167
+      ],
+      "radius": 0.055,
+      "action": "pressure"
+    }
+  ]
+}
