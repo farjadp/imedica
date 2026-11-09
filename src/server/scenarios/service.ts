@@ -22,6 +22,7 @@ import { CONTENT_ROLES, HttpError } from "../auth/guards";
 import type { CurrentUser } from "../auth/session";
 import { sourcesForSlug } from "../citations/registry";
 import { db } from "../db";
+import { servedArModel } from "./ar-model";
 import { publishProblems } from "./publish-check";
 
 // ============================================================================
@@ -130,7 +131,9 @@ export async function getScenarioBrief(scenarioId: string) {
   if (!scenario) throw new HttpError(404, "Scenario not found.");
   // The slug only picks the sources; it isn't part of the brief.
   const { slug, ...brief } = scenario;
-  return { ...brief, sources: sourcesForSlug(slug) };
+  // arModel: the newest physician-reviewed 3D casualty, or null. Added after
+  // app build 5, which ignores unknown fields.
+  return { ...brief, sources: sourcesForSlug(slug), arModel: await servedArModel(scenarioId) };
 }
 
 /** Everything, for authors: states, actions, rules, feedback and publish problems. */
@@ -143,6 +146,7 @@ export async function getScenarioForAuthor(user: CurrentUser, scenarioId: string
       actions: { orderBy: [{ category: "asc" }, { order: "asc" }] },
       rules: { orderBy: [{ priority: "asc" }] },
       feedback: { orderBy: { title: "asc" } },
+      arModels: { orderBy: { version: "desc" } },
     },
   });
   if (!scenario) throw new HttpError(404, "Scenario not found.");

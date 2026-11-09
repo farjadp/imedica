@@ -110,6 +110,7 @@ describe("learners only see published work, and never its answers", () => {
     expect(res.status).toBe(200);
     expect(Object.keys(res.data).sort()).toEqual(
       [
+        "arModel", // added after app build 5; null unless a reviewed model exists
         "category",
         "difficulty",
         "dispatch",
