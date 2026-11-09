@@ -5,6 +5,7 @@ import { z } from "zod";
 import { generateExplanation } from "../ai/feedback";
 import { HttpError } from "../auth/guards";
 import type { CurrentUser } from "../auth/session";
+import { sourcesForSlug } from "../citations/registry";
 import { db } from "../db";
 import { type EngineRule, evaluate, grade, maxScore, missedRequired, scorePercent } from "../engine/rules";
 import { anonymousHashFor, cohortKeyFor, projectSessionToAnalytics } from "../privacy/deidentify";
@@ -291,6 +292,7 @@ export async function getReview(user: CurrentUser, sessionId: string) {
       return { action: full.action.label, rationale: full.rationale };
     }),
     ai: ai ? { status: ai.status, content: ai.status === "READY" ? ai.content : null, review: ai.review } : null,
+    sources: sourcesForSlug(scenario.slug),
   };
 }
 

@@ -6,6 +6,7 @@ import * as explanation from "@/app/api/v1/sessions/[id]/explanation/route";
 import * as review from "@/app/api/v1/sessions/[id]/review/route";
 import * as runtime from "@/app/api/v1/sessions/[id]/route";
 import * as sessions from "@/app/api/v1/sessions/route";
+import { sourcesForSlug } from "@/server/citations/registry";
 import { db } from "@/server/db";
 
 import { type Person, call, organization, person, scenario } from "./helpers";
@@ -114,6 +115,22 @@ describe("someone else's run looks exactly like a missing one", () => {
 
     const mine = await call("GET", sessions.GET, { as: owner });
     expect(mine.data.map((s: { id: string }) => s.id)).toContain(runId);
+  });
+
+  it("the debrief links the scenario's sources", async () => {
+    const physician = await person("PHYSICIAN");
+    const asthma = await scenario(physician.id, "PUBLISHED");
+    await db.scenario.update({ where: { id: asthma.id }, data: { slug: "severe-asthma-exacerbation" } });
+    const start = await call("POST", sessions.POST, { as: owner, body: { scenarioId: asthma.id } });
+    const params = { id: start.data.id as string };
+    await call("POST", decisions.POST, { as: owner, params, body: { actionId: asthma.actions.transport.id } });
+
+    const debrief = await call("GET", review.GET, { as: owner, params });
+    expect(debrief.status).toBe(200);
+    expect(debrief.data.sources).toEqual(sourcesForSlug("severe-asthma-exacerbation"));
+    expect(debrief.data.sources[0]).toMatchObject({ id: "S1", section: "Bronchoconstriction Medical Directive" });
+    // Build 3 still reads these.
+    expect(debrief.data.scenario).toHaveProperty("protocolSource");
   });
 
   it("a decision can't use an action from another scenario", async () => {
