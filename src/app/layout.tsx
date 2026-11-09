@@ -1,27 +1,47 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Mono, IBM_Plex_Sans, Source_Serif_4 } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 
-const serif = Source_Serif_4({
+// Self-hosted so builds never fetch from Google Fonts (a failed fetch broke two
+// Railway builds on 2026-11-09). Files are the Google Fonts latin subsets that
+// next/font/google served before, licensed under the OFL (see ./fonts/*-OFL.txt).
+// The metric-matched fallback faces live in globals.css with Google's values,
+// so the swap before the font loads stays the same as before.
+
+// Variable font with wght 200–900 and the opsz axis.
+const sourceSerif4 = localFont({
+  src: "./fonts/source-serif-4-latin-variable.woff2",
+  weight: "200 900",
+  style: "normal",
   variable: "--font-serif",
-  subsets: ["latin"],
-  axes: ["opsz"],
   display: "swap",
+  adjustFontFallback: false,
+  fallback: ["SourceSerif4 Fallback"],
 });
 
-const plex = IBM_Plex_Sans({
+// One variable file serves the three weights, matching what Google served.
+const ibmPlexSans = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-sans-latin-variable.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-latin-variable.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/ibm-plex-sans-latin-variable.woff2", weight: "600", style: "normal" },
+  ],
   variable: "--font-plex",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
   display: "swap",
+  adjustFontFallback: false,
+  fallback: ["IBM Plex Sans Fallback"],
 });
 
-const plexMono = IBM_Plex_Mono({
+const ibmPlexMono = localFont({
+  src: [
+    { path: "./fonts/ibm-plex-mono-latin-400.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/ibm-plex-mono-latin-500.woff2", weight: "500", style: "normal" },
+  ],
   variable: "--font-plex-mono",
-  subsets: ["latin"],
-  weight: ["400", "500"],
   display: "swap",
+  adjustFontFallback: false,
+  fallback: ["IBM Plex Mono Fallback"],
 });
 
 export const metadata: Metadata = {
@@ -48,7 +68,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en-CA" className={`${serif.variable} ${plex.variable} ${plexMono.variable} antialiased`}>
+    <html lang="en-CA" className={`${sourceSerif4.variable} ${ibmPlexSans.variable} ${ibmPlexMono.variable} antialiased`}>
       <body className="flex min-h-dvh flex-col">{children}</body>
     </html>
   );
