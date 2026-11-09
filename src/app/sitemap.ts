@@ -23,6 +23,7 @@ const pages: [string, MetadataRoute.Sitemap[number]["changeFrequency"], number][
   ["/pipeda", "yearly", 0.5],
   ["/brand", "yearly", 0.3],
   ["/legal/disclaimer", "yearly", 0.2],
+  ["/sources", "monthly", 0.4],
   ["/blog", "daily", 0.7],
   ["/legal/privacy", "yearly", 0.2],
   ["/legal/terms", "yearly", 0.2],
