@@ -26,6 +26,22 @@ export type ERule = {
 };
 export type EFeedback = { id: string; title: string; body: string; reference: string | null };
 
+export type EArModel = {
+  id: string;
+  version: number;
+  glbUrl: string;
+  usdzUrl: string;
+  posterUrl: string | null;
+  heightMeters: number;
+  licence: string;
+  source: string;
+  hotspots: unknown;
+  createdById: string;
+  reviewerId: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+};
+
 export type EditorScenario = {
   id: string;
   title: string;
@@ -43,5 +59,6 @@ export type EditorScenario = {
   actions: EAction[];
   rules: ERule[];
   feedback: EFeedback[];
+  arModels: EArModel[];
   problems: string[];
 };

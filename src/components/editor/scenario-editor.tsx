@@ -8,6 +8,7 @@ import { cn } from "@/lib/cn";
 import { categoryLabel, difficultyLabel } from "@/lib/labels";
 
 import { ActionsTab } from "./actions-tab";
+import { ArModelTab } from "./ar-model-tab";
 import { BasicsForm } from "./basics-form";
 import { FeedbackTab } from "./feedback-tab";
 import { PublishTab } from "./publish-tab";
@@ -21,6 +22,7 @@ const TABS = [
   { key: "actions", label: "Action menu" },
   { key: "rules", label: "Rules" },
   { key: "feedback", label: "Teaching notes" },
+  { key: "model", label: "3D model" },
   { key: "publish", label: "Review & publish" },
 ] as const;
 type TabKey = (typeof TABS)[number]["key"];
@@ -44,6 +46,7 @@ export function ScenarioEditor({
     actions: scenario.actions.length,
     rules: scenario.rules.length,
     feedback: scenario.feedback.length,
+    model: scenario.arModels.length,
   };
 
   return (
@@ -116,6 +119,7 @@ export function ScenarioEditor({
         {tab === "actions" ? <ActionsTab scenario={scenario} locked={locked} /> : null}
         {tab === "rules" ? <RulesTab scenario={scenario} locked={locked} /> : null}
         {tab === "feedback" ? <FeedbackTab scenario={scenario} locked={locked} /> : null}
+        {tab === "model" ? <ArModelTab scenario={scenario} me={me} /> : null}
         {tab === "publish" ? <PublishTab scenario={scenario} me={me} /> : null}
       </div>
     </div>

@@ -2,9 +2,11 @@ import { Clock, Radio } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { ArPatient } from "@/components/app/ar-patient";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { categoryLabel, difficultyLabel } from "@/lib/labels";
 import { requireUserPage } from "@/server/auth/guards";
+import { servedArModel } from "@/server/scenarios/ar-model";
 import { libraryFor } from "@/server/sessions/queries";
 import { startRun } from "@/server/sessions/actions";
 
@@ -15,6 +17,7 @@ export default async function ScenarioDetailPage({ params }: { params: Promise<{
   const user = await requireUserPage(`/app/scenarios/${id}`);
   const s = (await libraryFor(user)).find((x) => x.id === id);
   if (!s) notFound();
+  const arModel = await servedArModel(s.id);
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -37,6 +40,8 @@ export default async function ScenarioDetailPage({ params }: { params: Promise<{
         </div>
         <p className="px-5 py-4 text-[16px] leading-relaxed text-ink">{s.dispatch}</p>
       </section>
+
+      {arModel ? <ArPatient model={arModel} title={s.title} /> : null}
 
       {s.learningGoals.length ? (
         <section>

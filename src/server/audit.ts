@@ -24,6 +24,8 @@ export type AuditAction =
   | "scenario.publish"
   | "scenario.archive"
   | "scenario.delete"
+  | "scenario.ar_model_attach"
+  | "scenario.ar_model_review"
   | "assessment.create"
   | "assessment.update"
   | "assessment.submit"

@@ -348,12 +348,43 @@ model Scenario {
   rules    ScenarioRule[]
   feedback FeedbackTemplate[]
   sessions TrainingSession[]
+  arModels ScenarioArModel[]
 
   @@index([status, category])
   @@schema("content")
 }
 
 // A moment in the call: what the paramedic sees and the patient's vitals.
+// A 3D casualty for "look before you act": the phone opens it in AR Quick Look
+// (USDZ) or Scene Viewer (GLB). One row per version; replacing a model adds a
+// version, so a reviewed model keeps serving until its successor is signed off.
+// Learners only ever get the newest physician-reviewed version.
+// hotspots: [{ node, label, region, action? }] — named parts of the model
+// (node), validated in src/lib/validators/ar-model.ts. Empty in the MVP; the
+// in-app AR version (v2) makes them tappable and routes `action` (a
+// ScenarioAction id) into the scoring engine.
+model ScenarioArModel {
+  id           String    @id @default(cuid())
+  scenarioId   String
+  scenario     Scenario  @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  version      Int
+  glbUrl       String // "/models/…" on this site, or an https URL
+  usdzUrl      String
+  posterUrl    String?
+  heightMeters Float // real-world size; viewers lock scale
+  licence      String // e.g. "CC0-1.0"
+  source       String // who made it and where it came from
+  hotspots     Json      @default("[]")
+  createdById  String // identity.User.id (no relation: cross-schema)
+  reviewerId   String? // the physician who signed it off; null = never served
+  reviewedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([scenarioId, version])
+  @@schema("content")
+}
+
 model ScenarioState {
   id         String   @id @default(cuid())
   scenarioId String
