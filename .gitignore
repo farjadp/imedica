@@ -44,3 +44,4 @@ next-env.d.ts
 
 !.env.example
 .claude/
+prototypes/ar-model/casualty-hemorrhage/.work/

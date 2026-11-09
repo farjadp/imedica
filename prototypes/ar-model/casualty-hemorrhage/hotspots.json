@@ -1,0 +1,92 @@
+[
+  {
+    "node": "dressing_thigh_left",
+    "label": "Soaked towel over the wound, left thigh",
+    "region": "left_leg"
+  },
+  {
+    "node": "wound_thigh_left",
+    "label": "Bleeding wound, left thigh",
+    "region": "left_leg"
+  },
+  {
+    "node": "thigh_left",
+    "label": "Left thigh, above the wound",
+    "region": "left_leg"
+  },
+  {
+    "node": "blood_pool",
+    "label": "Blood on the floor",
+    "region": "scene"
+  },
+  {
+    "node": "head",
+    "label": "Head and face",
+    "region": "head"
+  },
+  {
+    "node": "airway",
+    "label": "Airway and neck",
+    "region": "airway"
+  },
+  {
+    "node": "chest",
+    "label": "Chest",
+    "region": "chest"
+  },
+  {
+    "node": "abdomen",
+    "label": "Abdomen",
+    "region": "abdomen"
+  },
+  {
+    "node": "pelvis",
+    "label": "Pelvis",
+    "region": "pelvis"
+  },
+  {
+    "node": "arm_left",
+    "label": "Left arm",
+    "region": "left_arm"
+  },
+  {
+    "node": "arm_right",
+    "label": "Right arm",
+    "region": "right_arm"
+  },
+  {
+    "node": "thigh_right",
+    "label": "Right thigh",
+    "region": "right_leg"
+  },
+  {
+    "node": "lower_leg_left",
+    "label": "Left lower leg",
+    "region": "left_leg"
+  },
+  {
+    "node": "lower_leg_right",
+    "label": "Right lower leg",
+    "region": "right_leg"
+  },
+  {
+    "node": "foot_left",
+    "label": "Left foot",
+    "region": "left_leg"
+  },
+  {
+    "node": "foot_right",
+    "label": "Right foot",
+    "region": "right_leg"
+  },
+  {
+    "node": "clothing_shirt",
+    "label": "Wet clothing (shirt)",
+    "region": "chest"
+  },
+  {
+    "node": "clothing_trousers",
+    "label": "Wet, blood-soaked trousers",
+    "region": "left_leg"
+  }
+]
