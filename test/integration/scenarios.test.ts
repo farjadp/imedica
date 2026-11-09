@@ -6,6 +6,7 @@ import * as collection from "@/app/api/v1/scenarios/[id]/[collection]/route";
 import * as one from "@/app/api/v1/scenarios/[id]/route";
 import * as status from "@/app/api/v1/scenarios/[id]/status/route";
 import * as list from "@/app/api/v1/scenarios/route";
+import { sourcesForSlug } from "@/server/citations/registry";
 import { db } from "@/server/db";
 
 import { type Person, call, organization, person, scenario } from "./helpers";
@@ -116,6 +117,7 @@ describe("learners only see published work, and never its answers", () => {
         "learningGoals",
         "protocolSource",
         "publishedAt",
+        "sources",
         "summary",
         "timeLimitSec",
         "title",
@@ -123,6 +125,23 @@ describe("learners only see published work, and never its answers", () => {
     );
     for (const key of ["states", "actions", "rules", "feedback", "problems"]) expect(res.data).not.toHaveProperty(key);
     expect(res.data.dispatch).toBe(published.dispatch);
+  });
+
+  it("the brief links the published sources the scenario is built on", async () => {
+    const published = await scenario(author.id, "PUBLISHED");
+    await db.scenario.update({ where: { id: published.id }, data: { slug: "inferior-stemi-rv-involvement" } });
+    const res = await call("GET", one.GET, { as: medic, params: { id: published.id } });
+    expect(res.status).toBe(200);
+    expect(res.data).not.toHaveProperty("slug");
+    expect(res.data.sources).toEqual(sourcesForSlug("inferior-stemi-rv-involvement"));
+    expect(res.data.sources.map((s: { id: string }) => s.id)).toEqual(["S1", "S2"]);
+    for (const s of res.data.sources) expect(s.url).toMatch(/^https:\/\//);
+  });
+
+  it("a scenario outside the registry gets an empty source list, not an error", async () => {
+    const published = await scenario(author.id, "PUBLISHED");
+    const res = await call("GET", one.GET, { as: medic, params: { id: published.id } });
+    expect(res.data.sources).toEqual([]);
   });
 
   it.each(["states", "actions", "rules", "feedback"])("a learner can't read a published scenario's %s", async (c) => {

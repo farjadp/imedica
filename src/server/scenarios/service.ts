@@ -20,6 +20,7 @@ import {
 import { audit } from "../audit";
 import { CONTENT_ROLES, HttpError } from "../auth/guards";
 import type { CurrentUser } from "../auth/session";
+import { sourcesForSlug } from "../citations/registry";
 import { db } from "../db";
 import { publishProblems } from "./publish-check";
 
@@ -112,6 +113,7 @@ export async function listScenarios(user: CurrentUser, filter: { status?: Scenar
  */
 const briefSelect = {
   id: true,
+  slug: true,
   title: true,
   summary: true,
   dispatch: true,
@@ -126,7 +128,9 @@ const briefSelect = {
 export async function getScenarioBrief(scenarioId: string) {
   const scenario = await db.scenario.findFirst({ where: { id: scenarioId, status: "PUBLISHED" }, select: briefSelect });
   if (!scenario) throw new HttpError(404, "Scenario not found.");
-  return scenario;
+  // The slug only picks the sources; it isn't part of the brief.
+  const { slug, ...brief } = scenario;
+  return { ...brief, sources: sourcesForSlug(slug) };
 }
 
 /** Everything, for authors: states, actions, rules, feedback and publish problems. */
