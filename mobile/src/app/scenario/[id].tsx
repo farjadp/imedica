@@ -1,36 +1,28 @@
 import Feather from "@expo/vector-icons/Feather";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/button";
 import { Loading, Problem } from "@/components/screen";
+import { SourcesBlock } from "@/components/sources";
 import { Body, Display, Mono, Serif } from "@/components/type";
 import { api, errorMessage } from "@/lib/api";
 import { categoryLabel, difficultyLabel, minutes } from "@/lib/labels";
-import { keys } from "@/lib/queries";
+import { keys, useScenarioBrief } from "@/lib/queries";
 import { color, radius } from "@/lib/theme";
 
-// Learners get the published scenario without rules. Only the brief is shown
-// here: the states would give the call away.
-type Brief = {
-  id: string;
-  title: string;
-  summary: string;
-  dispatch: string;
-  category: string;
-  difficulty: string;
-  timeLimitSec: number;
-  learningGoals: string[];
-  protocolSource: string | null;
-};
-
+// Only the brief is shown here: the states would give the call away.
 export default function ScenarioBrief() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const brief = useQuery({ queryKey: ["scenario", id], queryFn: () => api<Brief>("GET", `/scenarios/${id}`) });
+  const brief = useScenarioBrief(id);
+  // The footer floats over the scroll; its real height (two-line caption, an
+  // error, larger text) decides how far the content must clear it.
+  const [footerHeight, setFooterHeight] = useState(160);
   const start = useMutation({
     mutationFn: () => api<{ id: string }>("POST", "/sessions", { scenarioId: id }),
     onSuccess: ({ id: runId }) => {
@@ -47,7 +39,7 @@ export default function ScenarioBrief() {
     <View style={{ flex: 1, backgroundColor: color.paper }}>
       <ScrollView
         // iOS shows this as a sheet below the status bar; Android draws the modal full screen.
-        contentContainerStyle={{ padding: 20, paddingTop: 18 + (Platform.OS === "android" ? insets.top : 0), paddingBottom: 140 }}
+        contentContainerStyle={{ padding: 20, paddingTop: 18 + (Platform.OS === "android" ? insets.top : 0), paddingBottom: footerHeight + 24 }}
       >
         <View style={styles.grabber} />
         <View style={styles.top}>
@@ -87,14 +79,17 @@ export default function ScenarioBrief() {
           </View>
         ) : null}
 
-        {s.protocolSource ? (
+        {s.sources?.length ? (
+          <SourcesBlock sources={s.sources} style={{ marginTop: 28 }} />
+        ) : s.protocolSource ? (
+          // A server without the citation registry: the name, at least.
           <Body size={12.5} tone={color.ink3} style={{ marginTop: 22 }}>
             Protocol: {s.protocolSource}
           </Body>
         ) : null}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 14 }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 14 }]} onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}>
         {start.error ? (
           <Body tone={color.signal} size={14} style={{ marginBottom: 8 }}>
             {errorMessage(start.error)}

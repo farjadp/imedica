@@ -4,22 +4,23 @@ import * as Haptics from "expo-haptics";
 import { router, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
+import { Alert, Modal, Pressable, ScrollView, StyleSheet, View, useWindowDimensions } from "react-native";
 import Animated, { FadeIn, FadeInDown, FadeOutDown, LinearTransition } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { EcgTrace } from "@/components/ecg";
 import { OutcomeTag } from "@/components/outcome-tag";
 import { Loading, Problem } from "@/components/screen";
-import { Body, Mono, Serif } from "@/components/type";
+import { SourcesBlock } from "@/components/sources";
+import { Body, Display, Mono, Serif } from "@/components/type";
 import { VitalsGrid } from "@/components/vitals";
 import { ApiError, api, errorMessage } from "@/lib/api";
 import { rhythmLabel, type Rhythm } from "@/lib/ecg";
 import { ECG_CREDIT, pickStrip } from "@/lib/ecg-strips";
 import { actionCategoryLabel, clock } from "@/lib/labels";
-import { keys } from "@/lib/queries";
+import { keys, useScenarioBrief } from "@/lib/queries";
 import { color, outcomeStyle, radius } from "@/lib/theme";
-import type { Runtime, Verdict } from "@/lib/types";
+import type { Runtime, ScenarioSource, Verdict } from "@/lib/types";
 
 const feel: Record<string, Haptics.NotificationFeedbackType> = {
   CORRECT: Haptics.NotificationFeedbackType.Success,
@@ -58,6 +59,9 @@ function Live({ initial, windowId }: { initial: Runtime; windowId?: string }) {
   const [filter, setFilter] = useState<string | null>(null);
   const ending = useRef(false);
   const verdictSeq = useRef(0);
+  // The doses are on this screen, so their sources are one tap away.
+  const sources = useScenarioBrief(initial.scenario.id).data?.sources;
+  const [showSources, setShowSources] = useState(false);
 
   // The server's clock is the authority; this offset corrects a skewed phone clock.
   const [offset] = useState(() => new Date(initial.serverNow).getTime() - Date.now());
@@ -141,6 +145,16 @@ function Live({ initial, windowId }: { initial: Runtime; windowId?: string }) {
             {data.assessment ? "ASSESSMENT · " : ""}
             {data.scenario.title.toUpperCase()}
           </Mono>
+          {sources?.length ? (
+            <Pressable
+              onPress={() => setShowSources(true)}
+              accessibilityRole="button"
+              accessibilityLabel="Sources for this scenario"
+              style={styles.sourcesBtn}
+            >
+              <Feather name="book-open" size={19} color={color.screenInk} />
+            </Pressable>
+          ) : null}
           <Clock endsAt={new Date(data.startedAt).getTime() + data.scenario.timeLimitSec * 1000} offset={offset} onExpire={finish} />
         </View>
 
@@ -227,7 +241,40 @@ function Live({ initial, windowId }: { initial: Runtime; windowId?: string }) {
       </View>
 
       {verdict ? <VerdictToast key={verdict.key} verdict={verdict} bottom={insets.bottom + 76} /> : null}
+
+      {sources?.length ? <SourcesSheet visible={showSources} sources={sources} onClose={() => setShowSources(false)} /> : null}
     </View>
+  );
+}
+
+/** A page sheet over the call: the clock keeps running underneath. */
+function SourcesSheet({ visible, sources, onClose }: { visible: boolean; sources: ScenarioSource[]; onClose: () => void }) {
+  const insets = useSafeAreaInsets();
+  return (
+    <Modal visible={visible} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
+      <ScrollView style={{ backgroundColor: color.paper }} contentContainerStyle={{ padding: 20, paddingTop: 22, paddingBottom: insets.bottom + 32 }}>
+        <View style={{ flexDirection: "row", alignItems: "flex-start", gap: 12 }}>
+          <View style={{ flex: 1 }}>
+            <Mono>THIS CALL IS BUILT ON</Mono>
+            <Display size={30} style={{ marginTop: 6 }}>
+              Sources
+            </Display>
+          </View>
+          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="Close" style={styles.sheetClose}>
+            <Feather name="x" size={18} color={color.ink} />
+          </Pressable>
+        </View>
+        <Body style={{ marginTop: 12 }}>The actions and doses in this call follow these standards. Your clock keeps running.</Body>
+        <SourcesBlock
+          sources={sources}
+          style={{ marginTop: 22 }}
+          onOpenAll={() => {
+            onClose();
+            router.push("/sources");
+          }}
+        />
+      </ScrollView>
+    </Modal>
   );
 }
 
@@ -305,6 +352,8 @@ const styles = StyleSheet.create({
   monitor: { backgroundColor: color.monitor, paddingHorizontal: 16, paddingBottom: 18, borderBottomLeftRadius: radius.lg, borderBottomRightRadius: radius.lg },
   bar: { flexDirection: "row", alignItems: "center" },
   traceLabel: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 12 },
+  sourcesBtn: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: 4 },
+  sheetClose: { width: 44, height: 44, borderRadius: 22, backgroundColor: color.paper2, alignItems: "center", justifyContent: "center" },
   clock: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, backgroundColor: color.monitor2 },
   clockLow: { backgroundColor: "#2a1210" },
   dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: color.alarm },

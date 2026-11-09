@@ -78,10 +78,38 @@ export type AiContent = {
   practiseNext: string;
 };
 
+// Citations (src/server/citations/registry.ts). Optional everywhere: builds
+// that predate the registry, and servers that predate it, must keep working.
+
+export type SourceKind = "guideline" | "data" | "literature";
+
+/** One source a scenario is built on, with the section of it that applies. */
+export type ScenarioSource = { id: string; title: string; publisher: string; version: string | null; section: string | null; url: string };
+
+/** One entry on the Sources & references screen. */
+export type Source = { id: string; title: string; publisher: string; version: string | null; url: string; kind: SourceKind };
+
+export type SourceList = { sources: Source[]; disclaimerUrl: string };
+
+/** GET /scenarios/:id. Learners get the published scenario without rules. */
+export type ScenarioBrief = {
+  id: string;
+  title: string;
+  summary: string;
+  dispatch: string;
+  category: string;
+  difficulty: string;
+  timeLimitSec: number;
+  learningGoals: string[];
+  protocolSource: string | null;
+  sources?: ScenarioSource[];
+};
+
 export type Review = {
   id: string;
   status: Runtime["status"];
   scenario: { id: string; title: string; category: string; protocolSource: string | null };
+  sources?: ScenarioSource[];
   startedAt: string;
   durationSec: number;
   score: number;

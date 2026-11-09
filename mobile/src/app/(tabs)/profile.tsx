@@ -11,10 +11,11 @@ import { Avatar } from "@/components/avatar";
 import { Body, Display, Mono, Serif } from "@/components/type";
 import { api, errorMessage } from "@/lib/api";
 import { useAuth, useMe } from "@/lib/auth";
+import { FALLBACK_DISCLAIMER_URL, openLink, siteUrl } from "@/lib/citations";
 import { useLock } from "@/lib/lock";
 import { chooseAvatar, removeAvatar } from "@/lib/avatar";
 import { categoryLabel } from "@/lib/labels";
-import { useSavedPapers, useScenarios, useSessions } from "@/lib/queries";
+import { useSavedPapers, useScenarios, useSessions, useSources } from "@/lib/queries";
 import { trainingStats } from "@/lib/stats";
 import { color, radius } from "@/lib/theme";
 import { usePull } from "@/lib/use-pull";
@@ -36,6 +37,7 @@ export default function Profile() {
   const sessions = useSessions();
   const scenarios = useScenarios();
   const saved = useSavedPapers();
+  const sources = useSources();
   const pull = usePull(() => Promise.all([sessions.refetch(), refresh()]));
   const [busy, setBusy] = useState(false);
   const [notify, setNotify] = useState(me.notifyAssessments);
@@ -248,6 +250,13 @@ export default function Profile() {
         <Row icon="trash-2" label="Delete account" danger onPress={() => router.push("/profile/delete")} last />
       </Section>
 
+      <Section title="ABOUT">
+        <Row icon="book-open" label="Sources & references" onPress={() => router.push("/sources")} />
+        <Row icon="info" label="Medical disclaimer" external onPress={() => void openLink(sources.data?.disclaimerUrl ?? FALLBACK_DISCLAIMER_URL)} />
+        <Row icon="file-text" label="Privacy policy" external onPress={() => void openLink(siteUrl("/legal/privacy"))} />
+        <Row icon="file" label="Terms of use" external onPress={() => void openLink(siteUrl("/legal/terms"))} last />
+      </Section>
+
       <View style={[styles.pad, { marginTop: 22, gap: 10 }]}>
         <View style={{ flexDirection: "row", gap: 10 }}>
           <Feather name="shield" size={16} color={color.pine2} style={{ marginTop: 2 }} />
@@ -317,6 +326,7 @@ function Row({
   value,
   onPress,
   danger,
+  external,
   last,
 }: {
   icon: React.ComponentProps<typeof Feather>["name"];
@@ -324,6 +334,7 @@ function Row({
   value?: string;
   onPress?: () => void;
   danger?: boolean;
+  external?: boolean;
   last?: boolean;
 }) {
   const tone = danger ? color.signal : color.ink;
@@ -331,7 +342,7 @@ function Row({
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      accessibilityRole={onPress ? "button" : "text"}
+      accessibilityRole={external ? "link" : onPress ? "button" : "text"}
       style={({ pressed }) => [styles.row, !last && styles.rowRule, pressed && { backgroundColor: color.paper2 }]}
     >
       <Feather name={icon} size={18} color={danger ? color.signal : color.ink2} />
@@ -343,7 +354,7 @@ function Row({
           {value}
         </Body>
       ) : null}
-      {onPress ? <Feather name="chevron-right" size={18} color={color.ink3} /> : null}
+      {onPress ? <Feather name={external ? "external-link" : "chevron-right"} size={external ? 16 : 18} color={color.ink3} /> : null}
     </Pressable>
   );
 }

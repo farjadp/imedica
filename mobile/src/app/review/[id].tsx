@@ -9,12 +9,14 @@ import { Button } from "@/components/button";
 import { OutcomeTag } from "@/components/outcome-tag";
 import { ScoreRing } from "@/components/score-ring";
 import { Loading, Problem } from "@/components/screen";
+import { SourcesBlock } from "@/components/sources";
 import { Body, Display, Mono, Serif } from "@/components/type";
 import { ApiError, errorMessage } from "@/lib/api";
+import { openLink, sourceForReference } from "@/lib/citations";
 import { categoryLabel, clock } from "@/lib/labels";
 import { useReview } from "@/lib/queries";
 import { color, radius } from "@/lib/theme";
-import type { Review } from "@/lib/types";
+import type { Review, ScenarioSource } from "@/lib/types";
 
 const gradeTone: Record<Review["grade"], string> = {
   Excellent: color.brand,
@@ -41,6 +43,7 @@ export default function ReviewScreen() {
   }
   const r = review.data;
   const tone = gradeTone[r.grade];
+  const sources = r.sources;
 
   return (
     <ScrollView style={{ backgroundColor: color.paper }} contentContainerStyle={{ paddingTop: insets.top + 12, paddingBottom: insets.bottom + 32 }}>
@@ -90,7 +93,7 @@ export default function ReviewScreen() {
       </View>
       <View style={{ marginTop: 12 }}>
         {r.decisions.map((d, i) => (
-          <Decision key={d.id} d={d} index={i} />
+          <Decision key={d.id} d={d} index={i} sources={sources} />
         ))}
       </View>
 
@@ -112,7 +115,9 @@ export default function ReviewScreen() {
         </View>
       ) : null}
 
-      {r.scenario.protocolSource ? (
+      {sources?.length ? (
+        <SourcesBlock sources={sources} style={{ ...styles.pad, marginTop: 28 }} />
+      ) : r.scenario.protocolSource ? (
         <Body size={12.5} tone={color.ink3} style={[styles.pad, { marginTop: 22 }]}>
           Protocol: {r.scenario.protocolSource}
         </Body>
@@ -126,8 +131,9 @@ export default function ReviewScreen() {
   );
 }
 
-function Decision({ d, index }: { d: Review["decisions"][number]; index: number }) {
+function Decision({ d, index, sources }: { d: Review["decisions"][number]; index: number; sources: ScenarioSource[] | undefined }) {
   const [open, setOpen] = useState(false);
+  const cited = d.teaching?.reference ? sourceForReference(d.teaching.reference, sources) : null;
   return (
     <Animated.View entering={FadeInDown.duration(450).delay(200 + Math.min(index, 10) * 60)} style={styles.decision}>
       <View style={styles.timeline}>
@@ -155,8 +161,20 @@ function Decision({ d, index }: { d: Review["decisions"][number]; index: number 
             {open ? (
               <View style={{ marginTop: 6 }}>
                 <Body size={14}>{d.teaching.body}</Body>
-                {d.teaching.reference ? (
-                  <Body size={12.5} tone={color.ink3} style={{ marginTop: 4 }}>
+                {d.teaching.reference && cited ? (
+                  <Pressable
+                    onPress={() => void openLink(cited.url)}
+                    accessibilityRole="link"
+                    accessibilityHint="Opens the source"
+                    style={({ pressed }) => [styles.reference, pressed && { opacity: 0.7 }]}
+                  >
+                    <Feather name="external-link" size={14} color={color.pine2} style={{ marginTop: 3 }} />
+                    <Body size={14} medium tone={color.pine2} style={{ flex: 1, textDecorationLine: "underline" }}>
+                      {d.teaching.reference}
+                    </Body>
+                  </Pressable>
+                ) : d.teaching.reference ? (
+                  <Body size={13} tone={color.ink3} style={{ marginTop: 4 }}>
                     {d.teaching.reference}
                   </Body>
                 ) : null}
@@ -238,5 +256,6 @@ const styles = StyleSheet.create({
   timeline: { width: 40, alignItems: "center" },
   line: { flex: 1, width: 1, backgroundColor: color.rule, marginTop: 6 },
   rationale: { marginTop: 8, borderLeftWidth: 2, borderLeftColor: color.pine, paddingLeft: 12 },
+  reference: { flexDirection: "row", gap: 6, alignItems: "flex-start", minHeight: 44, paddingVertical: 8, marginTop: 2 },
   missed: { marginTop: 10, padding: 14, borderRadius: radius.md, backgroundColor: color.signalWash },
 });

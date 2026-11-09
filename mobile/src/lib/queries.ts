@@ -1,10 +1,25 @@
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "./api";
-import type { Attempt, OpenAssessment, PaperBrief, PaperDetail, PaperRef, PaperSearch, Review, SavedPaper, ScenarioSummary, SessionSummary } from "./types";
+import type {
+  Attempt,
+  OpenAssessment,
+  PaperBrief,
+  PaperDetail,
+  PaperRef,
+  PaperSearch,
+  Review,
+  SavedPaper,
+  ScenarioBrief,
+  ScenarioSummary,
+  SessionSummary,
+  SourceList,
+} from "./types";
 
 export const keys = {
   scenarios: ["scenarios"] as const,
+  scenario: (id: string) => ["scenario", id] as const,
+  sources: ["sources"] as const,
   sessions: ["sessions"] as const,
   review: (id: string) => ["review", id] as const,
   assessments: ["assessments"] as const,
@@ -16,6 +31,19 @@ export const keys = {
 
 export function useScenarios() {
   return useQuery({ queryKey: keys.scenarios, queryFn: () => api<ScenarioSummary[]>("GET", "/scenarios") });
+}
+
+export function useScenarioBrief(id: string | undefined) {
+  return useQuery({
+    queryKey: keys.scenario(id ?? ""),
+    queryFn: () => api<ScenarioBrief>("GET", `/scenarios/${id}`),
+    enabled: Boolean(id),
+  });
+}
+
+/** Every source Imedica cites. Public, and it changes only with a release. */
+export function useSources() {
+  return useQuery({ queryKey: keys.sources, queryFn: () => api<SourceList>("GET", "/sources"), staleTime: 60 * 60_000 });
 }
 
 export function useSessions() {
