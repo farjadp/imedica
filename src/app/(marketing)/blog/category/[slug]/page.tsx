@@ -10,7 +10,7 @@ import { JsonLd } from "@/components/blog/json-ld";
 import { Pager } from "@/components/blog/pager";
 import { PostGrid } from "@/components/blog/post-grid";
 import { Container } from "@/components/marketing/section";
-import { breadcrumbLd, collectionLd } from "@/server/blog/seo";
+import { breadcrumbLd, collectionLd, DEFAULT_OG_IMAGE } from "@/server/blog/seo";
 import { getCategoriesWithCounts, getCategory, listLivePosts } from "@/server/blog/service";
 
 export async function generateMetadata({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams: Promise<{ page?: string }> }): Promise<Metadata> {
@@ -25,7 +25,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
     title: n > 1 ? `${cat.name} — page ${n} · Field Notes` : `${cat.name} · Field Notes`,
     description,
     alternates: { canonical: n > 1 ? `${path}?page=${n}` : path },
-    openGraph: { title: `${cat.name} · Imedica Field Notes`, description, url: path },
+    openGraph: { title: `${cat.name} · Imedica Field Notes`, description, url: path, images: [DEFAULT_OG_IMAGE] },
   };
 }
 

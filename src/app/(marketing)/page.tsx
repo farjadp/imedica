@@ -1,7 +1,9 @@
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
+import { JsonLd } from "@/components/blog/json-ld";
 import { EcgTrace } from "@/components/clinical/ecg-trace";
 import { CallSequence } from "@/components/marketing/call-sequence";
 import { HeroCall } from "@/components/marketing/hero-call";
@@ -11,6 +13,13 @@ import { PrivacyLayersLazy } from "@/components/marketing/privacy-layers-lazy";
 import { Container } from "@/components/marketing/section";
 import { Statement } from "@/components/marketing/statement";
 import { OutcomeTag } from "@/components/ui/outcome-tag";
+import { organizationLd, websiteLd } from "@/server/blog/seo";
+
+export const metadata: Metadata = {
+  description:
+    "Physician-written emergency scenarios, built on the Ontario ALS and BLS standards, that train the decisions Canadian paramedics make under pressure.",
+  alternates: { canonical: "/" },
+};
 
 const team = [
   {
@@ -36,6 +45,7 @@ const team = [
 export default function HomePage() {
   return (
     <>
+      <JsonLd data={[organizationLd(), websiteLd()]} />
       {/* ─── Hero: the resus bay monitor ─────────────────────────────────── */}
       <section
         data-nav="dark"

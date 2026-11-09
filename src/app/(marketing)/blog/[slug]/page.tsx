@@ -8,7 +8,7 @@ import { PostCard } from "@/components/blog/post-card";
 import { PilotClose } from "@/components/marketing/pilot-close";
 import { Container } from "@/components/marketing/section";
 import { asFaq, asSources } from "@/lib/blog";
-import { absolute, articleLd, breadcrumbLd, coverUrl, faqLd } from "@/server/blog/seo";
+import { absolute, articleLd, breadcrumbLd, coverUrl, DEFAULT_OG_IMAGE, faqLd } from "@/server/blog/seo";
 import { getLivePost, getRelatedPosts } from "@/server/blog/service";
 
 type Props = { params: Promise<{ slug: string }> };
@@ -37,9 +37,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [post.authorName],
       section: post.category?.name,
       tags: post.tags,
-      images: cover ? [{ url: cover, alt: post.coverAlt ?? post.title }] : undefined,
+      images: cover ? [{ url: cover, alt: post.coverAlt ?? post.title }] : [DEFAULT_OG_IMAGE],
     },
-    twitter: { card: cover ? "summary_large_image" : "summary", title, description, images: cover ? [cover] : undefined },
+    twitter: { card: "summary_large_image", title, description, images: [cover ?? DEFAULT_OG_IMAGE.url] },
   };
 }
 

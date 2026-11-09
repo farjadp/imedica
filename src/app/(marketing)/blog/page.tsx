@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/blog/json-ld";
 import { Pager } from "@/components/blog/pager";
 import { PostGrid } from "@/components/blog/post-grid";
 import { Container } from "@/components/marketing/section";
-import { BLOG_NAME, breadcrumbLd, collectionLd } from "@/server/blog/seo";
+import { BLOG_NAME, breadcrumbLd, collectionLd, DEFAULT_OG_IMAGE } from "@/server/blog/seo";
 import { getCategoriesWithCounts, listLivePosts } from "@/server/blog/service";
 
 const description =
@@ -22,7 +22,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
     description,
     alternates: { canonical: n > 1 ? `/blog?page=${n}` : "/blog", types: { "application/rss+xml": "/blog/feed.xml" } },
     robots: q ? { index: false, follow: true } : undefined,
-    openGraph: { title: BLOG_NAME, description, url: "/blog", type: "website" },
+    openGraph: { title: BLOG_NAME, description, url: "/blog", type: "website", images: [DEFAULT_OG_IMAGE] },
   };
 }
 

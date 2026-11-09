@@ -36,7 +36,10 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_CA",
     siteName: "Imedica",
+    // Mirrors DEFAULT_OG_IMAGE in src/server/blog/seo.ts (server-only, so not imported here).
+    images: [{ url: "/og/imedica-default.png", width: 1200, height: 630, alt: "Imedica: decision training for Canadian paramedics" }],
   },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
