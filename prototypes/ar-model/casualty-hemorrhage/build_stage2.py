@@ -4,10 +4,12 @@
 # Clinical parameters (all "to be confirmed by physician", brief section 2) are
 # collected here so a reviewer's change is a one-line edit + rebuild.
 CLIN = dict(
-    pallor_desat=0.38,        # skin saturation removed (0..1): "pale"
-    pallor_lift=0.06,         # skin value lift: pale, not grey (grey = shock state)
-    lip_desat=0.55,           # lips paler than the rest
-    skin_roughness=0.42,      # cool, slightly moist sheen ("clammy")
+    pallor_desat=0.52,        # skin saturation removed (0..1): "pale" (v1.1: stronger, holds under warm light)
+    pallor_lift=0.07,         # skin value lift: pale, not grey (grey = shock state, brief section 2)
+    pallor_cool=0.025,        # small cool shift (less red, a touch more blue), still not grey
+    lip_desat=0.65,           # lips paler than the rest
+    skin_roughness=0.50,      # body skin
+    sweat_roughness=0.26,     # face, neck, hands: sweat sheen ("clammy")
     wound_t=0.42,             # wound along hip->knee (0 = hip): mid/upper thigh
     wound_dir=(0.55, 0.0, 0.84),  # anterior-lateral (MH axes: +x left, +z anterior)
     pool_size=(0.50, 0.40),   # blood pool, metres (brief: 40-60 cm across)
@@ -160,6 +162,7 @@ rgb = px[..., :3]
 lum = (rgb * np.array([0.30, 0.59, 0.11])).sum(-1, keepdims=True)
 rgb = rgb + (lum - rgb) * CLIN["pallor_desat"]
 rgb = np.clip(rgb + CLIN["pallor_lift"], 0, 1)
+rgb = np.clip(rgb + np.array([-1.0, 0.0, 0.6]) * CLIN["pallor_cool"], 0, 1)
 px[..., :3] = rgb
 pale_skin_path = save_px(px, "_skin_pale_tmp.png", "PNG")
 
@@ -255,7 +258,7 @@ def skin_builder(nt, bsdf):
     hb = nt.nodes.new("ShaderNodeAttribute"); hb.attribute_name = "handblood"
     nz = noise_node(nt, 9, 4)
     mr = nt.nodes.new("ShaderNodeMapRange"); mr.inputs["From Min"].default_value = 0.30
-    mr.inputs["From Max"].default_value = 0.50
+    mr.inputs["From Max"].default_value = 0.44
     nt.links.new(nz.outputs["Fac"], mr.inputs["Value"])
     mul = nt.nodes.new("ShaderNodeMath"); mul.operation = "MULTIPLY"
     nt.links.new(hb.outputs["Fac"], mul.inputs[0]); nt.links.new(mr.outputs["Result"], mul.inputs[1])
@@ -266,6 +269,31 @@ def skin_builder(nt, bsdf):
     nt.links.new(out, bsdf.inputs["Base Color"])
 
 skin_path = bake_color(body, skin_builder, "skin_basecolor.jpg", 2048)
+
+SWEAT_BONES = ("head", "jaw", "oculi", "orbicularis", "oris", "risorius", "levator", "special0",
+               "temporalis", "neck0", "wrist", "metacarpal", "finger")
+sweat = np.zeros(nbody, np.float32)
+for bi, b in enumerate(bones):
+    if b.startswith(SWEAT_BONES):
+        sweat += W[bi, :nbody]
+sweat = np.clip(sweat, 0, 1) * (1 - hair)          # not on the hair
+a = body.data.attributes.new("sweat", "FLOAT", "POINT"); a.data.foreach_set("value", sweat)
+
+def skin_rough_builder(nt, bsdf):
+    sw = nt.nodes.new("ShaderNodeAttribute"); sw.attribute_name = "sweat"
+    nz = noise_node(nt, 260, 3)      # fine droplet breakup
+    beads = nt.nodes.new("ShaderNodeMapRange")
+    beads.inputs["From Min"].default_value = 0.45; beads.inputs["From Max"].default_value = 0.65
+    beads.inputs["To Min"].default_value = CLIN["sweat_roughness"] + 0.08
+    beads.inputs["To Max"].default_value = CLIN["sweat_roughness"] - 0.10
+    nt.links.new(nz.outputs["Fac"], beads.inputs["Value"])
+    mx = nt.nodes.new("ShaderNodeMapRange")
+    mx.inputs["To Min"].default_value = CLIN["skin_roughness"]
+    nt.links.new(sw.outputs["Fac"], mx.inputs["Value"])
+    nt.links.new(beads.outputs["Result"], mx.inputs["To Max"])
+    comb = nt.nodes.new("ShaderNodeCombineColor"); comb.inputs[0].default_value = 1.0; comb.inputs[2].default_value = 0.0
+    nt.links.new(mx.outputs["Result"], comb.inputs[1]); nt.links.new(comb.outputs[0], bsdf.inputs["Base Color"])
+skin_mr_path = bake_color(body, skin_rough_builder, "skin_mr.jpg", 1024)
 
 # --------------------------------------------------------------- clothing textures
 suit_dir = os.path.join(MH, "clothes", "male_casualsuit02")
@@ -286,6 +314,15 @@ def trouser_blood(rest):
     s = np.where(along < 0, -along / ext_down, along / ext_up)
     soak = np.clip(1.15 - s, 0, 1) * on_left
     core = np.clip(1 - np.linalg.norm(d, axis=1) / 0.09, 0, 1)   # wettest near the wound
+    # v1.1: wet runs down the back of the thigh, on the inner (medial, -x) and
+    # outer side, toward the floor: shows the pool comes from the leg.
+    post = np.clip((axis_pt[2] - rest[:, 2]) / 0.05, 0, 1)
+    band = np.clip(1 - np.abs(along + 0.05) / 0.11, 0, 1)
+    medial = np.clip((axis_pt[0] - rest[:, 0]) / 0.05, 0, 1)
+    lateral = np.clip((rest[:, 0] - axis_pt[0]) / 0.05, 0, 1)
+    run = band * on_left * np.clip(post * 1.4 + 0.6 * np.maximum(medial, lateral) * post, 0, 1)
+    core = np.maximum(core, run * 0.95)
+    soak = np.maximum(soak, run)
     return soak.astype(np.float32), core.astype(np.float32)
 
 trest = np.zeros((len(trousers.data.vertices), 3)); trousers.data.vertices.foreach_get("co", trest.ravel())
@@ -393,7 +430,7 @@ def pbr(name, color_path=None, color=None, rough=0.6, normal_path=None, mr_path=
     return m
 
 M = {
-    "skin": pbr("skin", skin_path, rough=CLIN["skin_roughness"]),
+    "skin": pbr("skin", skin_path, mr_path=skin_mr_path),
     "trousers": pbr("trousers", trousers_path, mr_path=trousers_mr_path,
                     normal_path=os.path.join(TEX, "suit_normal.jpg")),
     "shirt": pbr("shirt", shirt_path, rough=0.85, normal_path=os.path.join(TEX, "suit_normal.jpg")),

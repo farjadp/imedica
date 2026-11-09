@@ -101,7 +101,7 @@ def bvh_of(obs):
     return BVHTree.FromPolygons(verts, polys)
 surf = bvh_of([trousers, shirt, body])
 
-TL, TW, NU, NV = 0.30, 0.27, 36, 32       # folded hand towel, metres
+TL, TW, NU, NV = 0.24, 0.20, 34, 28       # folded hand towel held on the front of the thigh (v1.1)
 side = Vector((0, 0, 1)).cross(A).normalized()   # across the thigh, horizontal
 centre = P + A * 0.01
 top_z = max((surf.ray_cast(Vector(((centre + side * k).x, (centre + side * k).y, 1.0)),
@@ -115,8 +115,11 @@ for i in range(NU + 1):
         hz = hit.z if hit is not None else 0.0
         # start just above the leg surface (or level with the thigh top beyond it)
         u_, v_ = i / NU, j / NV
-        wrinkle = 0.006 * np.sin(u_ * 11 + 2.0 * v_) * np.sin(v_ * 7 + 0.5) + 0.004 * np.sin(u_ * 23 + v_ * 9)
-        grid[i, j] = (q.x, q.y, max(hz + 0.007, top_z - 0.03) + wrinkle + 0.004)
+        # crumpled: several fold frequencies, strongest toward the middle
+        wrinkle = (0.010 * np.sin(u_ * 13 + 3.0 * v_) * np.sin(v_ * 9 + 1.0)
+                   + 0.006 * np.sin(u_ * 29 + v_ * 17) + 0.004 * np.sin(v_ * 31 - u_ * 5)
+                   + 0.008 * np.exp(-((u_ - 0.55) ** 2 + (v_ - 0.45) ** 2) / 0.03))
+        grid[i, j] = (q.x, q.y, max(hz + 0.007, top_z - 0.035) + abs(wrinkle) + 0.004)
 tv = [tuple(grid[i, j]) for i in range(NU + 1) for j in range(NV + 1)]
 tf = [(i * (NV + 1) + j, (i + 1) * (NV + 1) + j, (i + 1) * (NV + 1) + j + 1, i * (NV + 1) + j + 1)
       for i in range(NU) for j in range(NV)]
@@ -143,8 +146,9 @@ pin = towel.vertex_groups.new(name="pin")
 for k in range(len(towel.data.vertices)):
     i, j = divmod(k, NV + 1)
     a_ = abs(j / NV - 0.5)
-    if a_ < 0.08:
-        pin.add([k], 1.0 - a_ / 0.08 * 0.5, "REPLACE")
+    b_ = abs(i / NU - 0.5)
+    if a_ < 0.26 and b_ < 0.42:   # held over the front of the thigh; edges fall free
+        pin.add([k], 1.0 - a_ / 0.26 * 0.7, "REPLACE")
 cl = towel.modifiers.new("Cloth", "CLOTH")
 cs = cl.settings
 cs.vertex_group_mass = "pin"; cs.pin_stiffness = 1.0
@@ -170,10 +174,10 @@ rv = np.array([[ (j / NV - 0.5) * TW, (i / NU - 0.5) * TL, 0] for i in range(NU 
 ra.data.foreach_set("vector", rv.ravel())
 # wound position in towel space ~ centre; soak radius covers most of the towel
 d_w = np.linalg.norm(rv[:, :2] - np.array([0.0, -0.01]), axis=1)
-sat = np.clip(1.30 - d_w / 0.185, 0, 1).astype(np.float32)
+sat = np.clip(1.18 - d_w / 0.115, 0, 1)   # darkest at the centre, dry-ish edges.astype(np.float32)
 a = towel.data.attributes.new("sat", "FLOAT", "POINT"); a.data.foreach_set("value", sat)
 
-TOWEL_DRY = (0.62, 0.66, 0.70, 1)   # pale blue-grey hand towel (linear)
+TOWEL_DRY = (0.30, 0.42, 0.60, 1)   # light-blue hand towel (linear): reads as a towel, contrasts with blood
 def towel_builder(nt, bsdf):
     s = nt.nodes.new("ShaderNodeAttribute"); s.attribute_name = "sat"
     nz = noise_node(nt, 14, 10)
@@ -251,6 +255,103 @@ pool = make_mesh("blood_pool", pv, pf)
 for p in pool.data.polygons:
     p.use_smooth = True
 pool.data.materials.append(M["blood_wet"])
+
+# ---------------------------------------------- left hand pressing the towel (v1.1)
+# Two-bone IK: wrist placed on the towel just above the wound (toward the hip),
+# fingers pointing toward the knee, palm down, thumb medial, fingers spread.
+bpy.context.view_layer.update()
+dg = bpy.context.evaluated_depsgraph_get()
+tbvh = bvh_of([towel])
+bpy.context.view_layer.objects.active = arm
+bpy.ops.object.mode_set(mode="POSE")
+pb = arm.pose.bones
+MW = arm.matrix_world; MWi = MW.inverted()
+def wpos(v): return MW @ v
+def hit_z(x, y):
+    h = tbvh.ray_cast(Vector((x, y, 1.0)), Vector((0, 0, -1)))[0]
+    return h.z if h is not None else None
+# top of the thigh (the wound is antero-lateral, so step medially toward the crest)
+tw = np.array([towel.matrix_world @ v.co for v in towel.data.vertices])
+crest_x = float(tw[np.argsort(tw[:, 2])[-40:], 0].mean())
+palm_xy = P - A * 0.035
+palm_xy.x = crest_x
+wrist_xy = palm_xy - A * 0.075
+# rest on the highest towel folds under the hand footprint (palm + fingers)
+foot = [np.linalg.norm(tw[:, :2] - np.array([c.x, c.y]), axis=1) < 0.05
+        for c in (wrist_xy, palm_xy, palm_xy + A * 0.06)]
+zt = float(max(tw[m, 2].max() for m in foot if m.any()))
+T = Vector((wrist_xy.x, wrist_xy.y, zt + 0.012))       # wrist bone just above the folds (pressing in)
+S = wpos(pb["upperarm01.L"].head)
+E0 = wpos(pb["lowerarm01.L"].head); W0 = wpos(pb["wrist.L"].head)
+L1, L2 = (E0 - S).length, (W0 - E0).length
+d = min((T - S).length, L1 + L2 - 0.004)
+u = (T - S).normalized(); T = S + u * d
+a_ = (L1 ** 2 - L2 ** 2 + d ** 2) / (2 * d); h_ = max(L1 ** 2 - a_ ** 2, 0) ** 0.5
+pole = Vector((1.0, 0.0, -0.35)); pole = (pole - u * pole.dot(u)).normalized()   # elbow out, toward the floor
+E = S + u * a_ + pole * h_
+def align_ws(bname, target_ws):
+    b = pb[bname]; bpy.context.view_layer.update()
+    head = b.head.copy()
+    tgt_as = MWi @ target_ws
+    q = (b.tail - head).normalized().rotation_difference((tgt_as - head).normalized())
+    b.matrix = Matrix.Translation(head) @ q.to_matrix().to_4x4() @ Matrix.Translation(-head) @ b.matrix
+    bpy.context.view_layer.update()
+for bn in ("upperarm01.L", "upperarm02.L"):
+    align_ws(bn, E)
+for bn in ("lowerarm01.L", "lowerarm02.L"):
+    align_ws(bn, T)
+hand_dir = (A + Vector((0, 0, -0.12))).normalized()
+align_ws("wrist.L", wpos(pb["wrist.L"].head) + hand_dir * 0.1)
+# roll the hand about its own axis: palm plane horizontal, thumb medial (-X)
+def palm_score():
+    bpy.context.view_layer.update()
+    k = [wpos(pb[f"metacarpal{i}.L"].tail) for i in (1, 4)]
+    w = wpos(pb["wrist.L"].head); tip = wpos(pb["metacarpal2.L"].tail)
+    n = (k[1] - k[0]).cross(tip - w).normalized()
+    thumb = wpos(pb["finger1-2.L"].head)
+    centre = (k[0] + k[1]) / 2
+    return abs(n.z) + (0.5 if thumb.x < centre.x else -0.5)
+best = (-9, 0)
+b = pb["wrist.L"]
+base = b.matrix.copy()
+for deg in range(0, 360, 10):
+    ax = (b.tail - b.head).normalized()
+    R = Matrix.Rotation(np.radians(deg), 4, ax)
+    b.matrix = Matrix.Translation(base.translation) @ R @ Matrix.Translation(-base.translation) @ base
+    sc_ = palm_score()
+    if sc_ > best[0]:
+        best = (sc_, deg)
+ax = (b.tail - b.head).normalized()
+b.matrix = Matrix.Translation(base.translation) @ Matrix.Rotation(np.radians(best[1]), 4, ax) @ Matrix.Translation(-base.translation) @ base
+bpy.context.view_layer.update()
+# spread the fingers a little (about the palm normal) and flatten them onto the towel
+k1, k4 = wpos(pb["metacarpal1.L"].tail), wpos(pb["metacarpal4.L"].tail)
+nrm_ = (k4 - k1).cross(wpos(pb["metacarpal2.L"].tail) - wpos(pb["wrist.L"].head)).normalized()
+if nrm_.z < 0:
+    nrm_ = -nrm_
+for f_, ang in (("finger2-1.L", -9), ("finger3-1.L", -3), ("finger4-1.L", 4), ("finger5-1.L", 10)):
+    bb = pb[f_]; hd = bb.head.copy()
+    R = Matrix.Rotation(np.radians(ang), 4, (MWi.to_3x3() @ nrm_).normalized())
+    bb.matrix = Matrix.Translation(hd) @ R @ Matrix.Translation(-hd) @ bb.matrix
+    bpy.context.view_layer.update()
+# straighten the fingers along the hand, curving slightly onto the thigh
+for fn in (2, 3, 4, 5):
+    for seg, tilt in ((1, 0.10), (2, 0.25), (3, 0.40)):
+        bb = pb[f"finger{fn}-{seg}.L"]
+        par = bb.parent
+        spread = {2: -0.16, 3: -0.05, 4: 0.06, 5: 0.17}[fn]
+        if seg > 1:
+            dvec = (par.tail - par.head).normalized()
+        else:
+            hd_ws = (hand_dir + nrm_.cross(hand_dir).normalized() * spread).normalized()
+            dvec = (MWi.to_3x3() @ hd_ws).normalized()
+        dvec = (dvec - (MWi.to_3x3() @ nrm_).normalized() * tilt).normalized()
+        hd = bb.head.copy()
+        q = (bb.tail - hd).normalized().rotation_difference(dvec)
+        bb.matrix = Matrix.Translation(hd) @ q.to_matrix().to_4x4() @ Matrix.Translation(-hd) @ bb.matrix
+        bpy.context.view_layer.update()
+bpy.ops.object.mode_set(mode="OBJECT")
+print("HAND_IK reach", round(d, 3), "of", round(L1 + L2, 3), "roll", best)
 
 # --------------------------------------------------------------- hierarchy
 head_obj = parts["head"]

@@ -1,10 +1,22 @@
-# Physician review sheet: catastrophic limb haemorrhage casualty, v1
+# Physician review sheet: catastrophic limb haemorrhage casualty, v1 (revision 1.1)
 
 **Status: DRAFT, not reviewed. Not for learners.** Not attached to the scenario. A physician attaches it in the editor's **3D model** tab, and a second physician approves it (two-person rule). Every clinical item below is a draft until both reviewers sign.
 
 - Scenario: `catastrophic-limb-hemorrhage` (`src/server/scenarios/library/hemorrhage.ts`), `arrival` state: "On his back in the wood chips, a soaked towel on his **left** thigh with blood pulsing through it. Pale and talking, but slowly." Skin: "Pale, cold, clammy".
 - Files under review: `public/models/catastrophic-limb-hemorrhage/v1/patient.usdz` (iPhone) and `patient.glb` (Android). Git SHA: ______ (fill in from the PR's merge commit).
 - Spec: `docs/product/ar-model-brief.md` §2 (clinical) and §4 (this checklist), branch `feat/ar-model-brief`.
+
+## Revision 1.1 (PM review, 2026-11-08): each change needs physician confirmation
+
+| # | Change | Why | Physician confirms |
+|---|---|---|---|
+| 1 | Towel: smaller (24 × 20 cm), crumpled and folded, held over the **front** of the thigh; darkest at the centre, light-blue unsoaked cloth at the edges | v1 read as a red wrap/skirt around the thigh | ☐ Reads as a towel pressed on a wound and failing |
+| 2 | Left hand pressing on the towel, fingers spread, blood on the fingers and over the towel between them | "Blood through the fingers" cue; v1 hand floated beside the towel | ☐ Plausible for a conscious patient at `arrival` ☐ doesn't suggest that pressure alone is controlling it |
+| 3 | Pallor stronger (−52% saturation, slight cool shift, paler lips) and a **sweat sheen** on face, neck and hands (glossier skin with fine droplet breakup) | v1 looked calm and well-perfused | ☐ Pale and clammy, **not grey**. The brief (§2) keeps grey for the `shock` state. The PM asked for "a greyish tone"; we did **not** add grey. Please decide |
+| 4 | Trousers: darker, wet runs down the back of the left thigh, on the inner and outer side, to the floor | Shows the pool comes from the leg | ☐ Plausible flow for a supine patient |
+| 5 | Boots: foot skin pulled 1 cm inside the boot (v1 showed skin through the boot upper, which looked like sandal holes) | Closed footwear | ☐ Fine (they're closed black leather boots, not steel-toe work boots; a custom boot is possible later) |
+
+Trade-off to judge on the phone: under neutral daylight the skin now reads very pale (hands almost white); under a warm lamp it still reads only mildly pale. Pallor that holds in every light would need a different technique (e.g. the app warning about lighting), not just a paler texture.
 
 ## How to review (10 minutes)
 
@@ -22,6 +34,9 @@ The renders in `renders/` show the same views (from the shipped GLB, neutral and
 | `renders/ar_feet_*.jpg`, `ar_right_3q_*.jpg`, `ar_head_*.jpg` | From the feet, from his right side, from the head end |
 | `renders/top_*.jpg` | Straight down: pool size and position |
 | `renders/thigh_close_*.jpg` | Dressing, trouser soak, left hand (about 1 m) |
+| `renders/hand_close_*.jpg` | Hand pressing the towel, blood through the fingers |
+| `renders/inner_thigh_*.jpg` | From his right/feet: wet run down the inner thigh to the floor |
+| `renders/feet_close_*.jpg` | Boots |
 | `renders/face_close_*.jpg` | Face: pallor, eyes open |
 
 ## The cues on this model, and what to check
@@ -31,12 +46,12 @@ Each value is a parameter in `build_stage2.py` (`CLIN`) or the named file; a cha
 | # | Cue (brief §2) | What we built | Check | Knob |
 |---|---|---|---|---|
 | 1 | Adult male, ~42, average build, 1.75 m | MakeHuman male, age 42, slightly above average weight; length 1.75 m | Real size on the floor; plausible build | `AGE_YEARS`, `HEIGHT_M` (build.py) |
-| 2 | Supine, eyes open, head slightly turned, arms by the sides | Supine; head turned ~18° to his left; eyes open; mouth neutral, lips slightly parted; arms by the sides, left hand resting against the towel | Looks conscious and talking, not limp or dead | pose block in `build.py` |
+| 2 | Supine, eyes open, head slightly turned, arms by the sides | Supine; head turned ~18° to his left; eyes open; mouth neutral, lips slightly parted; right arm by the side; **left hand pressing the towel** (v1.1) | Looks conscious and talking, not limp or dead | pose block in `build.py` |
 | 3 | **Bleeding from the LEFT thigh** | Wound under the towel on the anterior-lateral **left** thigh, ~42% of the way from hip to knee | Side is right (patient's left); level is right | `wound_t`, `wound_dir` |
-| 4 | **Dressing saturated / failing** | Folded hand towel (30 × 27 cm, cloth-simulated), dark red and wet over most of it, paler blood-tinged edges | Reads as "soaked, not working" from 1.5 m | towel colour ramp, `sat` radius (`build_stage3.py`) |
-| 5 | Blood on the body | Left trouser leg soaked from the wound to the knee, heaviest laterally and behind the thigh (where it runs to the floor); left hand bloodied | Plausible spread; not too much, not too little | `trouser_soak_down`, `trouser_soak_up`; hand mask |
+| 4 | **Dressing saturated / failing** | Crumpled light-blue hand towel (24 × 20 cm, cloth-simulated) on the front of the thigh, dark wet red at the centre, unsoaked edges | Reads as "soaked, not working" from 1.5 m | towel colour ramp, `sat` radius (`build_stage3.py`) |
+| 5 | Blood on the body | Left trouser leg soaked from the wound to the knee; wet runs behind the thigh, inner and outer side, to the floor; left fingers bloodied | Plausible spread; not too much, not too little | `trouser_soak_down`, `trouser_soak_up`; hand mask |
 | 6 | **Blood on the floor reads as life-threatening** | Opaque pool ~50 × 40 cm beside and under the left thigh, glossy, slightly domed (≤ 2.5 mm), five small satellite drops | **You set the size.** The brief proposes 40–60 cm; is that right for "catastrophic" at this moment? | `pool_size` |
-| 7 | Pale, not grey (grey = `shock` state) | Skin desaturated 38% and lightened; lips paler; slightly glossy (clammy) | Pale in all three lights; **not grey**. Known weak spot: under warm lamp light the pallor fades (see `face_close_warm.jpg`) | `pallor_desat`, `pallor_lift`, `lip_desat`, `skin_roughness` |
+| 7 | Pale, not grey (grey = `shock` state) | Skin desaturated 52%, lightened, slight cool shift; lips paler; sweat sheen on face, neck, hands | Pale in all three lights; **not grey**. Known weak spot: under warm lamp light the pallor fades (see `face_close_warm.jpg`) | `pallor_desat`, `pallor_lift`, `pallor_cool`, `lip_desat`, `sweat_roughness` |
 | 8 | Clothing | Dark olive long-sleeve fleece/shirt, jeans (wet-darkened), black boots. No chainsaw chaps | Plausible for a man cutting wood at 4 °C | `build_stage2.py` shirt colour; clothing choice in `build.py` |
 | 9 | Gore limit | No visible wound, bone, muscle or spray. The wound mesh exists under the clothes for v2 cut-away only | OK for a first-year student and an App Store screenshot | — |
 | 10 | Things the scenario does **not** have | No fracture, no head injury, no amputation, no tourniquet, no chainsaw prop | Nothing suggests an extra finding | — |
@@ -73,6 +88,6 @@ Each value is a parameter in `build_stage2.py` (`CLIN`) or the named file; a cha
 ## Questions we'd like answered
 
 1. Pool size: keep ~50 × 40 cm, or larger/smaller?
-2. Should the left hand be on the towel (pressing) or beside the body? Right now it rests against the towel and is bloodied.
+2. Left hand pressing the towel (v1.1): keep, or beside the body?
 3. Is the warm-light pallor acceptable, or should the skin go paler (risk: grey under daylight)?
 4. Jeans or work trousers? (Jeans are what the CC0 library has; work trousers would need a custom texture.)

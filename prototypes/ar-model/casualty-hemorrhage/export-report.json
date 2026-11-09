@@ -20,7 +20,7 @@
   "thigh_right",
   "wound_thigh_left"
  ],
- "triangles_total": 41272,
+ "triangles_total": 40448,
  "triangles": {
   "head": 8340,
   "airway": 424,
@@ -36,7 +36,7 @@
   "foot_left": 2128,
   "foot_right": 2122,
   "wound_thigh_left": 16,
-  "dressing_thigh_left": 4880,
+  "dressing_thigh_left": 4056,
   "blood_pool": 1200,
   "clothing_shirt": 2408,
   "clothing_trousers": 1712,
@@ -50,7 +50,7 @@
  "min_z": 0.0,
  "body_length_m": 1.75,
  "bytes": {
-  "patient.glb": 937788,
-  "patient.usdz": 3476159
+  "patient.glb": 1077192,
+  "patient.usdz": 3581303
  }
 }

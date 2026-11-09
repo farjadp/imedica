@@ -1,6 +1,8 @@
-# AR casualty v1: catastrophic limb haemorrhage (draft, awaiting physician review)
+# AR casualty v1 (rev 1.1): catastrophic limb haemorrhage (draft, awaiting physician review)
 
 The first real "look before you act" casualty for `catastrophic-limb-hemorrhage`, built in-house in Blender 5.2 LTS from CC0 MakeHuman data, by script. Spec: `docs/product/ar-model-brief.md` (branch `feat/ar-model-brief`). Hosting: `docs/architecture/data-ar-model.md` (branch `feat/ar-mvp-backend`).
+
+Revision 1.1 (same `v1/` folder, nothing has been served yet) applied the PM review: crumpled towel on the front of the thigh, left hand pressing it, stronger pallor + sweat sheen, wet runs to the floor, boots fixed. See REVIEW.md.
 
 **Not attached to the scenario.** A physician attaches it in the editor's 3D model tab; a second physician approves it ([REVIEW.md](REVIEW.md)).
 
@@ -8,11 +10,11 @@ The first real "look before you act" casualty for `catastrophic-limb-hemorrhage`
 
 | File | Size | Notes |
 |---|---|---|
-| `patient.glb` | 0.94 MB | Draco geometry, JPEG textures, 19 named mesh nodes under root `casualty`, no skin |
-| `patient.usdz` | 3.48 MB | `usdchecker --arkit`: Success. Same 19 names as Xform + Mesh prims, Y-up, metres |
+| `patient.glb` | 1.08 MB | Draco geometry, JPEG textures, 19 named mesh nodes under root `casualty`, no skin |
+| `patient.usdz` | 3.58 MB | `usdchecker --arkit`: Success. Same 19 names as Xform + Mesh prims, Y-up, metres |
 | `poster.webp` | 0.12 MB | 1200×900, transparent, three-quarter view from standing height |
 
-41,272 triangles (budget 60k). Length 1.75 m. Floor at y = 0, origin centred under the body. Patient's left = +X.
+40,448 triangles (budget 60k). Length 1.75 m. Floor at y = 0, origin centred under the body. Patient's left = +X.
 
 ## Nodes (brief §3.2)
 
@@ -50,5 +52,5 @@ The Khronos glTF-Validator has **not** been run (fetching it with `npx` was bloc
 
 - Not opened on a phone yet. Quick Look and Scene Viewer are the real test (REVIEW.md, step 1).
 - MIME headers for `/models/*.usdz` come with the AR MVP backend PR (`src/lib/model-headers.ts`). Until that's merged, Quick Look may show "Zero KB" for this path.
-- Fidelity: a clean serious-game look, not photoreal. Generic MakeHuman face, no pores or subsurface detail, hair and eyebrows painted on (no hair cards: the brief forbids transparency), jeans rather than work trousers, the towel reads as a red cloth more than as terry.
+- Fidelity: a clean serious-game look, not photoreal. Generic MakeHuman face, no pores or subsurface detail, hair and eyebrows painted on (no hair cards: the brief forbids transparency), jeans rather than work trousers, the hand's finger pose is approximate.
 - Pallor fades under warm lamp light (the brief's known risk; see `renders/face_close_warm.jpg`).

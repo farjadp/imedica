@@ -192,16 +192,18 @@ for name, path in PROXIES.items():
 
 # Skin under clothing stays modelled (brief: cut-away readiness) but is pulled in
 # 3 mm where MakeHuman would delete it, so it never pokes through the cloth.
-hidden = set()
-for n in ("clothing_suit", "clothing_boots"):
-    hidden.update(i for i in proxy_data[n]["delete"] if i < nbody)
+hidden = {}
+for n, depth in (("clothing_suit", 0.003), ("clothing_boots", 0.010)):
+    for i in proxy_data[n]["delete"]:
+        if i < nbody:
+            hidden[i] = max(hidden.get(i, 0), depth)   # feet sit deeper: no skin through the boot
 body.data.update()
 nrm = np.zeros((nbody, 3))
 body.data.vertices.foreach_get("normal", nrm.ravel())
 co = np.zeros((nbody, 3))
 body.data.vertices.foreach_get("co", co.ravel())
 hid = np.array(sorted(hidden), dtype=np.int64)
-co[hid] -= nrm[hid] * 0.003 / 1.0
+co[hid] -= nrm[hid] * np.array([hidden[i] for i in hid])[:, None]
 body.data.vertices.foreach_set("co", co.ravel())
 body.data.update()
 

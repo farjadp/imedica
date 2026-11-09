@@ -2,7 +2,7 @@
 
   Blender -b <file.blend> --python render.py -- <out_dir> [views] [lights] [engine]
 
-views:  comma list of ar_left_3q, ar_feet, ar_right_3q, ar_head, top, thigh_close, face_close
+views:  comma list of ar_left_3q, ar_feet, ar_right_3q, ar_head, top, thigh_close, hand_close, inner_thigh, feet_close, face_close
         (default: all). lights: neutral,warm (default both).
 engine: EEVEE (default) or CYCLES.
 
@@ -25,6 +25,9 @@ VIEWS = {
     "ar_head":     ((0.4, 2.0, 1.6), (0.05, -0.1, 0.1)),
     "top":         ((0.0, 0.0, 3.2), (0.0, 0.0, 0.0)),
     "thigh_close": ((0.75, -0.55, 0.85), (0.1, -0.2, 0.12)),
+    "hand_close":  ((0.55, -0.35, 0.65), (0.14, -0.1, 0.2)),
+    "inner_thigh": ((-0.35, -0.75, 0.55), (0.08, -0.15, 0.08)),
+    "feet_close":  ((0.55, -1.45, 0.6), (0.0, -0.8, 0.08)),
     "face_close":  ((0.45, 1.05, 0.75), (0.02, 0.76, 0.08)),
 }
 views = argv[1].split(",") if len(argv) > 1 and argv[1] else list(VIEWS)

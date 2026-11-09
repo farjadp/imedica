@@ -19,7 +19,7 @@ usdchecker --arkit "$WORK/export/patient.usdz" 2>/dev/null | tail -2
 
 IMP="import bpy;bpy.ops.wm.read_factory_settings(use_empty=True);bpy.ops.import_scene.gltf(filepath='$WORK/export/patient.glb')"
 "$BLENDER" -b --factory-startup --python-expr "$IMP" --python "$HERE/render.py" -- "$WORK/renders" \
-  ar_left_3q,ar_feet,ar_right_3q,ar_head,top,thigh_close,face_close neutral,warm
+  ar_left_3q,ar_feet,ar_right_3q,ar_head,top,thigh_close,hand_close,inner_thigh,feet_close,face_close neutral,warm
 "$BLENDER" -b --factory-startup --python-expr "$IMP" --python "$HERE/render.py" -- "$WORK/renders" "" poster
 
 cp "$WORK/export/patient.glb" "$WORK/export/patient.usdz" "$WORK/renders/poster.webp" "$PUB/"

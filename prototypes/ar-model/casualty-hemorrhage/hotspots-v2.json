@@ -9,11 +9,11 @@
       "label": "Soaked towel over the wound, left thigh",
       "region": "left_leg",
       "anchor": [
-        0.127,
-        0.183,
-        0.137
+        0.146,
+        0.21,
+        0.138
       ],
-      "radius": 0.155,
+      "radius": 0.124,
       "action": "pressure"
     },
     {
@@ -67,18 +67,18 @@
       "label": "Airway and neck",
       "region": "airway",
       "anchor": [
-        -0.0,
+        0.002,
         0.152,
-        -0.661
+        -0.662
       ],
-      "radius": 0.111
+      "radius": 0.114
     },
     {
       "node": "chest",
       "label": "Chest",
       "region": "chest",
       "anchor": [
-        0.0,
+        0.002,
         0.148,
         -0.471
       ],
@@ -111,11 +111,11 @@
       "label": "Left arm",
       "region": "left_arm",
       "anchor": [
-        0.194,
-        0.143,
-        -0.238
+        0.158,
+        0.174,
+        -0.246
       ],
-      "radius": 0.386,
+      "radius": 0.378,
       "action": "fluid"
     },
     {
@@ -160,39 +160,39 @@
       "anchor": [
         -0.167,
         0.127,
-        0.554
+        0.555
       ],
-      "radius": 0.226
+      "radius": 0.227
     },
     {
       "node": "foot_left",
       "label": "Left foot",
       "region": "left_leg",
       "anchor": [
-        0.194,
-        0.203,
-        0.8
+        0.196,
+        0.204,
+        0.799
       ],
-      "radius": 0.127
+      "radius": 0.121
     },
     {
       "node": "foot_right",
       "label": "Right foot",
       "region": "right_leg",
       "anchor": [
-        -0.194,
-        0.203,
-        0.8
+        -0.196,
+        0.204,
+        0.799
       ],
-      "radius": 0.127
+      "radius": 0.121
     },
     {
       "node": "clothing_shirt",
       "label": "Wet clothing (shirt)",
       "region": "chest",
       "anchor": [
-        0.0,
-        0.138,
+        -0.031,
+        0.147,
         -0.337
       ],
       "radius": 0.311,
