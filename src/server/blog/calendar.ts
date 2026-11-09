@@ -6,7 +6,7 @@ import { join } from "node:path";
 import { db } from "../db";
 import { type CalendarArticle, monthsBetween, parseArticle, plannedKey } from "./frontmatter";
 
-export const CALENDAR = { start: "2025-01", end: "2026-12" } as const;
+export const CALENDAR = { start: "2025-01", end: "2027-12" } as const;
 const DIR = join(process.cwd(), "content/blog");
 
 export type CalendarFile = { file: string; article?: CalendarArticle; error?: string };

@@ -1,0 +1,24 @@
+# Imedica
+
+> Imedica is decision-training software for Canadian paramedics, built by Ashavid Inc. in Ontario: short emergency scenarios scored against physician-written rules aligned to the Ontario ALS and BLS Patient Care Standards.
+
+Imedica is for paramedic services (training leads, medical directors) and for paramedics and paramedic students. Scenarios are written and reviewed by physicians. Clinical content cites published standards and guidelines; see the Sources page. Imedica is a training tool, not a clinical decision-support device, and doesn't replace a service's medical directives.
+
+## Product
+
+- [Product](https://www.imedica.tech/product): what a scenario is and how it's scored
+- [How it works](https://www.imedica.tech/how-it-works): authoring, running, scoring and debrief
+- [For services](https://www.imedica.tech/for-services): what EMS services get, and how a pilot runs
+- [Security](https://www.imedica.tech/security) and [PIPEDA](https://www.imedica.tech/pipeda): privacy and data handling under Canadian law
+- [Sources and references](https://www.imedica.tech/sources): the clinical standards and datasets our content is built on
+
+## Field Notes (blog)
+
+- [Field Notes](https://www.imedica.tech/blog): case breakdowns, protocols and training articles for Canadian paramedics
+- [RSS feed](https://www.imedica.tech/blog/feed.xml)
+- [Imedica's training data](https://www.imedica.tech/blog/imedica-training-data-inventory): every dataset we use and its licence
+
+## Company
+
+- [About](https://www.imedica.tech/about): Ashavid Inc., Newmarket, Ontario
+- [Contact](https://www.imedica.tech/contact)

@@ -12,6 +12,7 @@ import { cn } from "@/lib/cn";
 export const metadata: Metadata = {
   title: "About",
   description: "Imedica is made by Ashavid Inc., an Ontario company based in Newmarket, built with clinicians to train emergency decision-making.",
+  alternates: { canonical: "/about" },
 };
 
 const team = [

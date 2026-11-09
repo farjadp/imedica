@@ -1,0 +1,47 @@
+keyword,intent,cluster,est_volume_ca_month,difficulty,priority,target_url,notes
+aemca exam,informational,B Certification & career,200-500,low,P1,/blog/aemca-exam-study-plan,Ministry page + PracticeTestGeeks rank; no strong study-method page
+how to study for the aemca exam,informational,B Certification & career,50-150,low,P1,/blog/aemca-exam-study-plan,SERP thin and off-topic (insurance/electrician exam tips rank)
+aemca practice questions,transactional,B Certification & career,100-300,medium,P2,/blog/aemca-exam-study-plan,Practice-test farms dominate; we answer with method + app CTA
+aemca exam dates,navigational,B Certification & career,100-300,low,P3,/blog/aemca-exam-study-plan,Ministry owns it; link out don't compete
+pcp vs acp ontario,informational,B Certification & career,150-400,low,P1,/blog/pcp-vs-acp-ontario,Answered by service recruitment pages only
+primary care paramedic vs advanced care paramedic,informational,B Certification & career,100-300,low,P1,/blog/pcp-vs-acp-ontario,National variant of above
+acp scope of practice ontario,informational,B Certification & career,50-150,low,P2,/blog/pcp-vs-acp-ontario,
+how to become a paramedic in ontario,informational,B Certification & career,500-1000,medium,P3,(later) /blog/become-a-paramedic-ontario,Colleges + cities rank; low fit for buyers
+paramedic cme ontario,informational,B Certification & career,30-100,low,P2,REFRESH /blog/paramedic-continuing-education-canada,Add Ontario base hospital CME section to existing post
+paramedic job interview scenarios,informational,B Certification & career,50-150,low,P2,/blog/paramedic-interview-scenario-prep,New grads; strong app fit
+ontario als pcs,navigational,A Ontario standards & directives,200-500,low,P1,/blog/ontario-als-pcs-explained,Only PDFs rank; an explainer page can win AI answers
+als pcs 5.4,informational,A Ontario standards & directives,100-300,low,P1,/blog/ontario-als-pcs-explained,In force 2 June 2025
+als pcs 5.5,informational,A Ontario standards & directives,20-100 (rising),low,P1,/blog/ontario-als-pcs-explained,v5.5 PDF is on ontario.ca but not yet listed as in force; update when it is
+ontario paramedic medical directives,informational,A Ontario standards & directives,100-300,low,P1,/blog/ontario-als-pcs-explained,Pillar for cluster A
+bls pcs ontario,navigational,A Ontario standards & directives,100-250,low,P2,/blog/ontario-als-pcs-explained,v3.4 in force 10 March 2023
+pcp medical directives quiz,transactional,A Ontario standards & directives,30-100,low,P2,/blog/pcp-medical-directives-practice-questions,Practice intent; app CTA
+ontario ambulance documentation standards,informational,A Ontario standards & directives,30-100,low,P3,/blog/ontario-ambulance-documentation-standards,v4.0 in force 2 Sept 2025
+stemi bypass ontario,informational,C ECG for paramedics,50-150,low,P1,/blog/stemi-bypass-ontario-criteria,CorHealth 2015 protocol + CJEM rank; no plain explainer
+paramedic 12 lead ecg,informational,C ECG for paramedics,100-300,medium,P2,EXISTING /blog/12-lead-ecg-stemi-paramedic,Refresh + interlink
+ecg rhythm interpretation paramedic,informational,C ECG for paramedics,100-300,medium,P2,/blog/ecg-rhythm-interpretation-method,US NREMT sites rank; tie to our 30 PTB-XL strips
+ecg practice strips,transactional,C ECG for paramedics,300-800,high,P3,/blog/ecg-rhythm-interpretation-method,practicalclinicalskills owns it; support not target
+posterior stemi 15 lead,informational,C ECG for paramedics,50-150,medium,P2,/blog/posterior-stemi-15-lead,Ontario PCPs do 15-lead (Peel scope list)
+hyperkalemia ecg signs,informational,C ECG for paramedics,300-800,high,P3,/blog/hyperkalemia-ecg-paramedic,Medical sites dominate; paramedic angle is the gap
+right ventricular infarction nitro,informational,C ECG for paramedics,50-150,medium,P2,EXISTING /blog/right-ventricle-before-nitro,Live; add internal links
+2025 aha cpr guidelines changes,informational,D Resuscitation & BLS,500-1500,high,P1,/blog/2025-aha-cpr-guidelines-paramedics,Time-sensitive; Canadian EMS angle is open
+termination of resuscitation rule,informational,D Resuscitation & BLS,50-150,medium,P2,/blog/termination-of-resuscitation-rule,Ontario-derived rule (Morrison et al.)
+high performance cpr,informational,D Resuscitation & BLS,100-300,medium,P2,EXISTING /blog/high-performance-cpr-paramedic-crews,Refresh with 2025 AHA
+double sequential defibrillation,informational,D Resuscitation & BLS,100-300,medium,P2,/blog/2025-aha-cpr-guidelines-paramedics,ALS PCS 5.4 allows DSED where authorized; AHA calls it not established. Explain gap carefully
+cpap paramedic chf,informational,E Clinical scenarios,50-150,low,P2,/blog/cpap-paramedic-acute-heart-failure,PCP scope includes CPAP
+carbon monoxide poisoning paramedic,informational,E Clinical scenarios,50-150,low,P2,/blog/carbon-monoxide-poisoning-paramedic,Seasonal (winter); SpCO in PCP scope
+patient refusal paramedic capacity,informational,E Clinical scenarios,50-150,medium,P2,/blog/patient-refusal-capacity-paramedic,Medico-legal; Ontario angle
+traumatic brain injury prehospital,informational,E Clinical scenarios,100-300,medium,P2,/blog/traumatic-brain-injury-prehospital,
+older adult falls paramedic,informational,E Clinical scenarios,30-100,low,P3,/blog/older-adult-falls-paramedic,
+chest pain not acs paramedic,informational,E Clinical scenarios,30-100,low,P3,/blog/chest-pain-beyond-acs-paramedic,
+behavioural emergency paramedic,informational,E Clinical scenarios,30-100,medium,P3,/blog/behavioural-emergencies-paramedic,Sensitive terminology; physician review required
+paramedic scenario practice,commercial,F EMS education for services,50-150,low,P1,/product,Competitors: Paramed Mastery app; Simulation Canada library
+scenario based training paramedics,commercial,F EMS education for services,50-150,low,P1,/blog/scenario-based-training-paramedic-services,Buyer intent; vendors (Laerdal; VRpatients; SimTutor) rank
+ems training software,commercial,F EMS education for services,100-300,high,P2,/for-services,US-heavy SERP; we win on Ontario PCS alignment
+paramedic competency assessment,commercial,F EMS education for services,30-100,low,P2,EXISTING /blog/ems-training-metrics-readiness,Refresh + link
+paramedic cme program design,commercial,F EMS education for services,10-50,low,P2,/blog/paramedic-cme-program-design,Training leads; low volume high value
+paramedic remediation after qa review,commercial,F EMS education for services,10-50,low,P2,/blog/scenario-remediation-medical-directors,Medical directors are buyers
+paramedic training cost per hour,commercial,F EMS education for services,10-50,low,P3,/blog/paramedic-training-roi,No invented stats; build a calculator later
+ai paramedic education,informational,G Data & AI,30-100,low,P3,EXISTING /blog/ai-in-paramedic-education,Live
+ptb-xl,navigational,G Data & AI,200-500 (global),medium,P3,EXISTING /blog/ptb-xl-ecg-dataset,Researchers; low buyer fit
+imedica,navigational,Brand,unknown,low,P1,/,Brand not found in web search today; entity work in GEO plan
+imedica app,navigational,Brand,unknown,low,P1,/download,After App Store approval

@@ -10,7 +10,9 @@ import { OutcomeTag } from "@/components/ui/outcome-tag";
 
 export const metadata: Metadata = {
   title: "How it works",
-  description: "How physicians author Imedica scenarios, how paramedics run them, and how every decision is scored and explained.",
+  description:
+    "How physicians write Imedica's emergency scenarios, how paramedics run them in ten minutes, and how every decision is scored against rules and explained.",
+  alternates: { canonical: "/how-it-works" },
 };
 
 const stages = [
