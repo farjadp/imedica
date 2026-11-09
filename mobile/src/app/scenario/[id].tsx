@@ -1,36 +1,24 @@
 import Feather from "@expo/vector-icons/Feather";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button } from "@/components/button";
 import { Loading, Problem } from "@/components/screen";
+import { SourcesBlock } from "@/components/sources";
 import { Body, Display, Mono, Serif } from "@/components/type";
 import { api, errorMessage } from "@/lib/api";
 import { categoryLabel, difficultyLabel, minutes } from "@/lib/labels";
-import { keys } from "@/lib/queries";
+import { keys, useScenarioBrief } from "@/lib/queries";
 import { color, radius } from "@/lib/theme";
 
-// Learners get the published scenario without rules. Only the brief is shown
-// here: the states would give the call away.
-type Brief = {
-  id: string;
-  title: string;
-  summary: string;
-  dispatch: string;
-  category: string;
-  difficulty: string;
-  timeLimitSec: number;
-  learningGoals: string[];
-  protocolSource: string | null;
-};
-
+// Only the brief is shown here: the states would give the call away.
 export default function ScenarioBrief() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
-  const brief = useQuery({ queryKey: ["scenario", id], queryFn: () => api<Brief>("GET", `/scenarios/${id}`) });
+  const brief = useScenarioBrief(id);
   const start = useMutation({
     mutationFn: () => api<{ id: string }>("POST", "/sessions", { scenarioId: id }),
     onSuccess: ({ id: runId }) => {
@@ -87,7 +75,10 @@ export default function ScenarioBrief() {
           </View>
         ) : null}
 
-        {s.protocolSource ? (
+        {s.sources?.length ? (
+          <SourcesBlock sources={s.sources} style={{ marginTop: 28 }} />
+        ) : s.protocolSource ? (
+          // A server without the citation registry: the name, at least.
           <Body size={12.5} tone={color.ink3} style={{ marginTop: 22 }}>
             Protocol: {s.protocolSource}
           </Body>
