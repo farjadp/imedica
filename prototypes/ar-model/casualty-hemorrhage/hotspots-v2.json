@@ -1,0 +1,214 @@
+{
+  "model": "catastrophic-limb-hemorrhage/v1",
+  "units": "m",
+  "up": "Y",
+  "action_is": "scenario action key (map to ScenarioAction.id when attaching)",
+  "hotspots": [
+    {
+      "node": "dressing_thigh_left",
+      "label": "Soaked towel over the wound, left thigh",
+      "region": "left_leg",
+      "anchor": [
+        0.146,
+        0.21,
+        0.138
+      ],
+      "radius": 0.124,
+      "action": "pressure"
+    },
+    {
+      "node": "wound_thigh_left",
+      "label": "Bleeding wound, left thigh",
+      "region": "left_leg",
+      "anchor": [
+        0.153,
+        0.21,
+        0.131
+      ],
+      "radius": 0.044,
+      "action": "pressure"
+    },
+    {
+      "node": "thigh_left",
+      "label": "Left thigh, above the wound",
+      "region": "left_leg",
+      "anchor": [
+        0.106,
+        0.134,
+        0.138
+      ],
+      "radius": 0.241,
+      "action": "tq"
+    },
+    {
+      "node": "blood_pool",
+      "label": "Blood on the floor",
+      "region": "scene",
+      "anchor": [
+        0.37,
+        0.002,
+        0.196
+      ],
+      "radius": 0.315
+    },
+    {
+      "node": "head",
+      "label": "Head and face",
+      "region": "head",
+      "anchor": [
+        0.001,
+        0.181,
+        -0.755
+      ],
+      "radius": 0.12
+    },
+    {
+      "node": "airway",
+      "label": "Airway and neck",
+      "region": "airway",
+      "anchor": [
+        0.002,
+        0.152,
+        -0.662
+      ],
+      "radius": 0.114
+    },
+    {
+      "node": "chest",
+      "label": "Chest",
+      "region": "chest",
+      "anchor": [
+        0.002,
+        0.148,
+        -0.471
+      ],
+      "radius": 0.176
+    },
+    {
+      "node": "abdomen",
+      "label": "Abdomen",
+      "region": "abdomen",
+      "anchor": [
+        0.0,
+        0.153,
+        -0.222
+      ],
+      "radius": 0.148
+    },
+    {
+      "node": "pelvis",
+      "label": "Pelvis",
+      "region": "pelvis",
+      "anchor": [
+        0.0,
+        0.141,
+        -0.069
+      ],
+      "radius": 0.159
+    },
+    {
+      "node": "arm_left",
+      "label": "Left arm",
+      "region": "left_arm",
+      "anchor": [
+        0.158,
+        0.174,
+        -0.246
+      ],
+      "radius": 0.378,
+      "action": "fluid"
+    },
+    {
+      "node": "arm_right",
+      "label": "Right arm",
+      "region": "right_arm",
+      "anchor": [
+        -0.194,
+        0.143,
+        -0.238
+      ],
+      "radius": 0.386,
+      "action": "fluid"
+    },
+    {
+      "node": "thigh_right",
+      "label": "Right thigh",
+      "region": "right_leg",
+      "anchor": [
+        -0.106,
+        0.137,
+        0.138
+      ],
+      "radius": 0.241
+    },
+    {
+      "node": "lower_leg_left",
+      "label": "Left lower leg",
+      "region": "left_leg",
+      "anchor": [
+        0.167,
+        0.127,
+        0.554
+      ],
+      "radius": 0.225,
+      "action": "elevate"
+    },
+    {
+      "node": "lower_leg_right",
+      "label": "Right lower leg",
+      "region": "right_leg",
+      "anchor": [
+        -0.167,
+        0.127,
+        0.555
+      ],
+      "radius": 0.227
+    },
+    {
+      "node": "foot_left",
+      "label": "Left foot",
+      "region": "left_leg",
+      "anchor": [
+        0.196,
+        0.204,
+        0.799
+      ],
+      "radius": 0.121
+    },
+    {
+      "node": "foot_right",
+      "label": "Right foot",
+      "region": "right_leg",
+      "anchor": [
+        -0.196,
+        0.204,
+        0.799
+      ],
+      "radius": 0.121
+    },
+    {
+      "node": "clothing_shirt",
+      "label": "Wet clothing (shirt)",
+      "region": "chest",
+      "anchor": [
+        -0.031,
+        0.147,
+        -0.337
+      ],
+      "radius": 0.311,
+      "action": "warm"
+    },
+    {
+      "node": "clothing_trousers",
+      "label": "Wet, blood-soaked trousers",
+      "region": "left_leg",
+      "anchor": [
+        -0.0,
+        0.138,
+        0.317
+      ],
+      "radius": 0.468,
+      "action": "warm"
+    }
+  ]
+}

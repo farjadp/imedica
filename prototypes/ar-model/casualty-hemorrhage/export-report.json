@@ -1,0 +1,56 @@
+{
+ "nodes": [
+  "abdomen",
+  "airway",
+  "arm_left",
+  "arm_right",
+  "blood_pool",
+  "chest",
+  "clothing_boots",
+  "clothing_shirt",
+  "clothing_trousers",
+  "dressing_thigh_left",
+  "foot_left",
+  "foot_right",
+  "head",
+  "lower_leg_left",
+  "lower_leg_right",
+  "pelvis",
+  "thigh_left",
+  "thigh_right",
+  "wound_thigh_left"
+ ],
+ "triangles_total": 40448,
+ "triangles": {
+  "head": 8340,
+  "airway": 424,
+  "chest": 1764,
+  "abdomen": 782,
+  "pelvis": 440,
+  "arm_left": 4316,
+  "arm_right": 4316,
+  "thigh_left": 676,
+  "thigh_right": 674,
+  "lower_leg_left": 470,
+  "lower_leg_right": 476,
+  "foot_left": 2128,
+  "foot_right": 2122,
+  "wound_thigh_left": 16,
+  "dressing_thigh_left": 4056,
+  "blood_pool": 1200,
+  "clothing_shirt": 2408,
+  "clothing_trousers": 1712,
+  "clothing_boots": 4128
+ },
+ "dims_m_blender_xyz": [
+  0.949,
+  1.75,
+  0.342
+ ],
+ "min_z": 0.0,
+ "body_length_m": 1.75,
+ "bytes": {
+  "patient.glb": 1077192,
+  "patient.usdz": 3581303
+ }
+}
