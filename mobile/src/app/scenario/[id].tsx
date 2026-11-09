@@ -1,6 +1,7 @@
 import Feather from "@expo/vector-icons/Feather";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
+import { useState } from "react";
 import { Platform, Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -19,6 +20,9 @@ export default function ScenarioBrief() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const brief = useScenarioBrief(id);
+  // The footer floats over the scroll; its real height (two-line caption, an
+  // error, larger text) decides how far the content must clear it.
+  const [footerHeight, setFooterHeight] = useState(160);
   const start = useMutation({
     mutationFn: () => api<{ id: string }>("POST", "/sessions", { scenarioId: id }),
     onSuccess: ({ id: runId }) => {
@@ -35,7 +39,7 @@ export default function ScenarioBrief() {
     <View style={{ flex: 1, backgroundColor: color.paper }}>
       <ScrollView
         // iOS shows this as a sheet below the status bar; Android draws the modal full screen.
-        contentContainerStyle={{ padding: 20, paddingTop: 18 + (Platform.OS === "android" ? insets.top : 0), paddingBottom: 140 }}
+        contentContainerStyle={{ padding: 20, paddingTop: 18 + (Platform.OS === "android" ? insets.top : 0), paddingBottom: footerHeight + 24 }}
       >
         <View style={styles.grabber} />
         <View style={styles.top}>
@@ -85,7 +89,7 @@ export default function ScenarioBrief() {
         ) : null}
       </ScrollView>
 
-      <View style={[styles.footer, { paddingBottom: insets.bottom + 14 }]}>
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 14 }]} onLayout={(e) => setFooterHeight(e.nativeEvent.layout.height)}>
         {start.error ? (
           <Body tone={color.signal} size={14} style={{ marginBottom: 8 }}>
             {errorMessage(start.error)}
