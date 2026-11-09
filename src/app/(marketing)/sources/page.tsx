@@ -44,12 +44,12 @@ export default function SourcesPage() {
           <p>{g.lead}</p>
           <ol className="mt-6 divide-y divide-rule border-y border-rule">
             {g.sources.map((s) => (
-              <li key={s.id} id={`source-${s.id}`} className="py-5">
+              <li key={s.id} id={`source-${s.id}`} className="scroll-mt-28 py-5">
                 <a
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="group flex items-start justify-between gap-4 no-underline"
+                  className="group flex items-start justify-between gap-4 no-underline!"
                 >
                   <span className="min-w-0">
                     <span className="block font-medium text-ink decoration-pine/40 underline-offset-4 group-hover:underline">
@@ -65,7 +65,7 @@ export default function SourcesPage() {
                       ) : null}
                     </span>
                     <span className="mt-1 block truncate font-mono text-[12px] text-ink-3">
-                      {s.url.replace(/^https?:\/\//, "")}
+                      {s.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                     </span>
                   </span>
                   <ArrowUpRight className="mt-1 size-5 shrink-0 text-pine" aria-hidden />
